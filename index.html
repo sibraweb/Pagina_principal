@@ -1588,51 +1588,52 @@ function calcularRetiro() {
       </div>
     </div>
     <div>
-      <form class="lead-form" onsubmit="handleSubmit(event)">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="nombre">Nombre *</label>
-            <input type="text" id="nombre" placeholder="Tu nombre" required>
-          </div>
-          <div class="form-group">
-            <label for="apellido">Apellido *</label>
-            <input type="text" id="apellido" placeholder="Tu apellido" required>
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="email">Email *</label>
-          <input type="email" id="email" placeholder="tu@email.com" required>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="telefono">Teléfono / WhatsApp</label>
-            <input type="tel" id="telefono" placeholder="+54 9 11 ...">
-          </div>
-          <div class="form-group">
-            <label for="pais">País</label>
-            <input type="text" id="pais" placeholder="Argentina">
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="interes">Área de Interés *</label>
-          <select id="interes" required>
-            <option value="" disabled selected>Seleccioná una opción</option>
-            <option>Inversiones (Sibra Investors)</option>
-            <option>Proyectos Internacionales</option>
-            <option>Gestión de Proyectos</option>
-            <option>Construcción / Desarrollo</option>
-            <option>Cursos y Formación</option>
-            <option>Libros y E-books</option>
-            <option>Otro</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="mensaje">Mensaje *</label>
-          <textarea id="mensaje" placeholder="Contanos brevemente sobre tu proyecto o consulta..." required></textarea>
-        </div>
-        <button type="submit" class="btn-submit">Enviar Consulta</button>
-        <p class="form-note">Tu información es confidencial. No compartimos datos con terceros.</p>
-      </form>
+      <form class="lead-form" action="https://formspree.io/f/mlgzqqke" method="POST">
+  <input type="hidden" name="_subject" value="CONTACTO DEL FORM DE LAND PAGE">
+  <div class="form-row">
+    <div class="form-group">
+      <label for="nombre">Nombre *</label>
+      <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" required>
+    </div>
+    <div class="form-group">
+      <label for="apellido">Apellido *</label>
+      <input type="text" id="apellido" name="apellido" placeholder="Tu apellido" required>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="email">Email *</label>
+    <input type="email" id="email" name="email" placeholder="tu@email.com" required>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label for="telefono">Teléfono / WhatsApp</label>
+      <input type="tel" id="telefono" name="telefono" placeholder="+54 9 11 ...">
+    </div>
+    <div class="form-group">
+      <label for="pais">País</label>
+      <input type="text" id="pais" name="pais" placeholder="Argentina">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="interes">Área de Interés *</label>
+    <select id="interes" name="area_interes" required>
+      <option value="" disabled selected>Seleccioná una opción</option>
+      <option>Inversiones (Sibra Investors)</option>
+      <option>Proyectos Internacionales</option>
+      <option>Gestión de Proyectos</option>
+      <option>Construcción / Desarrollo</option>
+      <option>Cursos y Formación</option>
+      <option>Libros y E-books</option>
+      <option>Otro</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label for="mensaje">Mensaje *</label>
+    <textarea id="mensaje" name="mensaje" placeholder="Contanos brevemente sobre tu proyecto o consulta..." required></textarea>
+  </div>
+  <button type="submit" class="btn-submit">Enviar Consulta</button>
+  <p class="form-note">Tu información es confidencial. No compartimos datos con terceros.</p>
+</form>
       <div id="form-success" style="display:none;background:rgba(225,6,0,0.08);border:1px solid rgba(225,6,0,0.2);padding:2rem;text-align:center;margin-top:1rem">
         <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:1.1rem;margin-bottom:0.5rem">¡Consulta enviada!</div>
         <p style="font-size:.85rem;color:#999">Te contactaremos en las próximas 24 horas hábiles.</p>
