@@ -1,0 +1,1761 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ejercicios de Clase — CIRSOC 301 · Sibratech Group × UNNE</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800;900&family=Raleway:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════
+   RESET & VARIABLES SIBRATECH
+══════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#E10600;
+  --red-dark:#b50500;
+  --red-dim:rgba(225,6,0,0.08);
+  --white:#ffffff;
+  --bg:#f0f0f0;
+  --bg2:#f7f7f7;
+  --bg3:#efefef;
+  --text:#1a1a1a;
+  --muted:#666;
+  --muted2:#999;
+  --border:rgba(0,0,0,0.08);
+  --border2:rgba(225,6,0,0.18);
+  --green:#1a9e47;
+  --green-dim:rgba(26,158,71,0.1);
+  --yellow:#c97d00;
+  --yellow-dim:rgba(201,125,0,0.1);
+  --mono:'IBM Plex Mono',monospace;
+  --sans:'Raleway',sans-serif;
+  --title:'Montserrat',sans-serif;
+  --radius:6px;
+  --radius2:10px;
+  --shadow:0 2px 16px rgba(0,0,0,0.07);
+  --shadow2:0 8px 40px rgba(225,6,0,0.10);
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--red)}
+
+/* ══════════════════════════════════════════
+   NAV — exacto estilo Sibratech
+══════════════════════════════════════════ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:999;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.8rem 5%;
+  background:rgba(255,255,255,0.97);
+  border-bottom:1px solid rgba(225,6,0,0.12);
+  box-shadow:0 2px 20px rgba(0,0,0,0.07);
+  transition:padding 0.3s;
+}
+.nav-left{display:flex;align-items:center;gap:1.5rem}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-wordmark{display:flex;flex-direction:column}
+.nav-wordmark .brand{font-family:var(--title);font-weight:900;font-size:1.15rem;color:#1a1a1a;letter-spacing:-0.5px}
+.nav-wordmark .brand span{color:var(--red)}
+.nav-wordmark .sub{font-size:0.46rem;letter-spacing:4px;text-transform:uppercase;color:var(--muted2);margin-top:-1px}
+.nav-breadcrumb{
+  font-family:var(--mono);font-size:0.58rem;
+  color:var(--muted2);letter-spacing:0.05em;
+  display:flex;align-items:center;gap:6px;
+  padding-left:1.2rem;border-left:1px solid var(--border);
+}
+.nav-breadcrumb span{color:var(--red)}
+.nav-links{display:flex;gap:1.5rem;list-style:none}
+.nav-links a{color:#444;text-decoration:none;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;font-weight:600;transition:color 0.3s}
+.nav-links a:hover{color:var(--red)}
+.nav-cta{
+  background:var(--red);color:#fff;border:none;
+  padding:0.5rem 1.2rem;
+  font-family:var(--title);font-weight:700;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;
+  cursor:pointer;transition:background 0.3s;
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));
+}
+.nav-cta:hover{background:var(--red-dark)}
+
+/* ══════════════════════════════════════════
+   HERO
+══════════════════════════════════════════ */
+.hero{
+  margin-top:64px;
+  padding:3.5rem 5% 2.5rem;
+  background:#fff;
+  border-bottom:1px solid var(--border);
+  position:relative;overflow:hidden;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(225,6,0,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(225,6,0,0.04) 1px,transparent 1px);
+  background-size:48px 48px;
+  pointer-events:none;
+}
+.hero-glow{
+  position:absolute;right:-5%;top:50%;transform:translateY(-50%);
+  width:40%;height:80%;
+  background:radial-gradient(ellipse,rgba(225,6,0,0.07) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-inner{position:relative;z-index:2;max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:center}
+.eyebrow{display:flex;align-items:center;gap:10px;font-size:0.62rem;letter-spacing:5px;text-transform:uppercase;color:var(--red);font-weight:700;margin-bottom:1rem}
+.eyebrow::before{content:'';display:inline-block;width:28px;height:1px;background:var(--red)}
+.hero-title{font-family:var(--title);font-size:clamp(1.8rem,3vw,2.8rem);font-weight:900;line-height:1.1;letter-spacing:-1px;color:#1a1a1a}
+.hero-title span{color:var(--red)}
+.hero-sub{margin-top:0.75rem;font-size:0.85rem;color:var(--muted);max-width:520px;line-height:1.8}
+.hero-pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:1.2rem}
+.pill{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 12px;border-radius:20px;
+  font-family:var(--mono);font-size:0.6rem;font-weight:700;letter-spacing:0.05em;
+  border:1px solid var(--border2);color:var(--red);background:var(--red-dim);
+}
+.hero-meta{text-align:right;font-family:var(--mono);font-size:0.6rem;color:var(--muted2);line-height:2.2}
+.hero-meta strong{color:var(--red);font-weight:500;display:block}
+
+/* ══════════════════════════════════════════
+   TABS
+══════════════════════════════════════════ */
+.tabs-wrap{
+  max-width:1200px;margin:0 auto;padding:2rem 5% 0;
+  position:sticky;top:64px;z-index:90;
+}
+.tabs{
+  display:flex;gap:0;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:var(--radius2) var(--radius2) 0 0;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+}
+.tab-btn{
+  flex:1;padding:1rem 1.5rem;
+  border:none;background:transparent;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  font-family:var(--title);font-weight:700;font-size:0.72rem;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);
+  border-bottom:3px solid transparent;
+  transition:all 0.25s;
+  position:relative;
+}
+.tab-btn:not(:last-child){border-right:1px solid var(--border)}
+.tab-btn .tab-num{
+  font-family:var(--mono);font-size:0.6rem;
+  background:var(--bg3);color:var(--muted2);
+  padding:2px 7px;border-radius:10px;
+  transition:all 0.25s;
+}
+.tab-btn:hover{color:var(--red);background:var(--red-dim)}
+.tab-btn.active{
+  color:var(--red);background:var(--red-dim);
+  border-bottom-color:var(--red);
+}
+.tab-btn.active .tab-num{background:var(--red);color:#fff}
+
+/* ══════════════════════════════════════════
+   CONTENIDO TABS
+══════════════════════════════════════════ */
+.tabs-content{max-width:1200px;margin:0 auto;padding:0 5% 4rem}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ══════════════════════════════════════════
+   SECCIÓN INTERNA — subtabs de variante
+══════════════════════════════════════════ */
+.sub-tabs{
+  display:flex;gap:6px;padding:1.5rem 0 0;
+  flex-wrap:wrap;
+}
+.sub-btn{
+  padding:7px 18px;border:1px solid var(--border);border-radius:20px;
+  background:#fff;color:var(--muted);
+  font-family:var(--mono);font-size:0.65rem;font-weight:700;letter-spacing:0.05em;
+  cursor:pointer;transition:all 0.2s;
+}
+.sub-btn:hover{border-color:var(--red);color:var(--red)}
+.sub-btn.active{background:var(--red);color:#fff;border-color:var(--red)}
+
+.sub-panel{display:none;padding-top:1.5rem}
+.sub-panel.active{display:block}
+
+/* ══════════════════════════════════════════
+   PANEL CARD
+══════════════════════════════════════════ */
+.panel{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:var(--radius2);
+  overflow:hidden;
+  box-shadow:var(--shadow);
+  margin-bottom:1.25rem;
+}
+.panel-head{
+  padding:0.75rem 1.25rem;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg2);
+}
+.panel-head h3{
+  font-family:var(--mono);font-size:0.65rem;font-weight:700;
+  letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);
+  display:flex;align-items:center;gap:8px;
+}
+.panel-head h3 .ph-accent{color:var(--red)}
+.panel-body{padding:1.25rem}
+
+/* ══════════════════════════════════════════
+   LAYOUT CALC
+══════════════════════════════════════════ */
+.calc-grid{
+  display:grid;grid-template-columns:340px 1fr;gap:1.25rem;align-items:start;
+}
+.right-stack{display:flex;flex-direction:column;gap:1.25rem}
+
+/* ══════════════════════════════════════════
+   FORM CONTROLS
+══════════════════════════════════════════ */
+.field{margin-bottom:1rem}
+.field:last-child{margin-bottom:0}
+.field label{
+  display:block;font-family:var(--mono);font-size:0.6rem;font-weight:700;
+  letter-spacing:0.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:5px;
+}
+.field select,.field input[type=number],.field input[type=text]{
+  width:100%;padding:8px 11px;
+  background:#fff;border:1px solid rgba(0,0,0,0.14);
+  border-radius:var(--radius);color:var(--text);
+  font-family:var(--mono);font-size:0.8rem;
+  outline:none;transition:border-color 0.2s;appearance:none;
+}
+.field select:focus,.field input:focus{border-color:var(--red)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem}
+.field-note{font-size:0.58rem;color:var(--muted2);margin-top:3px;font-family:var(--mono)}
+.tog-row{display:flex;gap:6px;margin-top:4px}
+.tog{
+  flex:1;padding:7px;border:1px solid rgba(0,0,0,0.14);border-radius:var(--radius);
+  background:#fff;color:var(--muted);font-family:var(--mono);font-size:0.62rem;
+  font-weight:700;letter-spacing:0.05em;cursor:pointer;text-align:center;
+  transition:all 0.2s;text-transform:uppercase;
+}
+.tog.active{background:var(--red-dim);border-color:var(--red);color:var(--red)}
+
+/* ══════════════════════════════════════════
+   KPI STRIP
+══════════════════════════════════════════ */
+.kpi-strip{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:1px;background:var(--border);border-radius:var(--radius2);overflow:hidden;
+}
+.kpi{background:#fff;padding:0.9rem 1rem}
+.kpi-lbl{font-family:var(--mono);font-size:0.55rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:3px}
+.kpi-val{font-family:var(--mono);font-size:1.3rem;font-weight:700;color:var(--text);line-height:1}
+.kpi-unit{font-size:0.58rem;color:var(--muted2);margin-top:2px;font-family:var(--mono)}
+
+/* ══════════════════════════════════════════
+   VERIFICACIONES
+══════════════════════════════════════════ */
+.checks{display:flex;flex-direction:column;gap:1px}
+.chk{
+  background:#fff;padding:0.7rem 1.1rem;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  border-left:3px solid var(--border);
+  transition:border-color 0.2s;
+}
+.chk.ok{border-left-color:var(--green)}
+.chk.fail{border-left-color:var(--red)}
+.chk.na{border-left-color:var(--border);opacity:.55}
+.chk-left{flex:1}
+.chk-name{font-size:0.8rem;font-weight:600;color:var(--text)}
+.chk-detail{font-family:var(--mono);font-size:0.6rem;color:var(--muted);margin-top:1px}
+.badge{
+  font-family:var(--mono);font-size:0.6rem;font-weight:700;letter-spacing:0.05em;
+  padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0;
+}
+.badge.ok{background:var(--green-dim);color:var(--green);border:1px solid rgba(26,158,71,0.25)}
+.badge.fail{background:rgba(225,6,0,0.08);color:var(--red);border:1px solid rgba(225,6,0,0.25)}
+.badge.na{background:var(--bg3);color:var(--muted2);border:1px solid var(--border)}
+
+/* ══════════════════════════════════════════
+   CATÁLOGO IMG
+══════════════════════════════════════════ */
+.cat-img-wrap{
+  border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;
+  margin-bottom:0.75rem;cursor:zoom-in;position:relative;
+}
+.cat-img-wrap img{width:100%;display:block;transition:transform 0.4s}
+.cat-img-wrap:hover img{transform:scale(1.02)}
+.cat-img-wrap::after{
+  content:'⤢ Ampliar tabla';position:absolute;bottom:0;left:0;right:0;
+  background:rgba(26,26,26,0.6);color:#fff;font-family:var(--mono);font-size:0.58rem;
+  text-align:center;padding:4px;opacity:0;transition:opacity 0.3s;
+}
+.cat-img-wrap:hover::after{opacity:1}
+
+/* ══════════════════════════════════════════
+   DIST CHIPS
+══════════════════════════════════════════ */
+.dist-row{display:flex;gap:6px;flex-wrap:wrap;padding:0.75rem 1.1rem;border-top:1px solid var(--border)}
+.chip{font-family:var(--mono);font-size:0.58rem;padding:3px 8px;border-radius:4px}
+.chip.ok{background:var(--green-dim);color:var(--green)}
+.chip.fail{background:rgba(225,6,0,0.08);color:var(--red)}
+.chip.info{background:var(--yellow-dim);color:var(--yellow)}
+
+/* ══════════════════════════════════════════
+   CANVAS
+══════════════════════════════════════════ */
+.canvas-wrap{
+  border:1px solid var(--border);border-radius:var(--radius);
+  background:var(--bg2);overflow:hidden;position:relative;
+}
+canvas{display:block;width:100%}
+.canvas-lbl{
+  position:absolute;bottom:5px;right:8px;
+  font-family:var(--mono);font-size:0.55rem;color:var(--muted2);
+}
+
+/* ══════════════════════════════════════════
+   TABLA RESUMEN
+══════════════════════════════════════════ */
+.res-table{width:100%;border-collapse:collapse;font-size:0.75rem}
+.res-table th{
+  font-family:var(--mono);font-size:0.57rem;font-weight:700;letter-spacing:0.08em;
+  text-transform:uppercase;color:var(--muted2);padding:7px 12px;
+  border-bottom:1px solid var(--border);text-align:left;background:var(--bg2);
+}
+.res-table td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--muted);font-family:var(--mono);font-size:0.7rem}
+.res-table td:first-child{color:var(--text);font-weight:600}
+.res-table tr:last-child td{border-bottom:none}
+
+/* ══════════════════════════════════════════
+   VIGA — tab 2
+══════════════════════════════════════════ */
+.viga-grid{display:grid;grid-template-columns:320px 1fr;gap:1.25rem;align-items:start}
+.formula-box{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:0.9rem 1.1rem;margin-bottom:0.9rem;
+}
+.formula-box .f-label{font-family:var(--mono);font-size:0.58rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:6px}
+.formula-box .f-expr{font-family:var(--mono);font-size:0.82rem;color:var(--text);line-height:1.6}
+.formula-box .f-result{margin-top:6px;font-family:var(--mono);font-size:0.95rem;font-weight:700}
+.f-ok{color:var(--green)}
+.f-fail{color:var(--red)}
+.f-neutral{color:var(--text)}
+
+.diag-svg-wrap{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem}
+.diag-svg-wrap svg{width:100%;height:auto}
+
+/* ══════════════════════════════════════════
+   LIGHTBOX
+══════════════════════════════════════════ */
+.lb{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.88);align-items:center;justify-content:center;cursor:zoom-out}
+.lb.open{display:flex}
+.lb img{max-width:90vw;max-height:90vh;border-radius:var(--radius2)}
+
+/* ══════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════ */
+footer{
+  border-top:1px solid var(--border);background:#fff;
+  padding:1.5rem 5%;display:flex;justify-content:space-between;align-items:center;
+}
+.foot-left{font-family:var(--mono);font-size:0.58rem;color:var(--muted2);line-height:2}
+.foot-right{font-family:var(--mono);font-size:0.58rem;color:var(--muted2);text-align:right}
+.foot-logo{font-family:var(--title);font-weight:900;font-size:0.9rem;color:#1a1a1a}
+.foot-logo span{color:var(--red)}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .calc-grid,.viga-grid{grid-template-columns:1fr}
+  .kpi-strip{grid-template-columns:repeat(2,1fr)}
+  .hero-inner{grid-template-columns:1fr}
+  .hero-meta{text-align:left}
+  .tab-btn{padding:0.75rem 0.5rem;font-size:0.6rem}
+}
+
+/* ══════════════════════════════════════════
+   BUL INFO BOX — estilo calculadora
+══════════════════════════════════════════ */
+.bul-info-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:0;border-bottom:1px solid var(--border);
+}
+.bul-info-cell{
+  padding:1rem 1.1rem;
+  border-right:1px solid var(--border);
+}
+.bul-info-cell:last-child{border-right:none}
+.bul-info-lbl{
+  font-family:var(--mono);font-size:0.55rem;font-weight:700;
+  letter-spacing:0.08em;text-transform:uppercase;color:var(--muted2);
+  margin-bottom:6px;line-height:1.4;
+}
+.bul-info-val{
+  font-family:var(--mono);font-size:1.4rem;font-weight:700;
+  color:var(--text);line-height:1;
+}
+.bul-info-unit{
+  font-family:var(--mono);font-size:0.58rem;color:var(--muted2);
+  margin-top:3px;
+}
+.bul-req-box{
+  padding:1.2rem 1.4rem;
+  background:var(--red-dim);
+  border-top:1px solid rgba(225,6,0,0.12);
+}
+.bul-req-label{
+  font-family:var(--mono);font-size:0.55rem;font-weight:700;
+  letter-spacing:0.1em;text-transform:uppercase;color:var(--muted2);
+  margin-bottom:6px;
+}
+.bul-req-val{
+  font-family:var(--title);font-size:2rem;font-weight:900;
+  color:var(--red);line-height:1;margin-bottom:5px;
+}
+.bul-req-sub{
+  font-family:var(--mono);font-size:0.65rem;color:var(--muted);
+  line-height:1.5;
+}
+</style>
+</head>
+<body>
+
+<!-- ══════ NAV ══════ -->
+<nav>
+  <div class="nav-left">
+    <a href="#" class="nav-logo">
+      <svg width="32" height="32" viewBox="0 0 100 100" fill="none">
+        <rect width="100" height="100" rx="8" fill="#E10600"/>
+        <path d="M20 75 L20 35 L50 20 L80 35 L80 75" stroke="white" stroke-width="7" stroke-linejoin="round" fill="none"/>
+        <path d="M35 75 L35 52 L65 52 L65 75" stroke="white" stroke-width="7" stroke-linejoin="round" fill="none"/>
+        <line x1="20" y1="35" x2="80" y2="35" stroke="white" stroke-width="4"/>
+      </svg>
+      <div class="nav-wordmark">
+        <div class="brand">SIBRA<span>TECH</span></div>
+        <div class="sub">Construyendo Oportunidades</div>
+      </div>
+    </a>
+    <div class="nav-breadcrumb">
+      <span>Facultad de Ingeniería</span> / UNNE / <span>CIRSOC 301</span>
+    </div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#">Inicio</a></li>
+    <li><a href="#">Cursos</a></li>
+    <li><a href="#">Recursos</a></li>
+  </ul>
+  <button class="nav-cta" onclick="#">Contacto</button>
+</nav>
+
+<!-- ══════ HERO ══════ -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div>
+      <div class="eyebrow">Facultad de Ingeniería · UNNE</div>
+      <h1 class="hero-title">Ejercicios de<br><span>Clase Interactivos</span></h1>
+      <p class="hero-sub">
+        Herramientas de cálculo para el curso de Estructuras de Acero basadas en
+        <strong>CIRSOC 301 — Estados Límites</strong>. Ingresá los datos y verificá
+        las condiciones en tiempo real.
+      </p>
+      <div class="hero-pills">
+        <span class="pill">■ Empalme a Tracción</span>
+        <span class="pill">■ Viga con Platabanda</span>
+        <span class="pill">■ Soldadura · Bulones</span>
+      </div>
+    </div>
+    <div class="hero-meta">
+      <strong>Acero</strong> F.24 · F.26 · F.36
+      <strong>Bulones</strong> A307M · A325M · A490M
+      <strong>Soldadura</strong> FEXX = 480 MPa
+      <strong>Norma</strong> CIRSOC 301 — EL
+    </div>
+  </div>
+</section>
+
+<!-- ══════ TABS ══════ -->
+<div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('tab1',this)">
+      <span class="tab-num">EJ 1</span> Empalme a Tracción — Bulones y Soldadura
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab2',this)">
+      <span class="tab-num">EJ 6</span> Viga con Platabanda de Refuerzo Soldada
+    </button>
+  </div>
+</div>
+
+<!-- ══════ CONTENIDO ══════ -->
+<div class="tabs-content">
+
+  <!-- ════════════════════════ TAB 1: EMPALME ════════════════════════ -->
+  <div id="tab1" class="tab-panel active">
+
+    <!-- Sub-tabs variante -->
+    <div class="sub-tabs">
+      <button class="sub-btn active" onclick="switchSub('s-bulon',this,'grp1')">■ Var A — Bulones comunes A307M</button>
+      <button class="sub-btn" onclick="switchSub('s-bar',this,'grp1')">◆ Var B — BAR Alta Resistencia A325M</button>
+      <button class="sub-btn" onclick="switchSub('s-sold',this,'grp1')">▲ Var C — Soldadura de filete</button>
+    </div>
+
+    <!-- ── VAR A: BULONES COMUNES ── -->
+    <div id="s-bulon" class="sub-panel active" data-group="grp1">
+      <div class="calc-grid">
+
+        <!-- INPUTS IZQUIERDA -->
+        <div>
+          <div class="panel">
+            <div class="panel-head"><h3><span class="ph-accent">01</span> · Datos generales</h3></div>
+            <div class="panel-body">
+              <div class="field"><label>Carga última Pu (kN)</label><input type="number" id="a-pu" value="250" min="1" max="5000"></div>
+              <div class="field"><label>Acero</label>
+                <select id="a-acero">
+                  <option value="235-370">F.24 — Fy=235 / Fu=370 MPa</option>
+                  <option value="250-400">F.26 — Fy=250 / Fu=400 MPa</option>
+                  <option value="345-450">F.36 — Fy=345 / Fu=450 MPa</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h3><span class="ph-accent">02</span> · Planchuela — Catálogo Acindar</h3></div>
+            <div class="panel-body">
+              <div class="cat-img-wrap" onclick="openLb()">
+                <img id="cat-img" src="/mnt/user-data/uploads/1778462621707_image.png" alt="Tabla Acindar">
+              </div>
+              <div class="field-row">
+                <div class="field"><label>Ancho b</label><select id="a-b"></select></div>
+                <div class="field"><label>Espesor t</label><select id="a-t"></select></div>
+              </div>
+              <div class="field-row">
+                <div class="field"><label>Ag adoptada</label><input type="text" id="a-ag" readonly style="color:var(--yellow);font-weight:700"></div>
+                <div class="field"><label>Ag mínima</label><input type="text" id="a-agmin" readonly></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h3><span class="ph-accent">03</span> · Bulones</h3></div>
+            <div class="panel-body">
+              <div class="field">
+                <label>Tipo de bulón</label>
+                <select id="a-tipo-bulon">
+                  <option value="A307M">A307M / ISO 4.6 — Fv = 140 MPa (corte)</option>
+                  <option value="A325M-corte">A325M — Fv = 330 MPa (corte sin hilos)</option>
+                  <option value="A490M-corte">A490M — Fv = 414 MPa (corte sin hilos)</option>
+                </select>
+              </div>
+              <div class="field-row">
+                <div class="field"><label>Diámetro nominal</label>
+                  <select id="a-dnom">
+                    <option value="12">M12 — 12 mm</option><option value="16" selected>M16 — 16 mm</option>
+                    <option value="20">M20 — 20 mm</option><option value="22">M22 — 22 mm</option>
+                    <option value="24">M24 — 24 mm</option><option value="27">M27 — 27 mm</option>
+                  </select>
+                </div>
+                <div class="field"><label>Tipo de agujero</label>
+                  <select id="a-agujero">
+                    <option value="2">Normal (+2 mm)</option>
+                    <option value="4">Agrandado (+4 mm)</option>
+                    <option value="6">Ranurado corto (+6 mm)</option>
+                  </select>
+                </div>
+              </div>
+              <!-- Caja roja cantidad mínima — integrada en el panel de inputs -->
+              <div class="bul-req-box" style="margin-top:1rem;border-radius:6px">
+                <div class="bul-req-label">CANTIDAD MÍNIMA POR CORTE DE BULÓN</div>
+                <div class="bul-req-val" id="a-knb-big">—</div>
+                <div class="bul-req-sub" id="a-knb-sub">—</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h3><span class="ph-accent">04</span> · Disposición</h3></div>
+            <div class="panel-body">
+              <div class="field-row">
+                <div class="field"><label>Filas</label>
+                  <select id="a-nf"><option value="1" selected>1</option><option value="2">2</option><option value="3">3</option></select>
+                </div>
+                <div class="field">
+                  <label>Columnas <span id="a-nc-sugg" style="color:var(--red);font-size:0.55rem;font-weight:700;margin-left:4px"></span></label>
+                  <select id="a-nc"></select>
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field"><label>Separación s (mm)</label><input type="number" id="a-s" value="50" min="30" max="300" step="5"></div>
+                <div class="field"><label>Dist. borde db (mm)</label><input type="number" id="a-db" value="25" min="15" max="100" step="5"></div>
+              </div>
+              <div class="field"><label>Organización</label>
+                <div class="tog-row">
+                  <div class="tog active" id="a-btn-rect" onclick="setOrgA('rectangular')">■ Cuadrícula</div>
+                  <div class="tog" id="a-btn-tresb" onclick="setOrgA('tresbolillo')">◆ Tresbolillo</div>
+                </div>
+              </div>
+            </div>
+            <div class="canvas-wrap">
+              <canvas id="a-canvas" width="680" height="190"></canvas>
+              <div class="canvas-lbl">Vista en planta — cubrejunta</div>
+            </div>
+            <div class="dist-row" id="a-dist"></div>
+          </div>
+        </div>
+
+        <!-- RESULTADOS DERECHA -->
+        <div class="right-stack">
+          <!-- INFO BOX BULÓN — Ab, Rb, dag -->
+          <div class="panel">
+            <div class="panel-head"><h3><span class="ph-accent">■</span> · Parámetros del bulón calculados</h3></div>
+            <div class="bul-info-grid">
+              <div class="bul-info-cell">
+                <div class="bul-info-lbl">Ab — Área neta</div>
+                <div class="bul-info-val" id="a-kab">—</div>
+                <div class="bul-info-unit">cm²</div>
+              </div>
+              <div class="bul-info-cell">
+                <div class="bul-info-lbl">Rb unit. — doble corte</div>
+                <div class="bul-info-val" id="a-krb">—</div>
+                <div class="bul-info-unit">kN / bulón</div>
+              </div>
+              <div class="bul-info-cell">
+                <div class="bul-info-lbl">dag / dcalc</div>
+                <div class="bul-info-val" id="a-kdag">—</div>
+                <div class="bul-info-unit">mm</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h3>Verificaciones CIRSOC 301</h3></div>
+            <div class="checks" style="padding:0">
+              <div class="chk na" id="a-c1"><div class="chk-left"><div class="chk-name">Fluencia — sección bruta</div><div class="chk-detail" id="a-d1">—</div></div><span class="badge na" id="a-b1">—</span></div>
+              <div class="chk na" id="a-c2"><div class="chk-left"><div class="chk-name">Rotura — sección neta</div><div class="chk-detail" id="a-d2">—</div></div><span class="badge na" id="a-b2">—</span></div>
+              <div class="chk na" id="a-c3"><div class="chk-left"><div class="chk-name">Aplastamiento (chapa)</div><div class="chk-detail" id="a-d3">—</div></div><span class="badge na" id="a-b3">—</span></div>
+              <div class="chk na" id="a-c4"><div class="chk-left"><div class="chk-name">Bloque de corte</div><div class="chk-detail" id="a-d4">—</div></div><span class="badge na" id="a-b4">—</span></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h3>Resumen de material</h3></div>
+            <table class="res-table"><thead><tr><th>Elemento</th><th>Sección</th><th>Long. CJ total</th><th>Peso unit.</th><th>Par CJ</th></tr></thead>
+            <tbody id="a-tbody"></tbody></table>
+          </div>
+
+          <div class="panel" id="a-diag-panel" style="display:none">
+            <div class="panel-head"><h3>Diagnóstico</h3></div>
+            <div class="panel-body"><div id="a-diag" style="font-size:0.82rem;line-height:1.8;color:var(--muted)"></div></div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /s-bulon -->
+
+    <!-- ── VAR B: BAR A325M ── -->
+    <div id="s-bar" class="sub-panel" data-group="grp1">
+      <div class="calc-grid">
+        <div>
+          <div class="panel">
+            <div class="panel-head"><h3><span class="ph-accent">01</span> · Datos generales</h3></div>
+            <div class="panel-body">
+              <div class="field"><label>Carga última Pu (kN)</label><input type="number" id="b-pu" value="250" min="1" max="5000"></div>
+              <div class="field"><label>Acero</label>
+                <select id="b-acero">
+                  <option value="235-370">F.24 — Fy=235 / Fu=370 MPa</option>
+                  <option value="250-400">F.26 — Fy=250 / Fu=400 MPa</option>
+                  <option value="345-450">F.36 — Fy=345 / Fu=450 MPa</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3><span class="ph-accent">02</span> · Planchuela</h3></div>
+            <div class="panel-body">
+              <div class="field-row">
+                <div class="field"><label>Ancho b</label><select id="b-b"></select></div>
+                <div class="field"><label>Espesor t</label><select id="b-t"></select></div>
+              </div>
+              <div class="field-row">
+                <div class="field"><label>Ag adoptada</label><input type="text" id="b-ag" readonly style="color:var(--yellow);font-weight:700"></div>
+                <div class="field"><label>Ag mínima</label><input type="text" id="b-agmin" readonly></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3><span class="ph-accent">03</span> · Bulón BAR A325M — deslizamiento crítico</h3></div>
+            <div class="panel-body">
+              <div class="field">
+                <label>Tipo de bulón</label>
+                <select id="b-tipo" onchange="calcB()">
+                  <option value="A325M">A325M — Tb tabla J.3-6 CIRSOC 301</option>
+                  <option value="A490M">A490M — Tb tabla J.3-6 CIRSOC 301</option>
+                </select>
+              </div>
+              <div class="field-row">
+                <div class="field"><label>Diámetro nominal</label>
+                  <select id="b-dnom">
+                    <option value="16" selected>M16 — 16 mm</option><option value="20">M20 — 20 mm</option>
+                    <option value="22">M22 — 22 mm</option><option value="24">M24 — 24 mm</option><option value="27">M27 — 27 mm</option>
+                  </select>
+                </div>
+                <div class="field"><label>Clase de superficie</label>
+                  <select id="b-mu">
+                    <option value="0.33">Clase A — μ = 0.33</option>
+                    <option value="0.50">Clase B — μ = 0.50</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field-note">φ = 1.00 · deslizamiento crítico · doble plano de corte Ns = 2</div>
+              <!-- Caja roja mínimo -->
+              <div class="bul-req-box" style="margin-top:1rem;border-radius:6px">
+                <div class="bul-req-label">CANTIDAD MÍNIMA POR DESLIZAMIENTO</div>
+                <div class="bul-req-val" id="b-knb-big">—</div>
+                <div class="bul-req-sub" id="b-knb-sub">—</div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3><span class="ph-accent">04</span> · Disposición</h3></div>
+            <div class="panel-body">
+              <div class="field-row">
+                <div class="field"><label>Filas</label><select id="b-nf"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option></select></div>
+                <div class="field">
+                  <label>Columnas <span id="b-nc-sugg" style="color:var(--red);font-size:0.55rem;font-weight:700;margin-left:4px"></span></label>
+                  <select id="b-nc"></select>
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field"><label>Separación s (mm)</label><input type="number" id="b-s" value="50" min="30" max="300" step="5"></div>
+                <div class="field"><label>Dist. borde db (mm)</label><input type="number" id="b-db" value="25" min="15" max="100" step="5"></div>
+              </div>
+            </div>
+            <div class="canvas-wrap"><canvas id="b-canvas" width="680" height="190"></canvas><div class="canvas-lbl">Vista en planta</div></div>
+            <div class="dist-row" id="b-dist"></div>
+          </div>
+        </div>
+        <div class="right-stack">
+          <!-- INFO BOX BAR A325M — Tb, Rdstr, total -->
+          <div class="panel">
+            <div class="panel-head"><h3><span class="ph-accent">◆</span> · Parámetros calculados — BAR</h3></div>
+            <div class="bul-info-grid">
+              <div class="bul-info-cell">
+                <div class="bul-info-lbl">Tb — Pretensado (Tab. J.3-6)</div>
+                <div class="bul-info-val" id="b-ktb">—</div>
+                <div class="bul-info-unit">kN</div>
+              </div>
+              <div class="bul-info-cell">
+                <div class="bul-info-lbl">Rdstr — Resist. desliz. unit.</div>
+                <div class="bul-info-val" id="b-krstr">—</div>
+                <div class="bul-info-unit">kN / bulón</div>
+              </div>
+              <div class="bul-info-cell">
+                <div class="bul-info-lbl">Total adoptado nf × nc</div>
+                <div class="bul-info-val" id="b-ktot">—</div>
+                <div class="bul-info-unit">bulones</div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>Verificaciones</h3></div>
+            <div class="checks" style="padding:0">
+              <div class="chk na" id="b-c1"><div class="chk-left"><div class="chk-name">Fluencia — sección bruta</div><div class="chk-detail" id="b-d1">—</div></div><span class="badge na" id="b-b1">—</span></div>
+              <div class="chk na" id="b-c2"><div class="chk-left"><div class="chk-name">Rotura — sección neta</div><div class="chk-detail" id="b-d2">—</div></div><span class="badge na" id="b-b2">—</span></div>
+              <div class="chk na" id="b-c3"><div class="chk-left"><div class="chk-name">Deslizamiento (Rdstr total ≥ Pu)</div><div class="chk-detail" id="b-d3">—</div></div><span class="badge na" id="b-b3">—</span></div>
+              <div class="chk na" id="b-c4"><div class="chk-left"><div class="chk-name">Aplastamiento</div><div class="chk-detail" id="b-d4">—</div></div><span class="badge na" id="b-b4">—</span></div>
+              <div class="chk na" id="b-c5"><div class="chk-left"><div class="chk-name">Bloque de corte</div><div class="chk-detail" id="b-d5">—</div></div><span class="badge na" id="b-b5">—</span></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>Resumen</h3></div>
+            <table class="res-table"><thead><tr><th>Elemento</th><th>Sección</th><th>Long. CJ total</th><th>Peso unit.</th><th>Par CJ</th></tr></thead>
+            <tbody id="b-tbody"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div><!-- /s-bar -->
+
+    <!-- ── VAR C: SOLDADURA ── -->
+    <div id="s-sold" class="sub-panel" data-group="grp1">
+      <div class="calc-grid">
+        <div>
+          <div class="panel">
+            <div class="panel-head"><h3><span class="ph-accent">01</span> · Datos generales</h3></div>
+            <div class="panel-body">
+              <div class="field"><label>Carga última Pu (kN)</label><input type="number" id="c-pu" value="250" min="1" max="5000"></div>
+              <div class="field"><label>Acero</label>
+                <select id="c-acero">
+                  <option value="235-370">F.24 — Fy=235 / Fu=370 MPa</option>
+                  <option value="250-400">F.26 — Fy=250 / Fu=400 MPa</option>
+                </select>
+              </div>
+              <div class="field"><label>Electrodo</label>
+                <select id="c-fexx">
+                  <option value="480" selected>E70 — FEXX=480 MPa</option>
+                  <option value="550">E80 — FEXX=550 MPa</option>
+                  <option value="620">E90 — FEXX=620 MPa</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3><span class="ph-accent">02</span> · Planchuela central — Catálogo Acindar</h3></div>
+            <div class="panel-body">
+              <div class="field-row">
+                <div class="field"><label>Ancho b</label><select id="c-b-sel"></select></div>
+                <div class="field"><label>Espesor t</label><select id="c-t-sel"></select></div>
+              </div>
+              <div class="field-row">
+                <div class="field"><label>Ag adoptada</label><input type="text" id="c-ag" readonly style="color:var(--yellow);font-weight:700"></div>
+                <div class="field"><label>Ag mínima</label><input type="text" id="c-agmin" readonly></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3><span class="ph-accent">03</span> · Cubrejuntas — Catálogo Acindar</h3></div>
+            <div class="panel-body">
+              <div class="field-row">
+                <div class="field"><label>Ancho bp</label><select id="c-bp-sel"></select></div>
+                <div class="field"><label>Espesor tc</label><select id="c-tc-sel"></select></div>
+              </div>
+              <div class="field-row">
+                <div class="field"><label>Acj adoptada</label><input type="text" id="c-acj" readonly style="color:var(--yellow);font-weight:700"></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3><span class="ph-accent">04</span> · Filete de soldadura</h3></div>
+            <div class="panel-body">
+              <div class="field-row">
+                <div class="field"><label>Lado cordón dw (mm)</label>
+                  <select id="c-dw">
+                    <option value="3">3 mm</option>
+                    <option value="4">4 mm</option>
+                    <option value="5" selected>5 mm</option>
+                    <option value="6">6 mm</option>
+                    <option value="8">8 mm</option>
+                    <option value="10">10 mm</option>
+                    <option value="12">12 mm</option>
+                    <option value="14">14 mm</option>
+                    <option value="16">16 mm</option>
+                  </select>
+                </div>
+                <div class="field"><label>Long. cord. laterales L1 (mm)</label>
+                  <input type="number" id="c-l1" value="60" min="10" max="500" step="5">
+                </div>
+              </div>
+              <div class="field-note">Disposición: 2 cordones laterales (L1 c/u) + 1 cordón frontal (bp)</div>
+              <div id="c-sold-hint" style="margin-top:8px;padding:8px 10px;background:var(--red-dim);border-left:3px solid var(--red);font-family:var(--mono);font-size:0.62rem;color:var(--muted);display:none"></div>
+            </div>
+          </div>
+        </div>
+        <div class="right-stack">
+          <div class="panel">
+            <div class="panel-head"><h3>Parámetros de soldadura</h3></div>
+            <div class="kpi-strip">
+              <div class="kpi"><div class="kpi-lbl">Fw (MPa)</div><div class="kpi-val" id="c-kfw">—</div><div class="kpi-unit">0.6·FEXX</div></div>
+              <div class="kpi"><div class="kpi-lbl">Lw total</div><div class="kpi-val" id="c-klw">—</div><div class="kpi-unit">cm</div></div>
+              <div class="kpi"><div class="kpi-lbl">Rd soldadura</div><div class="kpi-val" id="c-krd">—</div><div class="kpi-unit">kN</div></div>
+              <div class="kpi"><div class="kpi-lbl">Long. CJ total</div><div class="kpi-val" id="c-klcj">—</div><div class="kpi-unit">mm</div></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>Verificaciones</h3></div>
+            <div class="checks" style="padding:0">
+              <div class="chk na" id="c-c1"><div class="chk-left"><div class="chk-name">Fluencia — sección bruta</div><div class="chk-detail" id="c-d1">—</div></div><span class="badge na" id="c-b1">—</span></div>
+              <div class="chk na" id="c-c2"><div class="chk-left"><div class="chk-name">Rotura — sección neta (sin agujeros)</div><div class="chk-detail" id="c-d2">—</div></div><span class="badge na" id="c-b2">—</span></div>
+              <div class="chk na" id="c-c3"><div class="chk-left"><div class="chk-name">Resistencia filete (Rd ≥ Pu)</div><div class="chk-detail" id="c-d3">—</div></div><span class="badge na" id="c-b3">—</span></div>
+              <div class="chk na" id="c-c4"><div class="chk-left"><div class="chk-name">Lado mínimo filete (J.2.2)</div><div class="chk-detail" id="c-d4">—</div></div><span class="badge na" id="c-b4">—</span></div>
+              <div class="chk na" id="c-c5"><div class="chk-left"><div class="chk-name">Lado máximo filete (≤ t-2mm)</div><div class="chk-detail" id="c-d5">—</div></div><span class="badge na" id="c-b5">—</span></div>
+              <div class="chk na" id="c-c6"><div class="chk-left"><div class="chk-name">Bloque de corte</div><div class="chk-detail" id="c-d6">—</div></div><span class="badge na" id="c-b6">—</span></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>Resumen</h3></div>
+            <table class="res-table"><thead><tr><th>Elemento</th><th>Dimensión</th><th>Valor</th></tr></thead>
+            <tbody id="c-tbody"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div><!-- /s-sold -->
+
+  </div><!-- /tab1 -->
+
+  <!-- ════════════════════════ TAB 2: VIGA CON PLATABANDA ════════════════════════ -->
+  <div id="tab2" class="tab-panel">
+    <div style="padding-top:1.5rem">
+      <div class="viga-grid">
+
+        <!-- INPUTS -->
+        <div>
+          <div class="panel">
+            <div class="panel-head"><h3><span class="ph-accent">01</span> · Perfil laminado</h3></div>
+            <div class="panel-body">
+              <div class="field"><label>Perfil</label>
+                <select id="v-perfil" onchange="calcViga()">
+                  <option value="9800-653-762-125-16.2-241-10.8-300">IPN 300 — Ix=9800cm⁴ Sx=653cm³ Zx=762cm³</option>
+                  <option value="6360-541-601-120-13.7-213-9.5-260">IPN 260 — Ix=6360cm⁴ Sx=490cm³ Zx=550cm³</option>
+                  <option value="14900-893-1022-150-17.5-275-11.5-340">IPN 340 — Ix=14900cm⁴ Sx=880cm³ Zx=990cm³</option>
+                </select>
+              </div>
+              <div class="field"><label>Acero</label>
+                <select id="v-acero" onchange="calcViga()">
+                  <option value="235-370">F.24 — Fy=235 / Fu=370 MPa</option>
+                  <option value="250-400">F.26 — Fy=250 / Fu=400 MPa</option>
+                </select>
+              </div>
+              <div class="field-row">
+                <div class="field"><label>Mu (kNm)</label><input type="number" id="v-mu" value="275" min="1" onchange="calcViga()" oninput="calcViga()"></div>
+                <div class="field"><label>Vu (kN)</label><input type="number" id="v-vu" value="110" min="1" onchange="calcViga()" oninput="calcViga()"></div>
+              </div>
+              <div class="field"><label>Longitud viga L (m)</label><input type="number" id="v-L" value="10" min="1" step="0.5" onchange="calcViga()" oninput="calcViga()"></div>
+            </div>
+          </div>
+
+          <!-- MODO: calculado o adoptado por el usuario -->
+          <div class="panel">
+            <div class="panel-head">
+              <h3><span class="ph-accent">02</span> · Platabanda</h3>
+              <div class="tog-row" style="gap:4px">
+                <div class="tog active" id="v-modo-calc" onclick="setVigaModo('calc')" style="font-size:0.55rem;padding:4px 10px">AUTO tp→bp</div>
+                <div class="tog" id="v-modo-bp" onclick="setVigaModo('bp')" style="font-size:0.55rem;padding:4px 10px">FIJAR bp→tp</div>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="field-row">
+                <div class="field">
+                  <label>Espesor tp (mm)</label>
+                  <select id="v-tp" onchange="calcViga()">
+                    <option value="9.525">3/8" — 9.5 mm</option>
+                    <option value="12.7">1/2" — 12.7 mm</option>
+                    <option value="15.875">5/8" — 15.9 mm</option>
+                    <option value="19.05" selected>3/4" — 19.1 mm</option>
+                    <option value="25.4">1" — 25.4 mm</option>
+                    <option value="31.75">1 1/4" — 31.75 mm</option>
+                  </select>
+                </div>
+                <div class="field" id="v-bp-field">
+                  <label>Ancho bp (mm) — calculado</label>
+                  <input type="text" id="v-bp" readonly style="color:var(--yellow);font-weight:700;background:var(--bg2)">
+                </div>
+                <div class="field" id="v-bp-input-field" style="display:none">
+                  <label>Ancho bp adoptado (mm)</label>
+                  <input type="number" id="v-bp-input" value="200" min="50" max="500" step="10" onchange="calcViga()" oninput="calcViga()">
+                </div>
+              </div>
+              <div id="v-pb-hint" style="margin-top:8px;padding:8px 10px;background:var(--red-dim);border-left:3px solid var(--red);font-family:var(--mono);font-size:0.62rem;color:var(--muted);display:none"></div>
+            </div>
+            <!-- KPI platabanda calculado -->
+            <div class="kpi-strip" style="border-top:1px solid var(--border)">
+              <div class="kpi"><div class="kpi-lbl">Zp aportado</div><div class="kpi-val" id="v-kzp">—</div><div class="kpi-unit">cm³</div></div>
+              <div class="kpi"><div class="kpi-lbl">Z total</div><div class="kpi-val" id="v-kztot">—</div><div class="kpi-unit">cm³</div></div>
+              <div class="kpi"><div class="kpi-lbl">Md con PB</div><div class="kpi-val" id="v-kmd">—</div><div class="kpi-unit">kNm</div></div>
+              <div class="kpi"><div class="kpi-lbl">η = Md/Mu</div><div class="kpi-val" id="v-keta">—</div><div class="kpi-unit">—</div></div>
+            </div>
+          </div>
+
+          <!-- LONGITUD PLATABANDA -->
+          <div class="panel">
+            <div class="panel-head"><h3><span class="ph-accent">03</span> · Longitud — Corte teórico</h3></div>
+            <div class="panel-body">
+              <div class="field-row">
+                <div class="field"><label>x₀ — inicio platabanda (m)</label><input type="text" id="v-x0" readonly style="color:var(--red);font-weight:700;background:var(--bg2)"></div>
+                <div class="field"><label>x₁ = L − x₀ (m)</label><input type="text" id="v-x1" readonly style="color:var(--red);font-weight:700;background:var(--bg2)"></div>
+              </div>
+              <div class="field-row">
+                <div class="field"><label>Lp teórica (m)</label><input type="text" id="v-lpteo" readonly style="background:var(--bg2)"></div>
+                <div class="field"><label>a' = 1.5·bp (mm)</label><input type="text" id="v-aprime" readonly style="background:var(--bg2)"></div>
+              </div>
+              <div class="field">
+                <label>Lp TOTAL adoptada (m) — teórica + 2a'</label>
+                <input type="text" id="v-lptot" readonly style="color:var(--yellow);font-weight:700;font-size:1rem;padding:0.9rem;background:var(--bg2)">
+              </div>
+            </div>
+          </div>
+
+          <!-- SOLDADURA -->
+          <div class="panel">
+            <div class="panel-head"><h3><span class="ph-accent">04</span> · Soldadura extremo platabanda</h3></div>
+            <div class="panel-body">
+              <div class="field-row">
+                <div class="field"><label>Electrodo FEXX (MPa)</label>
+                  <select id="v-fexx" onchange="calcViga()">
+                    <option value="480" selected>E70 — 480 MPa</option>
+                    <option value="550">E80 — 550 MPa</option>
+                  </select>
+                </div>
+                <div class="field"><label>Lado dw adoptado (mm)</label>
+                  <select id="v-dw" onchange="calcViga()">
+                    <option value="3">3 mm</option>
+                    <option value="4">4 mm</option>
+                    <option value="5">5 mm</option>
+                    <option value="6">6 mm</option>
+                    <option value="8">8 mm</option>
+                    <option value="9" selected>9 mm</option>
+                    <option value="10">10 mm</option>
+                    <option value="12">12 mm</option>
+                    <option value="14">14 mm</option>
+                    <option value="16">16 mm</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field"><label>a' (mm) — cord. lat. ext.</label><input type="text" id="v-aprime-sold" readonly style="color:var(--muted);background:var(--bg2)"></div>
+                <div class="field"><label>Lw extremo (cm)</label><input type="text" id="v-lw-ext" readonly style="color:var(--muted);background:var(--bg2)"></div>
+              </div>
+              <div class="field-row">
+                <div class="field"><label>Tu — Fuerza en PB (kN)</label><input type="text" id="v-tu" readonly style="color:var(--red);font-weight:700;background:var(--bg2)"></div>
+                <div class="field"><label>Rdw — Resist. soldadura (kN)</label><input type="text" id="v-rdw" readonly style="color:var(--green);font-weight:700;background:var(--bg2)"></div>
+              </div>
+              <div id="v-sold-hint" style="margin-top:8px;padding:8px 10px;background:var(--red-dim);border-left:3px solid var(--red);font-family:var(--mono);font-size:0.62rem;color:var(--muted);display:none"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RESULTADOS -->
+        <div class="right-stack">
+
+          <!-- Diagrama de viga SVG -->
+          <div class="panel">
+            <div class="panel-head"><h3>Diagrama — Viga con platabanda</h3></div>
+            <div class="panel-body">
+              <div class="diag-svg-wrap">
+                <canvas id="v-canvas" width="600" height="240" style="width:100%"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pasos de cálculo -->
+          <div class="panel">
+            <div class="panel-head"><h3>Paso a paso — Cálculo CIRSOC 301</h3></div>
+            <div class="panel-body" id="v-steps" style="display:flex;flex-direction:column;gap:0.6rem"></div>
+          </div>
+
+          <!-- Verificaciones -->
+          <div class="panel">
+            <div class="panel-head"><h3>Verificaciones</h3></div>
+            <div class="checks" style="padding:0">
+              <div class="chk na" id="v-c1"><div class="chk-left"><div class="chk-name">Sección compacta — Ala</div><div class="chk-detail" id="v-d1">—</div></div><span class="badge na" id="v-b1">—</span></div>
+              <div class="chk na" id="v-c2"><div class="chk-left"><div class="chk-name">Sección compacta — Alma</div><div class="chk-detail" id="v-d2">—</div></div><span class="badge na" id="v-b2">—</span></div>
+              <div class="chk na" id="v-c3"><div class="chk-left"><div class="chk-name">Sección compacta — Platabanda (B.5 cas.10)</div><div class="chk-detail" id="v-d3">—</div></div><span class="badge na" id="v-b3">—</span></div>
+              <div class="chk na" id="v-c4"><div class="chk-left"><div class="chk-name">Resistencia flexión con platabanda (Md ≥ Mu)</div><div class="chk-detail" id="v-d4">—</div></div><span class="badge na" id="v-b4">—</span></div>
+              <div class="chk na" id="v-c5"><div class="chk-left"><div class="chk-name">Resistencia soldadura extremo (Rdw ≥ Tu)</div><div class="chk-detail" id="v-d5">—</div></div><span class="badge na" id="v-b5">—</span></div>
+              <div class="chk na" id="v-c6"><div class="chk-left"><div class="chk-name">Lado mínimo filete (J.2.2)</div><div class="chk-detail" id="v-d6">—</div></div><span class="badge na" id="v-b6">—</span></div>
+              <div class="chk na" id="v-c7"><div class="chk-left"><div class="chk-name">Lado máximo filete (≤ tp-2mm)</div><div class="chk-detail" id="v-d7">—</div></div><span class="badge na" id="v-b7">—</span></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h3>Resumen final</h3></div>
+            <table class="res-table"><thead><tr><th>Dato</th><th>Valor</th></tr></thead>
+            <tbody id="v-tbody"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /tab2 -->
+
+</div><!-- /tabs-content -->
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-left">
+    Herramienta educativa — no reemplaza la verificación profesional.<br>
+    Catálogo Acindar S.A.I.A · Norma CIRSOC 301 — Estados Límites
+  </div>
+  <div>
+    <div class="foot-logo">SIBRA<span>TECH</span> GROUP</div>
+    <div class="foot-right" style="margin-top:3px">Facultad de Ingeniería · UNNE<br>Estructuras de Acero</div>
+  </div>
+</footer>
+
+<!-- LIGHTBOX -->
+<div class="lb" id="lb" onclick="closeLb()">
+  <img src="/mnt/user-data/uploads/1778462621707_image.png" alt="Catálogo Acindar">
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   DATOS ACINDAR
+══════════════════════════════════════════ */
+const ANC=[
+  {mm:12.7,p:'1/2"'},{mm:15.9,p:'5/8"'},{mm:19.0,p:'3/4"'},{mm:22.2,p:'7/8"'},
+  {mm:25.4,p:'1"'},{mm:31.8,p:'1 1/4"'},{mm:38.1,p:'1 1/2"'},{mm:44.5,p:'1 3/4"'},
+  {mm:50.8,p:'2"'},{mm:57.2,p:'2 1/4"'},{mm:63.5,p:'2 1/2"'},{mm:76.2,p:'3"'},
+  {mm:88.9,p:'3 1/2"'},{mm:101.6,p:'4"'},{mm:127.0,p:'5"'},{mm:152.4,p:'6"'},
+];
+const ESP=[
+  {mm:3.2,p:'1/8"'},{mm:4.8,p:'3/16"'},{mm:6.4,p:'1/4"'},{mm:7.9,p:'5/16"'},
+  {mm:9.5,p:'3/8"'},{mm:12.7,p:'1/2"'},{mm:15.9,p:'5/8"'},{mm:19.0,p:'3/4"'},{mm:25.4,p:'1"'},
+];
+const PES={
+  '12.7-3.2':0.32,'12.7-4.8':0.48,'12.7-6.4':0.64,
+  '15.9-3.2':0.40,'15.9-4.8':0.60,'15.9-6.4':0.79,
+  '19.0-3.2':0.48,'19.0-4.8':0.72,'19.0-6.4':0.95,'19.0-7.9':1.18,'19.0-9.5':1.42,
+  '22.2-3.2':0.56,'22.2-4.8':0.84,'22.2-6.4':1.12,'22.2-7.9':1.38,
+  '25.4-3.2':0.64,'25.4-4.8':0.96,'25.4-6.4':1.28,'25.4-7.9':1.58,'25.4-9.5':1.89,'25.4-12.7':2.53,
+  '31.8-3.2':0.80,'31.8-4.8':1.20,'31.8-6.4':1.60,'31.8-7.9':1.97,'31.8-9.5':2.37,'31.8-12.7':3.17,
+  '38.1-3.2':0.96,'38.1-4.8':1.44,'38.1-6.4':1.91,'38.1-7.9':2.36,'38.1-9.5':2.84,'38.1-12.7':3.80,
+  '44.5-3.2':1.12,'44.5-4.8':1.68,'44.5-6.4':2.24,'44.5-7.9':2.76,'44.5-9.5':3.32,'44.5-12.7':4.44,
+  '50.8-3.2':1.28,'50.8-4.8':1.91,'50.8-6.4':2.55,'50.8-7.9':3.15,'50.8-9.5':3.79,'50.8-12.7':5.06,'50.8-15.9':6.34,'50.8-19.0':7.58,
+  '63.5-3.2':1.60,'63.5-4.8':2.39,'63.5-6.4':3.19,'63.5-7.9':3.94,'63.5-9.5':4.74,'63.5-12.7':6.33,'63.5-15.9':7.93,'63.5-19.0':9.52,'63.5-25.4':12.66,
+  '76.2-3.2':1.91,'76.2-4.8':2.87,'76.2-6.4':3.83,'76.2-7.9':4.73,'76.2-9.5':5.68,'76.2-12.7':7.60,'76.2-15.9':9.51,'76.2-19.0':11.37,
+  '88.9-3.2':2.23,'88.9-4.8':3.35,'88.9-6.4':4.47,'88.9-7.9':5.51,'88.9-9.5':6.58,'88.9-12.7':8.78,
+  '101.6-3.2':2.55,'101.6-4.8':3.83,'101.6-6.4':5.10,'101.6-7.9':6.30,'101.6-9.5':7.58,'101.6-12.7':10.13,'101.6-15.9':12.68,'101.6-19.0':15.15,
+  '127.0-3.2':3.19,'127.0-4.8':4.79,'127.0-6.4':6.38,'127.0-7.9':7.88,'127.0-9.5':9.47,'127.0-12.7':12.66,'127.0-15.9':15.85,'127.0-19.0':18.94,
+  '152.4-3.2':3.83,'152.4-4.8':5.73,'152.4-6.4':7.64,'152.4-7.9':9.45,'152.4-9.5':11.39,'152.4-12.7':15.19,'152.4-15.9':19.02,'152.4-19.0':22.73,
+};
+// Pretensado Tabla J.3-6 CIRSOC 301
+const Tb_A325={12:50,16:91,20:142,22:176,24:205,27:267};
+
+function gp(b,t){return PES[`${b}-${t}`]??null;}
+function f(n,d=2){return (+n).toFixed(d);}
+
+/* ══════ TABS ══════ */
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+function switchSub(id,btn,grp){
+  document.querySelectorAll(`[data-group="${grp}"]`).forEach(p=>p.classList.remove('active'));
+  btn.closest('.sub-tabs').querySelectorAll('.sub-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ══════ SELECTS ══════ */
+function buildSel(bid,tid,defB,defT){
+  const sb=document.getElementById(bid);
+  sb.innerHTML='';
+  ANC.forEach(a=>{const o=document.createElement('option');o.value=a.mm;o.textContent=`${a.p} — ${a.mm}mm`;if(a.mm===defB)o.selected=true;sb.appendChild(o);});
+  sb.addEventListener('change',()=>updateEsp(bid,tid));
+  updateEsp(bid,tid,defT);
+}
+function updateEsp(bid,tid,defT){
+  const b=+document.getElementById(bid).value;
+  const st=document.getElementById(tid);
+  const prev=defT||+st.value||12.7;
+  st.innerHTML='';
+  ESP.forEach(e=>{if(PES[`${b}-${e.mm}`]!==undefined){const o=document.createElement('option');o.value=e.mm;o.textContent=`${e.p} — ${e.mm}mm`;if(e.mm===prev)o.selected=true;st.appendChild(o);}});
+  if(!st.value&&st.options.length)st.options[Math.min(3,st.options.length-1)].selected=true;
+}
+function buildColSel(selId,defV){
+  const s=document.getElementById(selId);const prev=+s.value||defV||3;s.innerHTML='';
+  for(let c=1;c<=16;c++){const o=document.createElement('option');o.value=c;o.textContent=c===1?'1 col':`${c} cols`;s.appendChild(o);}
+  s.value=prev>=1?prev:defV||3;
+}
+
+/* ══════ BADGE HELPER ══════ */
+function setBadge(bid,cid,ok){
+  const b=document.getElementById(bid),c=document.getElementById(cid);
+  b.textContent=ok?'✓ Verifica':'✗ No verifica';
+  b.className='badge '+(ok?'ok':'fail');
+  c.className='chk '+(ok?'ok':'fail');
+}
+function resetBadge(bid,cid){
+  document.getElementById(bid).textContent='—';document.getElementById(bid).className='badge na';
+  document.getElementById(cid).className='chk na';
+}
+
+/* ══════ CANVAS ══════ */
+let orgA='rectangular';
+function setOrgA(o){orgA=o;document.getElementById('a-btn-rect').classList.toggle('active',o==='rectangular');document.getElementById('a-btn-tresb').classList.toggle('active',o==='tresbolillo');calcA();}
+
+function drawCanvas(canvasId,nf,nc,s,db,b,dnom,org){
+  const cv=document.getElementById(canvasId);const ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height;ctx.clearRect(0,0,W,H);
+  const cPlate='#f5f4f2',cBorder='#d4d2cc',cHole='#fff',cHoleB='#E10600',cJunta='#ccc',cText='#999';
+  const mg=28,longTot=2*(db+(nc-1)*s+db);
+  const sc=Math.min((W-2*mg)/longTot,(H-36)/b,2.6);
+  const plW=longTot*sc,plH=b*sc,ox=(W-plW)/2,oy=(H-plH)/2;
+  ctx.fillStyle=cPlate;ctx.strokeStyle=cBorder;ctx.lineWidth=1;
+  ctx.beginPath();ctx.roundRect(ox,oy,plW,plH,3);ctx.fill();ctx.stroke();
+  const jX=ox+plW/2;
+  ctx.setLineDash([5,4]);ctx.strokeStyle=cJunta;ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(jX,oy-5);ctx.lineTo(jX,oy+plH+5);ctx.stroke();ctx.setLineDash([]);
+  const r=Math.max(dnom*sc/2,3.5);
+  for(const lado of[-1,1]){
+    for(let fi=0;fi<nf;fi++){for(let ci=0;ci<nc;ci++){
+      let xMm,yMm;
+      if(org==='rectangular'){xMm=db+ci*s;yMm=b/2+(fi-(nf-1)/2)*s;}
+      else{xMm=db+ci*s+(fi%2===1?s/2:0);yMm=b/2+(fi-(nf-1)/2)*s*0.866;}
+      const px=jX+lado*xMm*sc,py=oy+yMm*sc;
+      ctx.fillStyle=cHole;ctx.strokeStyle=cHoleB;ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);ctx.fill();ctx.stroke();
+    }}
+  }
+  ctx.fillStyle=cText;ctx.font='10px IBM Plex Mono,monospace';ctx.textAlign='center';
+  ctx.fillText(`${nf}×${nc} M${dnom} · s=${s}mm · db=${db}mm · L_CJ=${(2*(db+(nc-1)*s+db)).toFixed(0)}mm`,W/2,H-7);
+}
+
+/* ══════ SUGERENCIA COLUMNAS ══════ */
+function suggestCols(nf, nb_min, selId, hintId) {
+  const nc_min = Math.ceil(nb_min / nf);
+  const s = document.getElementById(selId);
+  const hint = document.getElementById(hintId);
+  const nc_sug = Math.max(nc_min, 1);
+  // Asegurar que la opción exista
+  if (!s.querySelector(`option[value="${nc_sug}"]`)) {
+    for(let c=+s.options[s.options.length-1].value+1; c<=nc_sug; c++){
+      const o=document.createElement('option');o.value=c;o.textContent=`${c} cols`;s.appendChild(o);
+    }
+  }
+  const nc_actual = +s.value;
+  if (nc_actual < nc_sug) {
+    s.value = nc_sug;
+    if (hint) { hint.textContent = `↑ ${nc_sug} cols sugerido (mín. para ${nf} fila${nf>1?'s':''} y ${f(nb_min,1)} bul. requeridos)`; hint.style.color='var(--red)'; }
+  } else if (hint) {
+    hint.textContent = `✓ ${nc_actual}×${nf}=${nc_actual*nf} bul. ≥ ${f(nb_min,1)} req.`;
+    hint.style.color='var(--green)';
+  }
+}
+
+/* ══════ CALC A: BULONES COMUNES ══════ */
+function calcA(){
+  const Pu=+document.getElementById('a-pu').value;
+  const b=+document.getElementById('a-b').value;
+  const t=+document.getElementById('a-t').value;
+  const dnom=+document.getElementById('a-dnom').value;
+  const hol=+document.getElementById('a-agujero').value;
+  const dag=dnom+hol,dcalc=dag+2;
+  const nf=+document.getElementById('a-nf').value;
+  // Tipo de bulón → Fv
+  const tipoBulon=document.getElementById('a-tipo-bulon').value;
+  const FvMap={'A307M':140,'A325M-corte':330,'A490M-corte':414};
+  const Fv=FvMap[tipoBulon]||140;
+  const phi=0.75;
+
+  // ── Calcular bulones necesarios ANTES de leer nc ──
+  const [Fy_pre,Fu_pre]=document.getElementById('a-acero').value.split('-').map(Number);
+  const Ab_pre=Math.PI*dnom*dnom/4/100;
+  const Rb_pre=phi*Fv*Ab_pre*2/10;
+  const nb_min_pre=Pu/Rb_pre;
+  suggestCols(nf, nb_min_pre, 'a-nc', 'a-nc-sugg');
+
+  const nc=+document.getElementById('a-nc').value;
+  const s=+document.getElementById('a-s').value;
+  const db=+document.getElementById('a-db').value;
+  const [Fy,Fu]=[Fy_pre,Fu_pre];
+  const Ag=b*t/100,Ag_min=(Pu*10)/(0.9*Fy);
+  document.getElementById('a-ag').value=f(Ag)+' cm²';
+  document.getElementById('a-agmin').value=f(Ag_min)+' cm²';
+  const Ab=Math.PI*dnom*dnom/4/100;
+  const Rb=phi*Fv*Ab*2/10;
+  const nb_min=Pu/Rb;
+  const nb_tot=nf*nc;
+  document.getElementById('a-kab').textContent=f(Ab);
+  document.getElementById('a-krb').textContent=f(Rb);
+  document.getElementById('a-kdag').textContent=`${dag}/${dcalc}`;
+  // ── Info box destacado ──
+  const nb_tot_actual=nf*nc;
+  document.getElementById('a-knb-big').textContent=`${Math.ceil(nb_min)} bulones`;
+  document.getElementById('a-knb-sub').textContent=`Pu = ${Pu} kN · Rb = ${f(Rb)} kN/bulón · Pu/Rb = ${f(nb_min,2)}.\nCon ${nf} fila${nf>1?'s':''}: adoptar ${Math.ceil(nb_min/nf)} columna${Math.ceil(nb_min/nf)>1?'s':''}.`;
+  // distancias
+  const smin=3*dnom,smax=Math.min(24*t,300),dbmin=1.5*dnom,dbmax=Math.min(12*t,150);
+  const s_ok=s>=smin&&s<=smax,db_ok=db>=dbmin&&db<=dbmax;
+  document.getElementById('a-dist').innerHTML=
+    `<span class="chip ${s_ok?'ok':'fail'}">s=${s}mm [${smin}–${smax}]</span>`+
+    `<span class="chip ${db_ok?'ok':'fail'}">db=${db}mm [${f(dbmin,0)}–${f(dbmax,0)}]</span>`+
+    `<span class="chip info">dag=${dag}mm · dcalc=${dcalc}mm</span>`;
+  // verif
+  const flu_ok=Ag>=Ag_min;
+  const An=(b-nf*dcalc)*t/100;
+  const Pd_net=0.75*Fu*An/10;
+  const net_ok=An>0&&Pd_net>=Pu;
+  const Lc=db-dag/2;
+  const Rd_apl=Math.min(1.2*Lc*t*Fu*1e-3,2.4*dnom*t*Fu*1e-3)*phi*nb_tot;
+  const apl_ok=Rd_apl>=Pu;
+  const Agt=nf*db*t/100,Agv=nf*((nc-1)*s+db)*t/100;
+  const Ant=Agt-nf*(dcalc/2)*t/100,Anv=Math.max(0,Agv-nf*(nc-0.5)*dcalc*t/100);
+  const Rn_blq=0.6*Anv>=Ant?(0.6*Fu*Anv+Fy*Agt)/10:(0.6*Fy*Agv+Fu*Ant)/10;
+  const Rd_blq=0.75*Rn_blq;
+  const blq_ok=Rd_blq>=Pu;
+  setBadge('a-b1','a-c1',flu_ok); document.getElementById('a-d1').textContent=`φFyAg=${f(0.9*Fy*Ag/10)}kN | Ag=${f(Ag)}≥${f(Ag_min)}cm²`;
+  setBadge('a-b2','a-c2',net_ok); document.getElementById('a-d2').textContent=`An=${f(An)}cm² → Pd=${f(Pd_net)}kN`;
+  setBadge('a-b3','a-c3',apl_ok); document.getElementById('a-d3').textContent=`Rd=${f(Rd_apl)}kN (${nb_tot} bul × ${f(phi*Math.min(1.2*Lc*t*Fu*1e-3,2.4*dnom*t*Fu*1e-3))}kN)`;
+  setBadge('a-b4','a-c4',blq_ok); document.getElementById('a-d4').textContent=`Rd_blq=${f(Rd_blq)}kN`;
+  // resumen
+  const tc=t/2,longCJ=2*(db+(nc-1)*s+db),pesopc=gp(b,t),pesocj=gp(b,tc);
+  const parCJ=pesocj?f(pesocj*longCJ/1000*2)+'kg':'—';
+  const allOk=[flu_ok,net_ok,apl_ok,blq_ok].every(Boolean);
+  document.getElementById('a-tbody').innerHTML=`
+    <tr><td>Pieza central</td><td>${f(b,1)}×${f(t,1)}mm</td><td>—</td><td>${pesopc??'—'}kg/m</td><td>—</td></tr>
+    <tr><td>Cubrejuntas ×2</td><td>${f(b,1)}×${f(tc,1)}mm</td><td>${f(longCJ,0)}mm</td><td>${pesocj??'—'}kg/m</td><td>${parCJ}</td></tr>
+    <tr><td>Bulones M${dnom}</td><td>${nb_tot}ud (${nf}f×${nc}c)</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr><td><strong>Estado</strong></td><td colspan="4" style="color:${allOk?'var(--green)':'var(--red)'};font-weight:700">${allOk?'✓ Todas verifican':'✗ Hay incumplimientos'}</td></tr>`;
+  const dp=document.getElementById('a-diag-panel'),dm=document.getElementById('a-diag');
+  dp.style.display='block';
+  const fails=[];if(!flu_ok)fails.push('fluencia');if(!net_ok)fails.push('sección neta');if(!apl_ok)fails.push('aplastamiento');if(!blq_ok)fails.push('bloque corte');
+  dm.innerHTML=allOk?`<span style="color:var(--green);font-weight:700">✓ El empalme verifica todas las condiciones.</span> Long. CJ: ${f(longCJ/2,0)} mm por lado.`
+    :`<span style="color:var(--red);font-weight:700">✗ No verifica:</span> ${fails.join(', ')}. Revisá la sección o la disposición.`;
+  drawCanvas('a-canvas',nf,nc,s,db,b,dnom,orgA);
+}
+
+/* ══════ CALC B: BAR A325M ══════ */
+function calcB(){
+  const Pu=+document.getElementById('b-pu').value;
+  const b=+document.getElementById('b-b').value;
+  const t=+document.getElementById('b-t').value;
+  const dnom=+document.getElementById('b-dnom').value;
+  const mu=+document.getElementById('b-mu').value;
+  const nf=+document.getElementById('b-nf').value;
+
+  // ── Calcular mínimo de bulones ANTES de leer nc ──
+  const Tb_pre=Tb_A325[dnom]||91;
+  const Rdstr_unit_pre=1.0*mu*2*Tb_pre;
+  const nb_min_pre=Pu/Rdstr_unit_pre;
+  suggestCols(nf, nb_min_pre, 'b-nc', 'b-nc-sugg');
+
+  const nc=+document.getElementById('b-nc').value;
+  const s=+document.getElementById('b-s').value;
+  const db=+document.getElementById('b-db').value;
+  const [Fy,Fu]=document.getElementById('b-acero').value.split('-').map(Number);
+  const dag=dnom+2,dcalc=dag+2,Ns=2,phi_str=1.0;
+  const Tb=Tb_A325[dnom]||91;
+  const Rdstr_unit=phi_str*mu*Ns*Tb;
+  const nb_min=Pu/Rdstr_unit;
+  const nb_tot=nf*nc;
+  const Ag=b*t/100,Ag_min=(Pu*10)/(0.9*Fy);
+  document.getElementById('b-ag').value=f(Ag)+' cm²';
+  document.getElementById('b-agmin').value=f(Ag_min)+' cm²';
+  document.getElementById('b-ktb').textContent=f(Tb);
+  document.getElementById('b-krstr').textContent=f(Rdstr_unit);
+  document.getElementById('b-ktot').textContent=nb_tot;
+  // ── Info box destacado ──
+  document.getElementById('b-knb-big').textContent=`${Math.ceil(nb_min)} bulones`;
+  document.getElementById('b-knb-sub').textContent=`Pu = ${Pu} kN · Rdstr = ${f(Rdstr_unit)} kN/bulón · Pu/Rdstr = ${f(nb_min,2)}.\nCon ${nf} fila${nf>1?'s':''}: adoptar ${Math.ceil(nb_min/nf)} columna${Math.ceil(nb_min/nf)>1?'s':''} → ${nb_tot} bulones totales.`;
+  // distancias
+  const smin=3*dnom,smax=Math.min(24*t,300),dbmin=1.5*dnom,dbmax=Math.min(12*t,150);
+  const s_ok=s>=smin&&s<=smax,db_ok=db>=dbmin&&db<=dbmax;
+  document.getElementById('b-dist').innerHTML=
+    `<span class="chip ${s_ok?'ok':'fail'}">s=${s}mm [${smin}–${smax}]</span>`+
+    `<span class="chip ${db_ok?'ok':'fail'}">db=${db}mm [${f(dbmin,0)}–${f(dbmax,0)}]</span>`;
+  // verif
+  const flu_ok=Ag>=Ag_min;
+  const An=(b-nf*dcalc)*t/100,Pd_net=0.75*Fu*An/10,net_ok=An>0&&Pd_net>=Pu;
+  const str_ok=Rdstr_unit*nb_tot>=Pu;
+  const Lc=db-dag/2,phi_b=0.75;
+  const Rd_apl=Math.min(1.2*Lc*t*Fu*1e-3,2.4*dnom*t*Fu*1e-3)*phi_b*nb_tot,apl_ok=Rd_apl>=Pu;
+  const Agt=nf*db*t/100,Agv=nf*((nc-1)*s+db)*t/100;
+  const Ant=Agt-nf*(dcalc/2)*t/100,Anv=Math.max(0,Agv-nf*(nc-0.5)*dcalc*t/100);
+  const Rn_blq=0.6*Anv>=Ant?(0.6*Fu*Anv+Fy*Agt)/10:(0.6*Fy*Agv+Fu*Ant)/10;
+  const Rd_blq=0.75*Rn_blq,blq_ok=Rd_blq>=Pu;
+  setBadge('b-b1','b-c1',flu_ok);document.getElementById('b-d1').textContent=`φFyAg=${f(0.9*Fy*Ag/10)}kN`;
+  setBadge('b-b2','b-c2',net_ok);document.getElementById('b-d2').textContent=`An=${f(An)}cm² → Pd=${f(Pd_net)}kN`;
+  setBadge('b-b3','b-c3',str_ok);document.getElementById('b-d3').textContent=`Rdstr total=${f(Rdstr_unit*nb_tot)}kN = ${nb_tot}×${f(Rdstr_unit)}kN`;
+  setBadge('b-b4','b-c4',apl_ok);document.getElementById('b-d4').textContent=`Rd_apl=${f(Rd_apl)}kN`;
+  setBadge('b-b5','b-c5',blq_ok);document.getElementById('b-d5').textContent=`Rd_blq=${f(Rd_blq)}kN`;
+  const tc=t/2,longCJ=2*(db+(nc-1)*s+db),pesopc=gp(b,t),pesocj=gp(b,tc);
+  const parCJ=pesocj?f(pesocj*longCJ/1000*2)+'kg':'—';
+  const allOk=[flu_ok,net_ok,str_ok,apl_ok,blq_ok].every(Boolean);
+  document.getElementById('b-tbody').innerHTML=`
+    <tr><td>Pieza central</td><td>${f(b,1)}×${f(t,1)}mm</td><td>—</td><td>${pesopc??'—'}kg/m</td><td>—</td></tr>
+    <tr><td>Cubrejuntas ×2</td><td>${f(b,1)}×${f(tc,1)}mm</td><td>${f(longCJ,0)}mm</td><td>${pesocj??'—'}kg/m</td><td>${parCJ}</td></tr>
+    <tr><td>BAR M${dnom} Tb=${Tb}kN</td><td>${nb_tot}ud (${nf}f×${nc}c)</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr><td><strong>Estado</strong></td><td colspan="4" style="color:${allOk?'var(--green)':'var(--red)'};font-weight:700">${allOk?'✓ Todas verifican':'✗ Hay incumplimientos'}</td></tr>`;
+  drawCanvas('b-canvas',nf,nc,s,db,b,dnom,'rectangular');
+}
+
+/* ══════ CALC C: SOLDADURA ══════ */
+function calcC(){
+  const Pu=+document.getElementById('c-pu').value;
+  const b=+document.getElementById('c-b-sel').value;
+  const t=+document.getElementById('c-t-sel').value;
+  const bp=+document.getElementById('c-bp-sel').value;
+  const tc=+document.getElementById('c-tc-sel').value;
+  const fexx=+document.getElementById('c-fexx').value;
+  const dw=+document.getElementById('c-dw').value;
+  const L1=+document.getElementById('c-l1').value;
+  const [Fy,Fu]=document.getElementById('c-acero').value.split('-').map(Number);
+  // Mostrar Ag y Acj
+  const Ag=b*t/100, Ag_min=(Pu*10)/(0.9*Fy);
+  const Acj=bp*tc/100;
+  document.getElementById('c-ag').value=f(Ag)+' cm²';
+  document.getElementById('c-agmin').value=f(Ag_min)+' cm²';
+  document.getElementById('c-acj').value=f(Acj)+' cm² (×2)';
+  const Fw=0.6*fexx;
+  const Lw_total=2*L1+bp;
+  const phi_w=0.60;
+  const Rd=phi_w*Fw*Lw_total*0.707*dw*1e-4*10;
+  const An=Ag;
+  const Pd_neta=0.75*Fu*An/10;
+  const flu_ok=Ag>=Ag_min,net_ok=Pd_neta>=Pu,sold_ok=Rd>=Pu;
+  // lado mín (Tabla J.2-4 simplificada)
+  const dw_min=tc<=6?3:tc<=12?5:tc<=19?6:8;
+  const dw_max=tc-2;
+  const dmin_ok=dw>=dw_min,dmax_ok=dw<=dw_max;
+  // bloque corte (sin agujeros) — Rn=(0.6Fu·Agv + Fy·Agt)/10 aprox
+  const Agv=2*L1*tc/100,Agt=bp*tc/100;
+  const Rn_blq=(0.6*Fu*Agv+Fy*Agt)/10,Rd_blq=0.75*Rn_blq,blq_ok=Rd_blq>=Pu;
+  const LCJ=2*L1+bp; // mm
+  document.getElementById('c-kfw').textContent=f(Fw,0);
+  document.getElementById('c-klw').textContent=f(Lw_total/10,1);
+  document.getElementById('c-krd').textContent=f(Rd);
+  document.getElementById('c-klcj').textContent=f(LCJ,0);
+  // ── Sugerencia L1 mínimo que verifica ──
+  const hint_c=document.getElementById('c-sold-hint');
+  if(hint_c){
+    const Fw_h=0.6*fexx;
+    // Rd = phi_w * Fw * (2*L1+bp) * 0.707 * dw * 1e-4 * 10 >= Pu
+    // => Lw >= Pu/(phi_w*Fw*0.707*dw*1e-3)
+    const Lw_min_mm=Pu/(0.60*Fw_h*0.707*dw*1e-3);
+    const L1_min=Math.ceil((Lw_min_mm-bp)/2);
+    // También: dw mínimo para L1 actual
+    const dw_min_for_L1=Pu/(0.60*Fw_h*(2*L1+bp)*0.707*1e-3);
+    const dw_sug=Math.ceil(dw_min_for_L1*2)/2; // redondear a 0.5mm
+    if(!sold_ok){
+      hint_c.style.display='block';
+      hint_c.innerHTML=`⚠ No verifica. Opciones: aumentar L1 ≥ <strong style="color:var(--red)">${L1_min}mm</strong> (actual ${L1}mm), o aumentar dw ≥ <strong style="color:var(--red)">${f(dw_sug,1)}mm</strong> (actual ${dw}mm).`;
+    } else {
+      hint_c.style.display='block';
+      hint_c.innerHTML=`✓ Con dw=${dw}mm: L1 mín. = ${L1_min}mm — actual ${L1}mm verifica (η=${f(Rd/Pu*100,0)}%)`;
+    }
+  }
+  setBadge('c-b1','c-c1',flu_ok);document.getElementById('c-d1').textContent=`φFyAg=${f(0.9*Fy*Ag/10)}kN ≥ Pu=${Pu}kN`;
+  setBadge('c-b2','c-c2',net_ok);document.getElementById('c-d2').textContent=`Pd=0.75·Fu·An=${f(Pd_neta)}kN ≥ ${Pu}kN`;
+  setBadge('c-b3','c-c3',sold_ok);document.getElementById('c-d3').textContent=`Rd=φ·Fw·Lw·0.707·dw=${f(Rd)}kN | Lw=${f(Lw_total/10,1)}cm`;
+  setBadge('c-b4','c-c4',dmin_ok);document.getElementById('c-d4').textContent=`dw=${dw}mm ≥ dw_mín=${dw_min}mm (t_chapa=${tc}mm)`;
+  setBadge('c-b5','c-c5',dmax_ok);document.getElementById('c-d5').textContent=`dw=${dw}mm ≤ t-2=${dw_max}mm`;
+  setBadge('c-b6','c-c6',blq_ok);document.getElementById('c-d6').textContent=`Rd_blq=0.75·(0.6Fu·Agv+Fy·Agt)=${f(Rd_blq)}kN`;
+  const allOk=[flu_ok,net_ok,sold_ok,dmin_ok,dmax_ok,blq_ok].every(Boolean);
+  document.getElementById('c-tbody').innerHTML=`
+    <tr><td>Pieza central</td><td>${f(b,0)}×${f(t,1)}mm</td><td>Ag=${f(Ag)}cm²</td></tr>
+    <tr><td>Cubrejuntas ×2</td><td>${f(bp,0)}×${f(tc,1)}mm</td><td>—</td></tr>
+    <tr><td>Fw soldadura</td><td>0.6·FEXX</td><td>${f(Fw,0)} MPa</td></tr>
+    <tr><td>Lado filete dw</td><td>adoptado</td><td>${dw} mm</td></tr>
+    <tr><td>Long. cordones lat.</td><td>L1</td><td>${L1} mm c/u</td></tr>
+    <tr><td>Long. CJ total</td><td>2L1+bp</td><td>${f(LCJ,0)} mm</td></tr>
+    <tr><td><strong>Estado</strong></td><td colspan="2" style="color:${allOk?'var(--green)':'var(--red)'};font-weight:700">${allOk?'✓ Verifica':'✗ No verifica'}</td></tr>`;
+}
+
+/* ══════ MODO PLATABANDA ══════ */
+let vigaModo='calc'; // 'calc' = tp→bp auto | 'bp' = bp fijado por usuario
+function setVigaModo(m){
+  vigaModo=m;
+  document.getElementById('v-modo-calc').classList.toggle('active',m==='calc');
+  document.getElementById('v-modo-bp').classList.toggle('active',m==='bp');
+  document.getElementById('v-bp-field').style.display=m==='calc'?'block':'none';
+  document.getElementById('v-bp-input-field').style.display=m==='bp'?'block':'none';
+  calcViga();
+}
+
+/* ══════ CALC VIGA CON PLATABANDA ══════ */
+function calcViga(){
+  const parts=document.getElementById('v-perfil').value.split('-').map(Number);
+  const [Ix,Sx,Zx,bf,tf,hw,tw,d]=parts;
+  const [Fy,Fu]=document.getElementById('v-acero').value.split('-').map(Number);
+  const Mu=+document.getElementById('v-mu').value;
+  const Vu=+document.getElementById('v-vu').value;
+  const L=+document.getElementById('v-L').value;
+  const tp=+document.getElementById('v-tp').value;
+  const fexx=+document.getElementById('v-fexx').value;
+  const dw=+document.getElementById('v-dw').value;
+
+  // 1) Clasificación perfil
+  const lam_ala=bf/2/tf, lp_ala=170/Math.sqrt(Fy);
+  const lam_alma=hw/tw,   lp_alma=1680/Math.sqrt(Fy);
+  const ala_ok=lam_ala<=lp_ala, alma_ok=lam_alma<=lp_alma;
+
+  // 2) Mdp perfil solo
+  const Mdp=0.9*Zx*Fy*1e-3;
+
+  // 3) Zp necesario
+  const Mnn=Mu/0.9, Zxn=Mnn*1e3/Fy, Zp_need=Zxn-Zx;
+
+  // 4) bp — modo auto o adoptado
+  const h=d;
+  const bp_calc_cm=Zp_need/(2*tp*(h/2+tp/2)*0.01);
+  const bp_calc=Math.ceil(bp_calc_cm/10)*10;
+
+  let bp;
+  if(vigaModo==='calc'){
+    bp=bp_calc;
+    document.getElementById('v-bp').value=bp+' mm';
+  } else {
+    bp=+document.getElementById('v-bp-input').value||200;
+  }
+
+  // 5) Z total y Md
+  const Zp_aportado=2*bp*tp*(h/2+tp/2)*0.01;
+  const Z_total=Zx+Zp_aportado;
+  const Md=0.9*Z_total*Fy*1e-3;
+  const eta=Md/Mu;
+
+  // KPIs platabanda
+  document.getElementById('v-kzp').textContent=f(Zp_aportado,1);
+  document.getElementById('v-kztot').textContent=f(Z_total,1);
+  document.getElementById('v-kmd').textContent=f(Md,1);
+  document.getElementById('v-keta').textContent=f(eta,3);
+
+  // 6) Compacidad platabanda Caso 10
+  const lam_pb=(bp/2)/tp, lp_pb=500/Math.sqrt(Fy);
+  const pb_ok=lam_pb<=lp_pb;
+
+  // Hint platabanda
+  const hint_pb=document.getElementById('v-pb-hint');
+  if(hint_pb){
+    const tp_min_compact=bp/(2*lp_pb);
+    const tpOpts=[9.525,12.7,15.875,19.05,25.4,31.75];
+    const tp_sug=tpOpts.find(x=>x>=tp_min_compact)||tpOpts[tpOpts.length-1];
+    hint_pb.style.display='block';
+    if(!pb_ok){
+      hint_pb.innerHTML=`⚠ <strong style="color:var(--red)">No compacta:</strong> λ = bp/2/tp = ${f(lam_pb,2)} > λp = ${f(lp_pb,2)} — aumentar tp ≥ ${f(tp_min_compact,1)} mm (siguiente disponible: <strong>${tp_sug} mm</strong>)`;
+    } else {
+      hint_pb.style.color='var(--green)';
+      hint_pb.innerHTML=`✓ Sección compacta: λ = bp/2/tp = ${f(lam_pb,2)} ≤ λp = ${f(lp_pb,2)} — tp = ${f(tp,2)} mm verifica Caso 10`;
+    }
+  }
+
+  // 7) Longitud platabanda
+  const qu=2*Vu/L;
+  const disc=Vu*Vu-4*(qu/2)*Mdp;
+  let x0=0,x1=0,lp_teo=0,lp_total=0,aPrime=0;
+  if(disc>=0){
+    x0=(Vu-Math.sqrt(disc))/qu;
+    x1=L-x0;
+    lp_teo=L-2*x0;
+    aPrime=1.5*bp; // mm
+    lp_total=lp_teo+2*aPrime/1000; // m
+  }
+  document.getElementById('v-x0').value=disc>=0?f(x0,3)+' m':'—';
+  document.getElementById('v-x1').value=disc>=0?f(x1,3)+' m':'—';
+  document.getElementById('v-lpteo').value=disc>=0?f(lp_teo,3)+' m':'—';
+  document.getElementById('v-aprime').value=disc>=0?f(aPrime,1)+' mm':'—';
+  document.getElementById('v-lptot').value=disc>=0?f(lp_total,3)+' m':'—';
+
+  // 8) Soldadura extremo
+  const Fw=0.6*fexx, phi_w=0.60;
+  const Tu=0.9*bp*tp*Fy*1e-3;
+  const aPrime_cm=1.5*bp/10;
+  const Lw=(2*aPrime_cm+bp/10); // cm
+  const Rdw=phi_w*Fw*Lw*0.707*dw*0.1*0.1;
+  const sold_ok=Rdw>=Tu;
+  const dw_min=tp<=6?3:tp<=12?5:tp<=19?6:8;
+  const dw_max=tp-2;
+  const dmin_ok=dw>=dw_min, dmax_ok=dw<=dw_max;
+  const flex_ok=Md>=Mu;
+
+  document.getElementById('v-aprime-sold').value=f(aPrime_cm*10,1)+' mm ('+f(aPrime_cm,2)+' cm)';
+  document.getElementById('v-lw-ext').value=f(Lw,2)+' cm';
+  document.getElementById('v-tu').value=f(Tu)+' kN';
+  document.getElementById('v-rdw').value=f(Rdw)+' kN';
+
+  // Hint soldadura
+  const hint_v=document.getElementById('v-sold-hint');
+  if(hint_v){
+    if(!sold_ok){
+      const dw_need=Tu/(phi_w*Fw*Lw*0.707*0.1*0.1);
+      const dwSugg=[3,4,5,6,8,9,10,12,14,16].find(x=>x>=dw_need&&x>=dw_min&&x<=dw_max)||16;
+      hint_v.style.display='block';
+      hint_v.innerHTML=`⚠ Rdw=${f(Rdw)}kN < Tu=${f(Tu)}kN — aumentar dw ≥ <strong style="color:var(--red)">${f(dw_need,1)}mm</strong> → sugerido: <strong>${dwSugg}mm</strong>`;
+    } else {
+      hint_v.style.display='block';
+      hint_v.style.color='var(--green)';
+      hint_v.innerHTML=`✓ Rdw=${f(Rdw)}kN ≥ Tu=${f(Tu)}kN — soldadura verifica (η=${f(Rdw/Tu*100,0)}%)`;
+    }
+  }
+
+  // Badges
+  setBadge('v-b1','v-c1',ala_ok);   document.getElementById('v-d1').textContent=`λ=${f(lam_ala,2)} vs λp=${f(lp_ala,2)} (bf/2tf = ${f(bf/2,1)}/${tf})`;
+  setBadge('v-b2','v-c2',alma_ok);  document.getElementById('v-d2').textContent=`λ=${f(lam_alma,2)} vs λp=${f(lp_alma,2)} (hw/tw = ${hw}/${tw})`;
+  setBadge('v-b3','v-c3',pb_ok);    document.getElementById('v-d3').textContent=`λ=${f(lam_pb,2)} (bp/2/tp) vs λp=${f(lp_pb,2)}`;
+  setBadge('v-b4','v-c4',flex_ok);  document.getElementById('v-d4').textContent=`Md=${f(Md)}kNm ≥ Mu=${Mu}kNm | Z=${f(Z_total,1)}cm³`;
+  setBadge('v-b5','v-c5',sold_ok);  document.getElementById('v-d5').textContent=`Rdw=${f(Rdw)}kN vs Tu=${f(Tu)}kN`;
+  setBadge('v-b6','v-c6',dmin_ok);  document.getElementById('v-d6').textContent=`dw=${dw}mm ≥ dw_mín=${dw_min}mm`;
+  setBadge('v-b7','v-c7',dmax_ok);  document.getElementById('v-d7').textContent=`dw=${dw}mm ≤ tp-2=${f(dw_max,1)}mm`;
+
+  // Pasos
+  const steps=[
+    {t:'1. Resistencia perfil solo',     v:`Mdp = φ·Zx·Fy = 0.9 × ${Zx} × ${Fy} × 10⁻³ = <strong>${f(Mdp)} kNm</strong> ${Mdp>=Mu?'<span class="f-ok">≥ Mu ✓</span>':'<span class="f-fail">< Mu → se agrega platabanda</span>'}`},
+    {t:'2. Módulo plástico necesario',   v:`Mnn = Mu/φ = ${Mu}/0.9 = <strong>${f(Mnn)} kNm</strong> → Zxn = Mnn·10³/Fy = <strong>${f(Zxn,1)} cm³</strong> → Zp req. = <strong>${f(Zp_need,1)} cm³</strong>`},
+    {t:'3. Dimensiones platabanda',      v:`tp adoptado = ${f(tp,2)} mm → bp_calc = Zp/(2·tp·(h/2+tp/2)) = ${f(bp_calc_cm,1)} mm → <strong>bp adoptado = ${bp} mm</strong>`},
+    {t:'4. Z total y Md con platabanda', v:`Zp = 2·bp·tp·(h/2+tp/2)·10⁻² = <strong>${f(Zp_aportado,1)} cm³</strong><br>Z total = ${Zx} + ${f(Zp_aportado,1)} = <strong>${f(Z_total,1)} cm³</strong><br>Md = 0.9·Z·Fy·10⁻³ = <strong>${f(Md)} kNm</strong> ${flex_ok?'<span class="f-ok">≥ Mu ✓</span>':'<span class="f-fail">< Mu ✗</span>'}`},
+    {t:'5. Longitud teórica de platabanda', v:disc>=0?`qu = 2Vu/L = ${f(qu,2)} kN/m<br>M(x) = Mdp → x₀ = <strong>${f(x0,3)} m</strong> — x₁ = L−x₀ = <strong>${f(x1,3)} m</strong><br>Lp teórica = L−2x₀ = <strong>${f(lp_teo,3)} m</strong>`:'Discriminante negativo — Mdp > Mu (verificar datos)'},
+    {t:'6. Longitud total adoptada',        v:disc>=0?`a' = 1.5·bp = 1.5×${bp} = <strong>${f(aPrime,1)} mm = ${f(aPrime/1000,4)} m</strong><br>Lp total = Lp teórica + 2a' = ${f(lp_teo,3)} + 2×${f(aPrime/1000,4)} = <strong>${f(lp_total,3)} m</strong>`:'—'},
+    {t:'7. Fuerza en soldadura extremo',    v:`Tu = φ·bp·tp·Fy = 0.9×${bp}×${f(tp,2)}×${Fy}×10⁻³ = <strong>${f(Tu)} kN</strong>`},
+    {t:'8. Resistencia soldadura extremo',  v:`a' = ${f(aPrime_cm*10,1)} mm = ${f(aPrime_cm,2)} cm<br>Lw = 2a'+bp = 2×${f(aPrime_cm,2)}+${f(bp/10,2)} = <strong>${f(Lw,2)} cm</strong><br>Rdw = φ·Fw·Lw·0.707·dw = 0.60×${f(Fw,0)}×${f(Lw,2)}×0.707×${dw/10} = <strong>${f(Rdw)} kN</strong>`},
+  ];
+  document.getElementById('v-steps').innerHTML=steps.map(st=>`
+    <div class="formula-box">
+      <div class="f-label">${st.t}</div>
+      <div class="f-expr">${st.v}</div>
+    </div>`).join('');
+
+  // Resumen tabla
+  document.getElementById('v-tbody').innerHTML=`
+    <tr><td>Perfil laminado</td><td>Zx=${Zx} cm³ · Mdp=${f(Mdp)} kNm</td></tr>
+    <tr><td>Platabanda adoptada</td><td><strong>${bp} × ${f(tp,2)} mm</strong></td></tr>
+    <tr><td>Zp aportado</td><td>${f(Zp_aportado,1)} cm³</td></tr>
+    <tr><td>Z total</td><td>${f(Z_total,1)} cm³</td></tr>
+    <tr><td>Md con platabanda</td><td><strong style="color:${flex_ok?'var(--green)':'var(--red)'}">${f(Md)} kNm</strong></td></tr>
+    <tr><td>x₀ — corte teórico</td><td>${disc>=0?f(x0,3)+' m':'—'}</td></tr>
+    <tr><td>x₁ = L − x₀</td><td>${disc>=0?f(x1,3)+' m':'—'}</td></tr>
+    <tr><td>Lp teórica</td><td>${disc>=0?f(lp_teo,3)+' m':'—'}</td></tr>
+    <tr><td>a' = 1.5·bp</td><td>${disc>=0?f(aPrime,1)+' mm':'—'}</td></tr>
+    <tr><td>Lp TOTAL adoptada</td><td><strong>${disc>=0?f(lp_total,3)+' m':'—'}</strong></td></tr>
+    <tr><td>Tu (fuerza en PB)</td><td>${f(Tu)} kN</td></tr>
+    <tr><td>dw adoptado</td><td>${dw} mm</td></tr>
+    <tr><td>Rdw soldadura extremo</td><td style="color:${sold_ok?'var(--green)':'var(--red)'}">${f(Rdw)} kN</td></tr>`;
+
+  drawViga(Mu,Vu,Mdp,Md,L,x0,disc>=0);
+}
+
+function drawViga(Mu,Vu,Mdp,Md,L,x0,hasX0){
+  const cv=document.getElementById('v-canvas');const ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height;ctx.clearRect(0,0,W,H);
+  const mono='10px IBM Plex Mono,monospace';
+
+  // Convención: momentos positivos hacia ABAJO
+  // Eje de referencia (línea de viga) en la parte SUPERIOR
+  const mgL=52,mgR=16,mgTop=28,mgBot=32;
+  const chartW=W-mgL-mgR,chartH=H-mgTop-mgBot;
+  const scX=chartW/L,scY=Md>0?chartH/Md:1;
+  const baseY=mgTop;   // eje de la viga = y=mgTop, momentos crecen hacia abajo
+
+  // ── Dibujar la viga (rectángulo fino en la parte superior) ──
+  ctx.fillStyle='#d4d2cc';
+  ctx.fillRect(mgL,baseY-5,chartW,8);
+  // apoyos
+  for(const xp of[mgL, mgL+chartW]){
+    ctx.beginPath();ctx.moveTo(xp,baseY+3);ctx.lineTo(xp-10,baseY+18);ctx.lineTo(xp+10,baseY+18);ctx.closePath();
+    ctx.fillStyle='#bbb';ctx.fill();ctx.strokeStyle='#aaa';ctx.lineWidth=1;ctx.stroke();
+  }
+
+  // ── Línea base horizontal del DMF ──
+  ctx.strokeStyle='#ccc';ctx.lineWidth=1;ctx.setLineDash([]);
+  ctx.beginPath();ctx.moveTo(mgL,baseY);ctx.lineTo(mgL+chartW,baseY);ctx.stroke();
+
+  // ── Parábola DMF (positivos hacia abajo) ──
+  const qu=2*Vu/L;
+  ctx.fillStyle='rgba(225,6,0,0.10)';ctx.strokeStyle='#E10600';ctx.lineWidth=2;
+  ctx.beginPath();
+  ctx.moveTo(mgL,baseY);
+  for(let i=1;i<=100;i++){
+    const x=L*i/100;
+    const m=Vu*x-qu*x*x/2;
+    ctx.lineTo(mgL+x*scX, baseY+m*scY);
+  }
+  ctx.lineTo(mgL+chartW,baseY);
+  ctx.closePath();ctx.fill();
+  ctx.beginPath();
+  for(let i=0;i<=100;i++){
+    const x=L*i/100;
+    const m=Vu*x-qu*x*x/2;
+    const py=baseY+m*scY;
+    i===0?ctx.moveTo(mgL,baseY):ctx.lineTo(mgL+x*scX,py);
+  }
+  ctx.stroke();
+
+  // ── Línea horizontal Mdp (verde) ──
+  const yMdp=baseY+Mdp*scY;
+  ctx.strokeStyle='#1a9e47';ctx.lineWidth=1.5;ctx.setLineDash([6,4]);
+  ctx.beginPath();ctx.moveTo(mgL,yMdp);ctx.lineTo(mgL+chartW,yMdp);ctx.stroke();
+
+  // ── Línea horizontal Mu (azul punteada) ──
+  const yMu=baseY+Mu*scY;
+  ctx.strokeStyle='#4ea8de';ctx.lineWidth=1;ctx.setLineDash([3,4]);
+  ctx.beginPath();ctx.moveTo(mgL,yMu);ctx.lineTo(mgL+chartW,yMu);ctx.stroke();
+  ctx.setLineDash([]);
+
+  // ── Líneas verticales x₀ ──
+  if(hasX0&&x0>0&&x0<L/2){
+    ctx.strokeStyle='rgba(225,6,0,0.35)';ctx.lineWidth=1;ctx.setLineDash([4,3]);
+    [x0,L-x0].forEach(xv=>{
+      const px=mgL+xv*scX;
+      ctx.beginPath();ctx.moveTo(px,baseY);ctx.lineTo(px,baseY+Mdp*scY);ctx.stroke();
+    });
+    ctx.setLineDash([]);
+    // etiqueta x0
+    ctx.fillStyle='rgba(225,6,0,0.7)';ctx.font=mono;ctx.textAlign='center';
+    ctx.fillText(`x₀=${f(x0,2)}m`,mgL+x0*scX,baseY+Mdp*scY+12);
+    ctx.fillText(`x₀=${f(x0,2)}m`,mgL+(L-x0)*scX,baseY+Mdp*scY+12);
+  }
+
+  // ── Etiqueta eje Y (flecha hacia abajo) ──
+  ctx.fillStyle='#aaa';ctx.font=mono;ctx.textAlign='right';
+  ctx.fillText('M+',mgL-4,baseY+14);
+  ctx.beginPath();ctx.moveTo(mgL-14,baseY+2);ctx.lineTo(mgL-14,baseY+22);
+  ctx.lineTo(mgL-11,baseY+18);ctx.moveTo(mgL-14,baseY+22);ctx.lineTo(mgL-17,baseY+18);
+  ctx.strokeStyle='#bbb';ctx.lineWidth=1;ctx.stroke();
+
+  // ── Labels valores ──
+  ctx.font=mono;ctx.textAlign='left';
+  // Mu máximo (vértice parábola = L/2)
+  ctx.fillStyle='#E10600';ctx.textAlign='center';
+  ctx.fillText(`Mu=${Mu} kNm`,mgL+chartW/2,baseY+Mu*scY+14);
+  // Mdp
+  ctx.fillStyle='#1a9e47';ctx.textAlign='left';
+  ctx.fillText(`Mdp=${f(Mdp)} kNm`,mgL+4,yMdp-4);
+  // Mu línea
+  if(Math.abs(yMu-yMdp)>14){
+    ctx.fillStyle='#4ea8de';
+    ctx.fillText(`Mu=${Mu} kNm`,mgL+4,yMu-4);
+  }
+
+  // ── Escala X ──
+  ctx.fillStyle='#bbb';ctx.font=mono;ctx.textAlign='center';
+  ctx.fillText('0',mgL,baseY+chartH+mgBot-8);
+  ctx.fillText(`L=${L}m`,mgL+chartW,baseY+chartH+mgBot-8);
+  ctx.fillText(`L/2=${f(L/2,1)}m`,mgL+chartW/2,baseY+chartH+mgBot-8);
+}
+
+/* ══════ POLYFILL roundRect ══════ */
+if(!CanvasRenderingContext2D.prototype.roundRect){
+  CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
+    this.beginPath();this.moveTo(x+r,y);this.lineTo(x+w-r,y);
+    this.arcTo(x+w,y,x+w,y+r,r);this.lineTo(x+w,y+h-r);
+    this.arcTo(x+w,y+h,x+w-r,y+h,r);this.lineTo(x+r,y+h);
+    this.arcTo(x,y+h,x,y+h-r,r);this.lineTo(x,y+r);
+    this.arcTo(x,y,x+r,y,r);this.closePath();
+  };
+}
+
+/* ══════ LIGHTBOX ══════ */
+function openLb(){document.getElementById('lb').classList.add('open');}
+function closeLb(){document.getElementById('lb').classList.remove('open');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLb();});
+
+/* ══════ INIT ══════ */
+// Variante A
+buildSel('a-b','a-t',101.6,12.7);buildColSel('a-nc',3);
+['a-pu','a-acero','a-tipo-bulon','a-dnom','a-agujero','a-nf','a-nc','a-s','a-db'].forEach(id=>{
+  const el=document.getElementById(id);if(el){el.addEventListener('change',calcA);el.addEventListener('input',calcA);}
+});
+document.getElementById('a-t').addEventListener('change',calcA);
+// Variante B
+buildSel('b-b','b-t',101.6,7.9);buildColSel('b-nc',2);
+['b-pu','b-acero','b-dnom','b-mu','b-nf','b-nc','b-s','b-db'].forEach(id=>{
+  const el=document.getElementById(id);if(el){el.addEventListener('change',calcB);el.addEventListener('input',calcB);}
+});
+document.getElementById('b-b').addEventListener('change',()=>calcB());
+document.getElementById('b-t').addEventListener('change',()=>calcB());
+document.getElementById('b-nf').addEventListener('change',()=>{buildColSel('b-nc',2);calcB();});
+document.getElementById('a-nf').addEventListener('change',()=>{buildColSel('a-nc',3);calcA();});
+// Variante C — soldadura con nuevos selects Acindar
+buildSel('c-b-sel','c-t-sel',101.6,9.5);
+buildSel('c-bp-sel','c-tc-sel',101.6,12.7);
+['c-pu','c-acero','c-fexx','c-dw','c-l1'].forEach(id=>{
+  const el=document.getElementById(id);if(el){el.addEventListener('change',calcC);el.addEventListener('input',calcC);}
+});
+document.getElementById('c-b-sel').addEventListener('change',()=>{updateEsp('c-b-sel','c-t-sel');calcC();});
+document.getElementById('c-t-sel').addEventListener('change',calcC);
+document.getElementById('c-bp-sel').addEventListener('change',()=>{updateEsp('c-bp-sel','c-tc-sel');calcC();});
+document.getElementById('c-tc-sel').addEventListener('change',calcC);
+// Viga
+['v-perfil','v-acero','v-tp','v-fexx','v-dw'].forEach(id=>{
+  const el=document.getElementById(id);if(el){el.addEventListener('change',calcViga);}
+});
+['v-mu','v-vu','v-L','v-bp-input'].forEach(id=>{
+  const el=document.getElementById(id);if(el){el.addEventListener('input',calcViga);el.addEventListener('change',calcViga);}
+});
+
+calcA();calcB();calcC();calcViga();
+</script>
+</body>
+</html>
