@@ -1,1 +1,1543 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tracción & Empalme — CIRSOC 301·2018 | Sibratech</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Raleway:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ── Variables ──────────────────────────────────────────── */
+:root {
+  --red:#E10600; --red-bg:#fff0f0; --red-dk:#b80400;
+  --ok:#1a7f40; --ok-bg:#eafaf1;
+  --fail:#c0392b; --fail-bg:#fdecea;
+  --blue:#1a5fa8; --blue-bg:#eaf1fb;
+  --grey:#f4f4f6; --border:#dde1e7;
+  --text:#1a1a1a; --text2:#555;
+  --sidebar-w:300px;
+  --font-head:'Montserrat',sans-serif;
+  --font-body:'Raleway',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+
+/* ── Reset & Base ───────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+body { font-family:var(--font-body); background:#f0f2f5; color:var(--text); font-size:13px; }
+h1,h2,h3,h4,h5 { font-family:var(--font-head); }
+input,select,button { font-family:inherit; font-size:12px; }
+
+/* ── Layout ─────────────────────────────────────────────── */
+.app { display:flex; min-height:100vh; }
+
+/* ── Sidebar ────────────────────────────────────────────── */
+.sidebar {
+  width:var(--sidebar-w); min-width:var(--sidebar-w);
+  background:#1a1a1a; color:#f0f0f0;
+  display:flex; flex-direction:column;
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+  scrollbar-width:thin; scrollbar-color:#444 #1a1a1a;
+}
+.sidebar::-webkit-scrollbar { width:5px; }
+.sidebar::-webkit-scrollbar-thumb { background:#444; border-radius:3px; }
+
+.sb-logo {
+  padding:18px 16px 14px;
+  border-bottom:1px solid #2a2a2a;
+  display:flex; align-items:center; gap:10px;
+}
+.sb-logo .logo-mark {
+  width:32px; height:32px; background:var(--red);
+  border-radius:4px; display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-head); font-weight:900; font-size:16px; color:#fff;
+  flex-shrink:0;
+}
+.sb-logo .logo-text { line-height:1.2; }
+.sb-logo .logo-text b { font-family:var(--font-head); font-size:13px; font-weight:700; color:#fff; display:block; }
+.sb-logo .logo-text span { font-size:9px; color:#aaa; letter-spacing:.5px; }
+
+.sb-section {
+  padding:12px 14px 10px;
+  border-bottom:1px solid #252525;
+}
+.sb-section-title {
+  font-family:var(--font-head); font-size:9px; font-weight:700;
+  letter-spacing:1.2px; text-transform:uppercase; color:#888;
+  margin-bottom:8px;
+}
+
+/* inputs */
+.sb-row { display:flex; gap:6px; align-items:center; margin-bottom:6px; }
+.sb-row label { font-size:11px; color:#aaa; min-width:70px; flex-shrink:0; }
+.sb-row input, .sb-row select {
+  flex:1; background:#2a2a2a; border:1px solid #3a3a3a;
+  color:#f0f0f0; border-radius:4px; padding:5px 8px;
+  outline:none; min-width:0;
+}
+.sb-row input:focus, .sb-row select:focus { border-color:var(--red); }
+.sb-row input[type=number] { text-align:right; }
+.sb-row select option { background:#2a2a2a; }
+
+.sb-two { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:6px; }
+.sb-two label { font-size:10px; color:#aaa; display:block; margin-bottom:2px; }
+.sb-two input, .sb-two select {
+  width:100%; background:#2a2a2a; border:1px solid #3a3a3a;
+  color:#f0f0f0; border-radius:4px; padding:5px 7px; outline:none;
+}
+.sb-two input:focus, .sb-two select:focus { border-color:var(--red); }
+
+/* ── Planchuela selectors ───────────────────────────────── */
+.planch-block { margin-bottom:8px; }
+.planch-block .pb-label {
+  font-size:10px; color:#bbb; margin-bottom:5px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.planch-block .pb-ag {
+  font-family:var(--font-mono); font-size:10px; color:#e8c060;
+  background:#2a2400; border-radius:3px; padding:1px 6px;
+}
+
+/* Chips de ancho */
+.chip-row {
+  display:flex; flex-wrap:wrap; gap:3px; margin-bottom:4px;
+}
+.pchip {
+  font-family:var(--font-head); font-size:10px; font-weight:600;
+  background:#2a2a2a; border:1.5px solid #3a3a3a; border-radius:5px;
+  padding:3px 7px; cursor:pointer; color:#ccc; line-height:1.2;
+  transition:all .12s;
+}
+.pchip .pp { font-size:8px; font-weight:400; color:#888; font-family:var(--font-mono); }
+.pchip:hover { border-color:#888; color:#fff; }
+.pchip.sel { background:var(--red); border-color:var(--red); color:#fff; }
+.pchip.sel .pp { color:rgba(255,255,255,.7); }
+.pchip.sugg { border-color:#e8c060; color:#e8c060; background:#2a2400; }
+.pchip.sugg .pp { color:#a8880a; }
+.pchip.disabled { opacity:.35; cursor:not-allowed; }
+.pchip.ok-enough { border-color:#1a7f40 !important; }
+
+/* ── Bolt selectors ─────────────────────────────────────── */
+.bul-tabs {
+  display:flex; gap:4px; margin-bottom:7px;
+}
+.bul-tab {
+  flex:1; text-align:center; padding:5px; cursor:pointer;
+  background:#2a2a2a; border:1.5px solid #3a3a3a; border-radius:5px;
+  font-family:var(--font-head); font-size:10px; font-weight:700;
+  color:#888; transition:all .12s;
+}
+.bul-tab.active { background:var(--red); border-color:var(--red); color:#fff; }
+.bul-tab:hover:not(.active) { border-color:#666; color:#ccc; }
+
+/* bolt grid */
+.bul-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:3px;
+  margin-bottom:6px;
+}
+.bchip {
+  background:#2a2a2a; border:1.5px solid #3a3a3a; border-radius:5px;
+  padding:5px 4px; cursor:pointer; text-align:center;
+  transition:all .12s; overflow:hidden;
+}
+.bchip:hover { border-color:#888; }
+.bchip.sel { background:#1a1030; border-color:#6c3fe0; }
+.bchip .bd {
+  font-family:var(--font-head); font-size:11px; font-weight:700;
+  color:#e0e0e0; margin-bottom:1px;
+}
+.bchip.sel .bd { color:#c8a0ff; }
+.bchip .bs { font-family:var(--font-mono); font-size:8px; color:#888; line-height:1.3; }
+.bchip.sel .bs { color:#a080cc; }
+
+.bul-info-box {
+  background:#111; border:1px solid #2a2a2a; border-radius:5px;
+  padding:7px 9px; font-family:var(--font-mono); font-size:9.5px;
+  color:#aaa; line-height:1.5; margin-bottom:6px;
+}
+.bul-info-box strong { color:#e8c060; }
+
+/* ── Calc button ────────────────────────────────────────── */
+.btn-calc {
+  width:100%; background:var(--red); color:#fff; border:none;
+  border-radius:6px; padding:10px; font-family:var(--font-head);
+  font-size:12px; font-weight:700; letter-spacing:.5px; cursor:pointer;
+  transition:background .15s;
+}
+.btn-calc:hover { background:var(--red-dk); }
+
+/* ── Main content ───────────────────────────────────────── */
+.main { flex:1; display:flex; flex-direction:column; min-width:0; }
+
+.topbar {
+  background:#fff; border-bottom:3px solid var(--red);
+  padding:14px 24px 12px; display:flex; align-items:center; gap:16px;
+}
+.topbar h1 { font-size:17px; font-weight:900; color:var(--text); }
+.topbar h1 span { color:var(--red); }
+.topbar .sub { font-size:11px; color:#888; font-family:var(--font-head);
+  letter-spacing:.3px; margin-top:1px; }
+.topbar .badge {
+  margin-left:auto; background:var(--grey); border:1px solid var(--border);
+  border-radius:5px; padding:5px 12px; font-family:var(--font-head);
+  font-size:10px; font-weight:700; color:#555; letter-spacing:.5px;
+}
+
+/* tabs */
+.tab-nav {
+  background:#fff; border-bottom:1px solid var(--border);
+  display:flex; padding:0 20px; gap:2px;
+}
+.tab-btn {
+  font-family:var(--font-head); font-size:11px; font-weight:600;
+  padding:10px 16px; border:none; background:none; cursor:pointer;
+  color:#888; border-bottom:3px solid transparent; margin-bottom:-1px;
+  transition:all .15s; letter-spacing:.3px;
+}
+.tab-btn:hover { color:var(--text); }
+.tab-btn.active { color:var(--red); border-bottom-color:var(--red); }
+
+.tab-pane { display:none; padding:20px 24px 40px; }
+.tab-pane.active { display:block; }
+
+/* ── KPI row ────────────────────────────────────────────── */
+.kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:20px; }
+.kpi { border-radius:8px; padding:12px 14px; border:1px solid var(--border); }
+.kpi.cr { background:#fff5f5; border-color:#f5c0c0; }
+.kpi.cok { background:#f0fbf4; border-color:#a0d8b4; }
+.kpi.cb { background:#f0f6ff; border-color:#a8c4f0; }
+.kpi.cw { background:#fff; }
+.kpi-val { font-family:var(--font-head); font-size:18px; font-weight:700; color:var(--text); }
+.kpi-lbl { font-size:10px; color:var(--text2); margin-top:2px; font-family:var(--font-head); }
+
+/* ── Card ───────────────────────────────────────────────── */
+.card {
+  background:#fff; border-radius:8px; border:1px solid var(--border);
+  margin-bottom:16px; overflow:hidden;
+}
+.card-head {
+  padding:11px 16px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:8px;
+  background:var(--grey);
+}
+.card-head h3 {
+  font-size:12px; font-weight:700; color:var(--text);
+  letter-spacing:.2px; font-family:var(--font-head);
+}
+.card-body { padding:14px 16px; }
+
+/* ── Tables ─────────────────────────────────────────────── */
+table { width:100%; border-collapse:collapse; font-size:12px; margin:8px 0; }
+th { background:var(--grey); font-family:var(--font-head); font-size:10px;
+  font-weight:700; letter-spacing:.3px; padding:6px 8px; text-align:left;
+  border-bottom:2px solid var(--border); color:var(--text2); }
+td { padding:5px 8px; border-bottom:1px solid var(--border); color:var(--text); }
+tr:last-child td { border-bottom:none; }
+td.hi { font-family:var(--font-mono); font-weight:600; color:var(--text); }
+td.ok2 { color:var(--ok); font-weight:700; font-family:var(--font-head); }
+td.fail2 { color:var(--fail); font-weight:700; font-family:var(--font-head); }
+
+/* ── Formula blocks ─────────────────────────────────────── */
+.fm {
+  background:var(--grey); border-left:3px solid var(--red);
+  border-radius:0 5px 5px 0; padding:8px 12px; margin:7px 0;
+  font-family:var(--font-mono); font-size:11.5px;
+}
+.fm-lbl { font-family:var(--font-head); font-size:10px; font-weight:700;
+  color:var(--text2); margin-bottom:3px; text-transform:uppercase; letter-spacing:.3px; }
+.fm-res { color:var(--red); font-weight:700; margin-top:4px; font-size:12px; }
+
+/* ── Verification badges ─────────────────────────────────── */
+.vr {
+  display:flex; align-items:center; gap:8px;
+  padding:7px 12px; border-radius:6px; margin:5px 0; font-size:11.5px;
+}
+.vr.ok { background:var(--ok-bg); }
+.vr.fail { background:var(--fail-bg); }
+.vb { font-family:var(--font-head); font-size:10px; font-weight:700;
+  letter-spacing:.5px; padding:3px 8px; border-radius:4px; flex-shrink:0; }
+.vb.ok { background:var(--ok); color:#fff; }
+.vb.fail { background:var(--fail); color:#fff; }
+.vr-txt { font-family:var(--font-mono); font-size:11px; flex:1; }
+.vr-val { font-family:var(--font-mono); font-weight:600; font-size:11.5px; margin-left:auto; }
+
+/* ── Notes ──────────────────────────────────────────────── */
+.nota {
+  background:#f8f9fb; border:1px solid var(--border);
+  border-radius:5px; padding:7px 10px; margin:6px 0;
+  font-size:11px; color:var(--text2); line-height:1.5;
+}
+.nota.blue { background:var(--blue-bg); border-color:#b8d0f0; color:#1a3a6a; }
+.nota.warn { background:#fffbea; border-color:#e8d060; color:#6a4a00; }
+
+/* ── Summary ────────────────────────────────────────────── */
+.summ {
+  background:#fff; border-radius:8px; border:2px solid var(--red);
+  margin-top:20px; overflow:hidden;
+}
+.summ h3 {
+  background:var(--red); color:#fff; font-family:var(--font-head);
+  font-size:12px; font-weight:700; letter-spacing:.5px; padding:10px 16px;
+}
+.summ-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:1px;
+  background:var(--border);
+}
+.summ-grid > div { background:#fff; padding:10px 14px; }
+.si-lbl { font-family:var(--font-head); font-size:9px; font-weight:700;
+  color:#888; text-transform:uppercase; letter-spacing:.5px; margin-bottom:3px; }
+.si-val { font-family:var(--font-mono); font-size:12px; font-weight:600; color:var(--text); }
+
+/* ── Drawing ────────────────────────────────────────────── */
+.drawing { text-align:center; padding:8px 0; overflow-x:auto; }
+
+/* ── Modal ──────────────────────────────────────────────── */
+.modal-overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.55);
+  z-index:1000; align-items:center; justify-content:center;
+}
+.modal-overlay.show { display:flex; }
+.modal-box {
+  background:#fff; border-radius:10px; width:min(680px,94vw);
+  max-height:88vh; overflow-y:auto; box-shadow:0 24px 60px rgba(0,0,0,.25);
+}
+.modal-hdr {
+  display:flex; align-items:center; gap:10px; padding:14px 18px;
+  border-bottom:1px solid var(--border); position:sticky; top:0; background:#fff;
+}
+.modal-hdr .mbadge {
+  background:var(--red); color:#fff; font-family:var(--font-head);
+  font-size:11px; font-weight:700; padding:4px 10px; border-radius:4px;
+}
+.modal-hdr .mtitle { font-size:14px; font-weight:700; font-family:var(--font-head); }
+.modal-hdr button { margin-left:auto; background:none; border:none; cursor:pointer;
+  font-size:20px; color:#888; line-height:1; }
+.modal-content { padding:16px 18px; font-size:12px; line-height:1.6; }
+.modal-form {
+  background:#f4f6f9; border-radius:5px; padding:12px 14px;
+  font-family:var(--font-mono); font-size:11px; white-space:pre; margin:10px 0;
+  border-left:3px solid var(--blue); overflow-x:auto;
+}
+.modal-note {
+  background:#fffce8; border:1px solid #e8d870; border-radius:5px;
+  padding:8px 12px; margin:10px 0; font-size:11px; color:#5a4800;
+}
+.modal-note.blue { background:var(--blue-bg); border-color:#b0ccf0; color:#1a3a6a; }
+.modal-table { border-collapse:collapse; width:100%; font-size:11.5px; margin:10px 0; }
+.modal-table th, .modal-table td { border:1px solid var(--border); padding:5px 8px; }
+.modal-table th { background:var(--grey); font-family:var(--font-head); font-size:10px;
+  font-weight:700; letter-spacing:.3px; }
+
+/* norm badge buttons */
+.nb {
+  display:inline-flex; align-items:center; background:var(--blue-bg);
+  border:1px solid #b8d0f0; border-radius:4px; padding:1px 7px;
+  font-family:var(--font-head); font-size:9.5px; font-weight:700; color:var(--blue);
+  cursor:pointer; text-decoration:none; white-space:nowrap; transition:all .12s;
+}
+.nb:hover { background:var(--blue); color:#fff; border-color:var(--blue); }
+
+/* ── Sugg hint ──────────────────────────────────────────── */
+.sugg-hint {
+  font-size:10px; color:#e8c060; font-family:var(--font-mono);
+  background:#1a1500; border-radius:4px; padding:3px 7px;
+  margin-top:3px; min-height:18px; line-height:1.4;
+}
+
+/* ── Planchuela info pill ───────────────────────────────── */
+.planch-info {
+  font-family:var(--font-mono); font-size:9.5px; color:#aaa;
+  background:#111; border-radius:4px; padding:4px 8px;
+  border:1px solid #2a2a2a; margin-bottom:8px; line-height:1.5;
+}
+.planch-info strong { color:#e8c060; }
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media(max-width:900px){
+  .app { flex-direction:column; }
+  .sidebar { width:100%; height:auto; position:static; }
+  .kpi-row { grid-template-columns:repeat(2,1fr); }
+  .summ-grid { grid-template-columns:repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  MODAL overlay                                         -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <span class="mbadge" id="m-badge"></span>
+      <span class="mtitle" id="m-title"></span>
+      <button onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-content" id="m-body"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  APP                                                   -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="app">
+
+<!-- ─────────────────── SIDEBAR ──────────────────────── -->
+<aside class="sidebar">
+
+  <!-- Logo -->
+  <div class="sb-logo">
+    <div class="logo-mark">S</div>
+    <div class="logo-text">
+      <b>SIBRATECH</b>
+      <span>CIRSOC 301 · 2018</span>
+    </div>
+  </div>
+
+  <!-- Acero & Carga -->
+  <div class="sb-section">
+    <div class="sb-section-title">Acero & Carga</div>
+    <div class="sb-row">
+      <label>Preset</label>
+      <select id="acero_std" onchange="applyAcero()">
+        <option value="F24">F.24 — Fy=235 / Fu=370</option>
+        <option value="F26">F.26 — Fy=250 / Fu=400</option>
+        <option value="F36">F.36 — Fy=345 / Fu=485</option>
+        <option value="A572">A572 — Fy=345 / Fu=448</option>
+        <option value="custom">Personalizado</option>
+      </select>
+    </div>
+    <div class="sb-two">
+      <div><label>Fy (MPa)</label><input type="number" id="Fy" value="235" oninput="recalc()"></div>
+      <div><label>Fu (MPa)</label><input type="number" id="Fu" value="370" oninput="recalc()"></div>
+    </div>
+    <div class="sb-row">
+      <label>Pu (kN)</label>
+      <input type="number" id="Pu" value="250" oninput="recalc()">
+    </div>
+  </div>
+
+  <!-- Pieza Central -->
+  <div class="sb-section">
+    <div class="sb-section-title">Pieza Central (Acindar)</div>
+    <div class="planch-info" id="pc-info">Ag = — cm²</div>
+    <div class="planch-block">
+      <div class="pb-label">
+        <span>① Ancho</span>
+        <span class="pb-ag" id="pc-ag-badge">—</span>
+      </div>
+      <div class="chip-row" id="pc-anchos"></div>
+    </div>
+    <div class="planch-block">
+      <div class="pb-label"><span>② Espesor</span><span style="font-size:9px;color:#666">🟡 = sugerido mín.</span></div>
+      <div class="chip-row" id="pc-esps"></div>
+    </div>
+    <div class="sugg-hint" id="pc-sugg"></div>
+    <!-- hidden inputs for compat -->
+    <input type="hidden" id="b_mm" value="101.6">
+    <input type="hidden" id="t_mm" value="15.88">
+  </div>
+
+  <!-- Cubrejuntas -->
+  <div class="sb-section">
+    <div class="sb-section-title">Cubrejuntas ×2 (Acindar)</div>
+    <div class="planch-info" id="cj-info">Agc = — cm²</div>
+    <div class="planch-block">
+      <div class="pb-label">
+        <span>① Ancho</span>
+        <span class="pb-ag" id="cj-ag-badge">—</span>
+      </div>
+      <div class="chip-row" id="cj-anchos"></div>
+    </div>
+    <div class="planch-block">
+      <div class="pb-label"><span>② Espesor</span><span style="font-size:9px;color:#666">🟡 = sugerido mín.</span></div>
+      <div class="chip-row" id="cj-esps"></div>
+    </div>
+    <div class="sugg-hint" id="cj-sugg"></div>
+    <input type="hidden" id="bc_mm" value="101.6">
+    <input type="hidden" id="tc_mm" value="7.94">
+  </div>
+
+  <!-- Bulones -->
+  <div class="sb-section">
+    <div class="sb-section-title">Tipo de Bulón</div>
+
+    <!-- Tipo & rosca -->
+    <div class="sb-row">
+      <label>Tipo</label>
+      <select id="btipo" onchange="onBtipoChange()">
+        <option value="A307">A307M / ISO 4.6 — Comunes</option>
+        <option value="A325_inc" selected>A325M / ISO 8.8 — Rosca incl.</option>
+        <option value="A325_exc">A325M / ISO 8.8 — Rosca excl.</option>
+        <option value="A490_inc">A490M / ISO 10.9 — Rosca incl.</option>
+        <option value="A490_exc">A490M / ISO 10.9 — Rosca excl.</option>
+      </select>
+    </div>
+    <div class="sb-row">
+      <label>Agujeros</label>
+      <select id="aguj" onchange="onAgujChange()">
+        <option value="normal">Normales</option>
+        <option value="holgado">Holgados</option>
+      </select>
+    </div>
+
+    <!-- Sistema MM / Pulgadas -->
+    <div class="bul-tabs">
+      <div class="bul-tab active" id="bul-tab-mm" onclick="setBulSistema('mm')">Métrico (M)</div>
+      <div class="bul-tab" id="bul-tab-in" onclick="setBulSistema('in')">Pulgadas (UNC)</div>
+    </div>
+
+    <!-- chips de bulón -->
+    <div class="bul-grid" id="bul-chips"></div>
+
+    <!-- info del bulón seleccionado -->
+    <div class="bul-info-box" id="bul-info">Seleccione un bulón</div>
+  </div>
+
+  <!-- Geometría de unión -->
+  <div class="sb-section">
+    <div class="sb-section-title">Geometría de Unión</div>
+    <div class="sb-two">
+      <div><label>N° filas</label><input type="number" id="nFil" value="2" min="1" max="6" oninput="recalc()"></div>
+      <div><label>N° columnas</label><input type="number" id="nCol" value="3" min="1" max="10" oninput="recalc()"></div>
+    </div>
+    <div class="sb-two">
+      <div><label>Planos corte</label>
+        <select id="nCorte" onchange="recalc()">
+          <option value="1">1 — Corte simple</option>
+          <option value="2" selected>2 — Corte doble</option>
+        </select>
+      </div>
+      <div><label>Deformación cond.</label>
+        <select id="deform" onchange="recalc()">
+          <option value="1" selected>Sí — Ec.J.3.6a</option>
+          <option value="0">No — Ec.J.3.6b</option>
+        </select>
+      </div>
+    </div>
+    <div class="sb-two">
+      <div><label>s long. (mm)</label><input type="number" id="s_mm" value="50" oninput="recalc()"></div>
+      <div><label>s transv. (mm)</label><input type="number" id="sf_mm" value="50" oninput="recalc()"></div>
+    </div>
+    <div class="sb-two">
+      <div><label>db borde long (mm)</label><input type="number" id="db_mm" value="25" oninput="recalc()"></div>
+      <div><label>db borde transv (mm)</label><input type="number" id="dbp_mm" value="25" oninput="recalc()"></div>
+    </div>
+    <div class="sb-row">
+      <label>Clase sup. (B)</label>
+      <select id="claseSup" onchange="recalc()">
+        <option value="A">A — µ=0,30 (cepillo metálico)</option>
+        <option value="B">B — µ=0,50 (chorro arena)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Soldadura filete -->
+  <div class="sb-section">
+    <div class="sb-section-title">Soldadura Filete (Var. C)</div>
+    <div class="sb-two">
+      <div><label>FEEX (MPa)</label><input type="number" id="Feex" value="480" oninput="recalc()"></div>
+      <div><label>w lado (mm)</label><input type="number" id="w_mm" value="5" oninput="recalc()"></div>
+    </div>
+    <div class="sb-two">
+      <div><label>N° cord. lat.</label><input type="number" id="nCordLat" value="2" min="1" max="4" oninput="recalc()"></div>
+      <div><label>Cord. frontal</label>
+        <select id="hasFront" onchange="recalc()">
+          <option value="1">Sí</option>
+          <option value="0">No</option>
+        </select>
+      </div>
+    </div>
+    <div class="sb-row">
+      <label>Penetración</label>
+      <select id="penTipo" onchange="recalc()">
+        <option value="completa">CJP — Completa</option>
+        <option value="parcial">PJP — Parcial</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="sb-section">
+    <button class="btn-calc" onclick="recalc()">⟳ Recalcular Todo</button>
+  </div>
+
+</aside>
+<!-- ──────────────────────────────────────────────────────── -->
+
+<!-- ─────────────────── MAIN ─────────────────────────── -->
+<main class="main">
+
+  <div class="topbar">
+    <div>
+      <h1>Tracción <span>&</span> Empalme — <span>§Cap. B · D · J</span></h1>
+      <div class="sub">Memoria de Cálculo · CIRSOC 301-2018</div>
+    </div>
+    <div class="badge">CIRSOC 301 · 2018</div>
+  </div>
+
+  <nav class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('tabA',this)">A — Aplastamiento</button>
+    <button class="tab-btn" onclick="switchTab('tabB',this)">B — Desliz. Crítico</button>
+    <button class="tab-btn" onclick="switchTab('tabC',this)">C — Soldadura Filete</button>
+    <button class="tab-btn" onclick="switchTab('tabD',this)">C' — Soldadura Tope</button>
+  </nav>
+
+  <!-- ── TAB A ─────────────────────────────────────────── -->
+  <div class="tab-pane active" id="tabA">
+    <div class="kpi-row" id="kA"></div>
+
+    <div class="card">
+      <div class="card-head"><h3>1. Área bruta mínima requerida</h3></div>
+      <div class="card-body" id="cA1"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>2. Adopción de planchuelas</h3></div>
+      <div class="card-body" id="cA2"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>3. Resistencia y número de bulones</h3></div>
+      <div class="card-body" id="cA3"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>4. Distancias y disposición</h3></div>
+      <div class="card-body" id="cA4"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>5. Verificaciones ELU</h3></div>
+      <div class="card-body" id="cA5"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>6. Esquema de empalme</h3></div>
+      <div class="card-body" id="cA6"></div>
+    </div>
+    <div class="summ" id="sA"></div>
+  </div>
+
+  <!-- ── TAB B ─────────────────────────────────────────── -->
+  <div class="tab-pane" id="tabB">
+    <div class="kpi-row" id="kB"></div>
+
+    <div class="card">
+      <div class="card-head"><h3>1. Sección y adopciones</h3></div>
+      <div class="card-body" id="cB1"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>2. Resistencia al deslizamiento</h3></div>
+      <div class="card-body" id="cB2"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>3. Disposición</h3></div>
+      <div class="card-body" id="cB3"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>4. Verificaciones ELU</h3></div>
+      <div class="card-body" id="cB4"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>5. Esquema</h3></div>
+      <div class="card-body" id="cB6"></div>
+    </div>
+    <div class="summ" id="sB"></div>
+  </div>
+
+  <!-- ── TAB C ─────────────────────────────────────────── -->
+  <div class="tab-pane" id="tabC">
+    <div class="kpi-row" id="kC"></div>
+
+    <div class="card">
+      <div class="card-head"><h3>1. Dimensionamiento de chapas</h3></div>
+      <div class="card-body" id="cC1"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>2. Limitaciones del cordón</h3></div>
+      <div class="card-body" id="cC2"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>3. Resistencia y longitudes</h3></div>
+      <div class="card-body" id="cC3"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>4. Bloque de corte</h3></div>
+      <div class="card-body" id="cC4"></div>
+    </div>
+    <div class="summ" id="sC"></div>
+  </div>
+
+  <!-- ── TAB D ─────────────────────────────────────────── -->
+  <div class="tab-pane" id="tabD">
+    <div class="kpi-row" id="kD"></div>
+
+    <div class="card">
+      <div class="card-head"><h3>1. ELU Tracción — Pieza base</h3></div>
+      <div class="card-body" id="cD1"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>2. Tipo de penetración</h3></div>
+      <div class="card-body" id="cD2"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>3. Resistencia de la soldadura</h3></div>
+      <div class="card-body" id="cD3"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>4. Verificaciones</h3></div>
+      <div class="card-body" id="cD4"></div>
+    </div>
+    <div class="summ" id="sD"></div>
+  </div>
+
+</main>
+<!-- ──────────────────────────────────────────────────────── -->
+</div><!-- .app -->
+
+<script>
+// ================================================================
+// DATOS CIRSOC 2018
+// ================================================================
+
+// Planchuelas Acindar: [ancho_mm, espesor_mm, label_in, peso_kgm]
+var PLANCH = [
+  [12.7,3.2,'1/2"x1/8"',0.32],[12.7,4.8,'1/2"x3/16"',0.48],[12.7,6.4,'1/2"x1/4"',0.64],
+  [15.9,3.2,'5/8"x1/8"',0.40],[15.9,4.8,'5/8"x3/16"',0.60],[15.9,6.4,'5/8"x1/4"',0.79],
+  [19.0,3.2,'3/4"x1/8"',0.48],[19.0,4.8,'3/4"x3/16"',0.72],[19.0,6.4,'3/4"x1/4"',0.95],[19.0,7.94,'3/4"x5/16"',1.18],[19.0,9.5,'3/4"x3/8"',1.42],
+  [22.2,3.2,'7/8"x1/8"',0.56],[22.2,4.8,'7/8"x3/16"',0.84],[22.2,6.4,'7/8"x1/4"',1.12],[22.2,7.94,'7/8"x5/16"',1.38],
+  [25.4,3.2,'1"x1/8"',0.64],[25.4,4.8,'1"x3/16"',0.96],[25.4,6.4,'1"x1/4"',1.28],[25.4,7.94,'1"x5/16"',1.58],[25.4,9.5,'1"x3/8"',1.89],[25.4,12.7,'1"x1/2"',2.53],
+  [31.8,3.2,'1 1/4"x1/8"',0.80],[31.8,4.8,'1 1/4"x3/16"',1.20],[31.8,6.4,'1 1/4"x1/4"',1.60],[31.8,7.94,'1 1/4"x5/16"',1.97],[31.8,9.5,'1 1/4"x3/8"',2.37],[31.8,12.7,'1 1/4"x1/2"',3.17],
+  [38.1,3.2,'1 1/2"x1/8"',0.96],[38.1,4.8,'1 1/2"x3/16"',1.44],[38.1,6.4,'1 1/2"x1/4"',1.91],[38.1,7.94,'1 1/2"x5/16"',2.36],[38.1,9.5,'1 1/2"x3/8"',2.84],[38.1,12.7,'1 1/2"x1/2"',3.80],
+  [44.5,3.2,'1 3/4"x1/8"',1.12],[44.5,4.8,'1 3/4"x3/16"',1.68],[44.5,6.4,'1 3/4"x1/4"',2.24],[44.5,7.94,'1 3/4"x5/16"',2.76],[44.5,9.5,'1 3/4"x3/8"',3.32],[44.5,12.7,'1 3/4"x1/2"',4.44],
+  [50.8,3.2,'2"x1/8"',1.28],[50.8,4.8,'2"x3/16"',1.91],[50.8,6.4,'2"x1/4"',2.55],[50.8,7.94,'2"x5/16"',3.15],[50.8,9.5,'2"x3/8"',3.79],[50.8,12.7,'2"x1/2"',5.06],[50.8,19.0,'2"x3/4"',6.34],[50.8,25.4,'2"x1"',7.58],
+  [57.2,3.2,'2 1/4"x1/8"',1.44],[57.2,4.8,'2 1/4"x3/16"',2.16],[57.2,6.4,'2 1/4"x1/4"',2.87],[57.2,7.94,'2 1/4"x5/16"',3.55],[57.2,9.5,'2 1/4"x3/8"',4.74],[57.2,12.7,'2 1/4"x1/2"',6.33],[57.2,19.0,'2 1/4"x3/4"',7.93],
+  [63.5,3.2,'2 1/2"x1/8"',1.60],[63.5,4.8,'2 1/2"x3/16"',2.39],[63.5,6.4,'2 1/2"x1/4"',3.19],[63.5,7.94,'2 1/2"x5/16"',3.94],[63.5,9.5,'2 1/2"x3/8"',4.73],[63.5,12.7,'2 1/2"x1/2"',5.68],[63.5,19.0,'2 1/2"x3/4"',7.60],
+  [76.2,3.2,'3"x1/8"',1.91],[76.2,4.8,'3"x3/16"',2.87],[76.2,6.4,'3"x1/4"',3.83],[76.2,7.94,'3"x5/16"',4.73],[76.2,9.5,'3"x3/8"',5.42],[76.2,12.7,'3"x1/2"',7.21],
+  [88.9,3.2,'3 1/2"x1/8"',2.23],[88.9,4.8,'3 1/2"x3/16"',3.35],[88.9,6.4,'3 1/2"x1/4"',4.47],[88.9,7.94,'3 1/2"x5/16"',5.51],[88.9,9.5,'3 1/2"x3/8"',6.62],
+  [101.6,3.2,'4"x1/8"',2.55],[101.6,4.8,'4"x3/16"',3.83],[101.6,6.4,'4"x1/4"',5.10],[101.6,7.94,'4"x5/16"',6.30],[101.6,9.5,'4"x3/8"',7.58],[101.6,12.7,'4"x1/2"',10.13],[101.6,15.88,'4"x5/8"',12.68],[101.6,19.0,'4"x3/4"',15.15],[101.6,25.4,'4"x1"',20.26],
+  [127.0,3.2,'5"x1/8"',3.19],[127.0,4.8,'5"x3/16"',4.79],[127.0,6.4,'5"x1/4"',6.38],[127.0,7.94,'5"x5/16"',7.88],[127.0,9.5,'5"x3/8"',9.47],[127.0,12.7,'5"x1/2"',12.66],[127.0,15.88,'5"x5/8"',15.85],[127.0,19.0,'5"x3/4"',18.94],[127.0,25.4,'5"x1"',25.32],
+  [152.4,3.2,'6"x1/8"',3.82],[152.4,4.8,'6"x3/16"',5.73],[152.4,6.4,'6"x1/4"',7.64],[152.4,7.94,'6"x5/16"',9.45],[152.4,9.5,'6"x3/8"',11.37],[152.4,12.7,'6"x1/2"',15.19],[152.4,19.0,'6"x3/4"',19.02],[152.4,25.4,'6"x1"',30.39]
+];
+
+// Anchos únicos [mm, label_pulg]
+var ANCHOS = [[12.7,'½"'],[15.9,'⅝"'],[19.0,'¾"'],[22.2,'⅞"'],[25.4,'1"'],[31.8,'1¼"'],[38.1,'1½"'],[44.5,'1¾"'],[50.8,'2"'],[57.2,'2¼"'],[63.5,'2½"'],[76.2,'3"'],[88.9,'3½"'],[101.6,'4"'],[127.0,'5"'],[152.4,'6"']];
+var ESPS = [[3.2,'1/8"'],[4.8,'3/16"'],[6.4,'1/4"'],[7.94,'5/16"'],[9.5,'3/8"'],[12.7,'1/2"'],[15.88,'5/8"'],[19.0,'3/4"'],[25.4,'1"']];
+
+// Obtener espesores disponibles para un ancho dado
+function espsParaAncho(a) {
+  var esps = [];
+  for (var i=0; i<PLANCH.length; i++) {
+    if (Math.abs(PLANCH[i][0]-a)<0.1) {
+      var e = PLANCH[i][1];
+      var found = false;
+      for (var j=0;j<esps.length;j++) if(Math.abs(esps[j]-e)<0.01){found=true;break;}
+      if(!found) esps.push(e);
+    }
+  }
+  esps.sort(function(a,b){return a-b;});
+  return esps;
+}
+
+function labelAncho(a) {
+  for(var i=0;i<ANCHOS.length;i++) if(Math.abs(ANCHOS[i][0]-a)<0.1) return ANCHOS[i][1];
+  return a+'mm';
+}
+function labelEsp(e) {
+  for(var i=0;i<ESPS.length;i++) if(Math.abs(ESPS[i][0]-e)<0.01) return ESPS[i][1];
+  return e.toFixed(2)+'mm';
+}
+
+// Bulones CIRSOC 2018 - Tab.J.3.1 + Tab.J.3.2
+// MM (ISO): [dnom_mm, label_mm, label_in, dag_normal, dag_holgado, Tb_A325M, Tb_A490M]
+var BUL_MM = [
+  [12,'M12','—',14,16,48,61],
+  [14,'M14','—',16,18,67,84],
+  [16,'M16','—',18,20,91,114],
+  [18,'M18','—',20,22,111,140],
+  [20,'M20','—',22,24,142,178],
+  [22,'M22','—',24,27,176,220],
+  [24,'M24','—',26,28,205,257],
+  [27,'M27','—',30,35,267,334],
+  [30,'M30','—',32,37,326,408],
+  [33,'M33','—',36,41,403,504],
+  [36,'M36','—',39,44,475,594]
+];
+// Pulgadas (UNC): [dnom_mm, label_in, dag_normal_mm, dag_holgado_mm, Tb_A325, Tb_A490]
+var BUL_IN = [
+  [11.11,'7/16"',13,15,40,null],
+  [12.70,'1/2"',14,16,53,66],
+  [14.28,'9/16"',16,18,68,85],
+  [15.87,'5/8"',18,20,84,105],
+  [19.05,'3/4"',21,24,125,156],
+  [22.22,'7/8"',24,27,172,215],
+  [25.40,'1"',27,30,226,283],
+  [28.57,'1 1/8"',31,35,249,356],
+  [31.75,'1 1/4"',34,38,317,453],
+  [34.92,'1 3/8"',37,41,377,539],
+  [38.10,'1 1/2"',41,46,459,656]
+];
+
+// Fnv segun tipo bulón (Tab.J.3.2 CIRSOC 2018)
+var FNV = {A307:140, A325_inc:330, A325_exc:415, A490_inc:414, A490_exc:517};
+
+// Tabla J.3.4 distancias mínimas al borde (mm): {dnom: [cizallado, soplete]}
+var DB_MIN = {
+  6:[12,10],7:[14,11],8:[15,12],10:[18,14],11.11:[18,14],
+  12:[22,16],14:[25,18],15.87:[28,22],16:[28,22],
+  19.05:[34,26],20:[34,26],22:[38,28],22.22:[38,28],
+  24:[42,30],25.40:[42,30],27:[48,34],28.57:[48,34],
+  30:[52,38],31.75:[52,38],33:[58,42],34.92:[62,44],36:[64,46],38.10:[68,48]
+};
+
+// Aceros preset
+var ACEROS = {F24:[235,370],F26:[250,400],F36:[345,485],A572:[345,448]};
+
+// ================================================================
+// ESTADO GLOBAL
+// ================================================================
+var gPC = {a:101.6, e:15.88, suggA:null, suggE:null};
+var gCJ = {a:101.6, e:7.94,  suggA:null, suggE:null};
+var gBul = {sistema:'mm', dnom:16.0, label:'M16', dag:18, Tb:91};
+var bulSistema = 'mm';
+
+// ================================================================
+// MODAL
+// ================================================================
+var NORMAS = {
+  D2: {badge:'§D.2', title:'Resistencia de Diseño a Tracción',
+    body: '<h3>D.2 — Resistencia de Diseño a Tracción</h3><p>La resistencia de diseño φt·Pn (kN) será el <strong>menor valor</strong> de los estados límite de:</p><div class="modal-form">(a) Fluencia en sección bruta:\n    φt = 0,90\n    Pn = Fy · Ag · (10⁻¹)         Ec.(D.2.1)\n\n(b) Rotura en sección neta:\n    φt = 0,75\n    Pn = Fu · Ae · (10⁻¹)         Ec.(D.2.2)</div><p>D.1 Esbeltez: kL/r ≤ 300 (≤250 con acciones dinámicas excepto viento).</p><div class="modal-note">Para elementos auxiliares abulonados: Ae = An ≤ 0,85·Ag (§J.4.1 CIRSOC 301-2018)</div>'
+  },
+  J31: {badge:'Tab.J.3.1', title:'Pretensión Mínima de Bulones (kN)',
+    body: '<h3>Tabla J.3.1 — Tracción mínima Tb (kN) = 0,70 × Resistencia mínima tracción bulón</h3><table class="modal-table"><tr><th>d,nom mm</th><th>ISO 8.8 / A325M</th><th>ISO 10.9 / A490M</th><th>d pulg.</th><th>A325 (kN)</th><th>A490 (kN)</th></tr><tr><td>12</td><td>48</td><td>61</td><td>7/16"</td><td>40</td><td>—</td></tr><tr><td>14</td><td>67</td><td>84</td><td>1/2"</td><td>53</td><td>66</td></tr><tr><td>16</td><td>91</td><td>114</td><td>9/16"</td><td>68</td><td>85</td></tr><tr><td>18</td><td>111</td><td>140</td><td>5/8"</td><td>84</td><td>105</td></tr><tr><td>20</td><td>142</td><td>178</td><td>3/4"</td><td>125</td><td>156</td></tr><tr><td>22</td><td>176</td><td>220</td><td>7/8"</td><td>172</td><td>215</td></tr><tr><td>24</td><td>205</td><td>257</td><td>1"</td><td>226</td><td>283</td></tr><tr><td>27</td><td>267</td><td>334</td><td>1 1/8"</td><td>249</td><td>356</td></tr><tr><td>30</td><td>326</td><td>408</td><td>1 1/4"</td><td>317</td><td>453</td></tr><tr><td>33</td><td>403</td><td>504</td><td>1 3/8"</td><td>377</td><td>539</td></tr><tr><td>36</td><td>475</td><td>594</td><td>1 1/2"</td><td>459</td><td>656</td></tr></table><div class="modal-note">Sólo A325M/A490M (ISO 8.8/10.9) tienen Tb para deslizamiento crítico. Los A307 (ISO 4.6) no se usan en deslizamiento crítico.</div>'
+  },
+  J32: {badge:'Tab.J.3.2', title:'Resistencia de Diseño de Bulones (Tab.J.3.2)',
+    body: '<h3>Tabla J.3.2 — Fnv y Fnt (MPa) — φb = 0,75</h3><table class="modal-table"><tr><th>Tipo</th><th>Fnt (MPa)</th><th>Fnv rosca incl. (MPa)</th><th>Fnv rosca excl. (MPa)</th></tr><tr><td>A307M / ISO 4.6</td><td>260</td><td>140</td><td>140</td></tr><tr><td>A325M / ISO 8.8</td><td>620</td><td>330</td><td>415</td></tr><tr><td>A490M / ISO 10.9</td><td>778</td><td>414</td><td>517</td></tr></table><div class="modal-form">Rn = φb · Fnv · Ab · (10⁻¹)  [kN]  — Ec.(J.3.1)\nAb = π·d² / 4  [cm²]  (área cuerpo no roscado)</div><div class="modal-note">(e) Si separación en dirección fuerza > 1000 mm, reducir Fnv en 20%.<br>(b) A307: se permite rosca en planos de corte.<br>(d) Para A325/A490 con fatiga a tracción ver Apéndice 3.</div>'
+  },
+  J33: {badge:'§J.3.3', title:'Separación Mínima y Máxima',
+    body: '<h3>J.3.3 — Separación Mínima</h3><div class="modal-form">s,min = 3 · d,nom</div><h3 style="margin-top:12px">J.3.5 — Máxima separación y distancia al borde</h3><div class="modal-form">s,max = min(24 · t,chapa ; 300 mm)   (barras pintadas/sin peligro corrosión)\ndb,max = min(12 · t,chapa ; 150 mm)</div><div class="modal-note">Para barras no pintadas de acero resistente a corrosión: s,max = min(14·t ; 180mm)</div>'
+  },
+  J33tab: {badge:'Tab.J.3.3', title:'Dimensión Nominal de Agujeros (mm)',
+    body: '<h3>Tabla J.3.3 — Dimensiones de Agujeros</h3><table class="modal-table"><tr><th>d,nom (mm)</th><th>Normal (mm)</th><th>Holgado (mm)</th><th>d,nom (pulg.)</th><th>Normal (pulg.)</th><th>Holgado (pulg.)</th></tr><tr><td>6</td><td>8</td><td>9</td><td>1/4"</td><td>5/16"</td><td>3/8"</td></tr><tr><td>8</td><td>10</td><td>11</td><td>5/16"</td><td>3/8"</td><td>7/16"</td></tr><tr><td>10</td><td>12</td><td>13</td><td>3/8"</td><td>7/16"</td><td>1/2"</td></tr><tr><td>12</td><td>14</td><td>16</td><td>7/16"</td><td>1/2"</td><td>9/16"</td></tr><tr><td>14</td><td>16</td><td>18</td><td>1/2"</td><td>9/16"</td><td>5/8"</td></tr><tr><td>16</td><td>18</td><td>20</td><td>5/8"</td><td>11/16"</td><td>13/16"</td></tr><tr><td>20</td><td>22</td><td>24</td><td>3/4"</td><td>13/16"</td><td>15/16"</td></tr><tr><td>22</td><td>24</td><td>27</td><td>7/8"</td><td>15/16"</td><td>1 1/16"</td></tr><tr><td>24</td><td>26</td><td>30</td><td>1"</td><td>1 1/16"</td><td>1 1/4"</td></tr><tr><td>27</td><td>30</td><td>35</td><td>—</td><td>—</td><td>—</td></tr><tr><td>30</td><td>32</td><td>37</td><td>—</td><td>—</td><td>—</td></tr><tr><td>>28 (MM)</td><td>d+3</td><td>d+8</td><td>>1 1/8"</td><td>d+1/16"</td><td>d+5/16"</td></tr></table><div class="modal-note">Para cálculo de área neta: d,calc = d,ag + 2 mm (§B.4.2). Compensa irregularidades del borde perforado.</div>'
+  },
+  J34: {badge:'§J.3.4', title:'Distancia Mínima al Borde (Tabla J.3.4)',
+    body: '<h3>Tabla J.3.4 — Distancia mínima db al borde (mm)</h3><table class="modal-table"><tr><th>d,nom mm / ISO</th><th>d,nom pulg.</th><th>Borde cizallado (mm)</th><th>Borde soplete/laminado (mm)</th></tr><tr><td>6</td><td>—</td><td>12</td><td>10</td></tr><tr><td>8</td><td>—</td><td>15</td><td>12</td></tr><tr><td>10</td><td>3/8"</td><td>18</td><td>14</td></tr><tr><td>11,11</td><td>7/16"</td><td>18</td><td>14</td></tr><tr><td>12</td><td>—</td><td>22</td><td>16</td></tr><tr><td>14</td><td>1/2"</td><td>25</td><td>18</td></tr><tr><td>15,87</td><td>5/8"</td><td>28</td><td>22</td></tr><tr><td>16</td><td>—</td><td>28</td><td>22</td></tr><tr><td>19,05</td><td>3/4"</td><td>34</td><td>26</td></tr><tr><td>20</td><td>—</td><td>34</td><td>26</td></tr><tr><td>22,22</td><td>7/8"</td><td>38</td><td>28</td></tr><tr><td>24</td><td>—</td><td>42</td><td>30</td></tr><tr><td>25,40</td><td>1"</td><td>42</td><td>30</td></tr><tr><td>27</td><td>1 1/16"</td><td>48</td><td>34</td></tr><tr><td>28,57</td><td>1 1/8"</td><td>48</td><td>34</td></tr><tr><td>30</td><td>—</td><td>52</td><td>38</td></tr><tr><td>31,75</td><td>1 1/4"</td><td>52</td><td>38</td></tr><tr><td>&gt;30 / &gt;1 1/8"</td><td>—</td><td>1,75 × d</td><td>1,25 × d</td></tr></table><div class="modal-note">(c) Reducir en 3 mm bordes a soplete cuando la tensión no excede el 25% de la resistencia máxima.<br>(d) Se permite 32 mm en extremos de ángulos de unión de vigas.</div>'
+  },
+  J38: {badge:'§J.3.8', title:'Deslizamiento Crítico — Ec.(J.3.4)',
+    body: '<h3>J.3.8 — Resistencia al Deslizamiento</h3><div class="modal-form">Rstr = Du · µ · hf · Tb · Ns      Ec.(J.3.4)\n\n  Du = 1,13  (relación pretensión media/mínima)\n  µ  = 0,30  Clase A (cepillo metálico, sin pintar)\n     = 0,50  Clase B (chorro de arena)\n  hf = 1,0   (sin chapas de relleno)\n  Tb = Tab.J.3.1  [kN]\n  Ns = N° superficies de rozamiento</div><p>Factor φ: agujeros normales φ=1,0 · holgados φ=0,85 · ovalados largos ⊥ φ=0,70</p><div class="modal-note"><strong>CIRSOC 2018: µ=0,30 (Clase A) y µ=0,50 (Clase B).</strong> El ejemplo 2019 usaba µ=0,33 (valor AISC anterior). El reglamento 2018 actualiza al valor 0,30. Los BAR dimensionados por deslizamiento deben verificarse también como aplastamiento para cargas mayoradas (§J.3.6 + §J.3.10).</div>'
+  },
+  J310: {badge:'§J.3.10', title:'Aplastamiento de la Chapa en los Agujeros',
+    body: '<h3>J.3.10 — φ = 0,75</h3><div class="modal-form">(a) Deformación NO es condición de proyecto — Ec.(J.3.6a):\n    Rn = min(1,2·Lc·t·Fu ; 2,4·d·t·Fu) · (10⁻¹)\n\n(b) Deformación SÍ permitida — Ec.(J.3.6b):\n    Rn = min(1,5·Lc·t·Fu ; 3,0·d·t·Fu) · (10⁻¹)\n\n(c) Agujeros ovalados largos eje ⊥ fuerza — Ec.(J.3.6c):\n    Rn = min(1,0·Lc·t·Fu ; 2,0·d·t·Fu) · (10⁻¹)\n\nLc = distancia libre borde agujero – borde material [cm]\nt  = espesor chapa crítica [cm]\nd  = diámetro bulón [cm]</div><p>Bulón de borde: Lc = db − d,calc/2 &nbsp;|&nbsp; Bulones interiores: Lc = s − d,calc</p>'
+  },
+  J41: {badge:'§J.4.1', title:'Resistencia de Elementos Auxiliares a Tracción',
+    body: '<h3>J.4.1 — Resistencia de Diseño a Tracción</h3><div class="modal-form">(a) Fluencia por tracción:\n    φ = 0,90    Rn = Fy · Ag · (10⁻¹)   Ec.(J.4.1)\n\n(b) Rotura por tracción:\n    φ = 0,75    Rn = Fu · Ae · (10⁻¹)   Ec.(J.4.2)\n\nPara elementos planos auxiliares abulonados:\n    Ae = An ≤ 0,85 · Ag</div><div class="modal-note blue">Diferencia clave CIRSOC 301-2018: el límite Ae ≤ 0,85·Ag para elementos auxiliares (cubrejuntas, chapas de nudo) está explicitado en §J.4.1. En ediciones anteriores no era tan explícito.</div>'
+  },
+  J43: {badge:'§J.4.3', title:'Bloque de Corte — Ec.(J.4.5)',
+    body: '<h3>J.4.3 — Resistencia a la Rotura de Bloque de Corte</h3><p>φ = 0,75</p><div class="modal-form">Rn = min(\n  0,60·Fu·Anv + Ubs·Fu·Ant ;\n  0,60·Fy·Agv + Ubs·Fu·Ant\n) · (10⁻¹)                              Ec.(J.4.5)\n\nUbs = 1,0  (tensión de tracción uniforme)\nUbs = 0,5  (tensión de tracción no uniforme)</div><div class="modal-note">CIRSOC 301-2018 Ec.(J.4.5) unifica en una sola expresión con Ubs. El ejemplo 2019 usaba dos ecuaciones separadas (J.4.3.a / J.4.3.b) que ya no corresponden al reglamento 2018. Para empalmes simétricos con carga centrada: Ubs = 1,0.</div>'
+  },
+  J22: {badge:'§J.2.2', title:'Soldadura de Filete — Limitaciones',
+    body: '<h3>J.2.2(b) — Limitaciones (Tabla J.2.4)</h3><div class="modal-form">w,min según t del material más grueso:\n  t ≤ 6 mm       →  w,min = 3 mm\n  6 < t ≤ 13 mm  →  w,min = 5 mm\n  13 < t ≤ 19 mm →  w,min = 6 mm\n  t > 19 mm      →  w,min = 8 mm\n\nw,max = t − 2 mm  (para t ≥ 6 mm)\n\nLw,mín = 4 · w  (longitud mínima efectiva)\n\nFactor β — Ec.(J.2.1) filetes longitudinales:\n  β = 1,0               si L ≤ 100·w\n  β = 1,2 − 0,002·(L/w) si 100w < L ≤ 300w\n  Le = 180·w             si L > 300w\n  Le = β · L</div><p>Espesor garganta efectivo: <strong>eg = w/√2</strong></p>'
+  },
+  J24: {badge:'Tab.J.2.5', title:'Resistencia de Uniones Soldadas',
+    body: '<h3>Tabla J.2.5 — Resistencia de Diseño de Uniones Soldadas</h3><table class="modal-table"><tr><th>Tipo soldadura</th><th>Fuerza</th><th>Material crítico</th><th>φ</th><th>Fn</th></tr><tr><td rowspan="2">CJP (penetr. completa)</td><td>Tracción ⊥</td><td>Base</td><td>0,90</td><td>Fy</td></tr><tr><td>Corte área ef.</td><td>Electrodo</td><td>0,60</td><td>0,60·FEXX</td></tr><tr><td rowspan="2">PJP (penetr. parcial)</td><td>Tracción ⊥</td><td>Base</td><td>0,75</td><td>Fu</td></tr><tr><td>Corte área ef.</td><td>Electrodo</td><td>0,60</td><td>0,60·FEXX</td></tr><tr><td>Filete</td><td>Corte área ef.</td><td>Electrodo</td><td>0,75</td><td>0,60·FEXX</td></tr></table><div class="modal-form">Para filete:\n  Fw = 0,60 · FEXX   φ = 0,75\n  Rd = φ · Fw · Aw · (10⁻¹)  [kN]\n  Aw = eg · Lw  [cm²]</div><div class="modal-note">La tracción/compresión paralela al eje de la soldadura no necesita considerarse en el dimensionado (Tab.J.2.5 nota).</div>'
+  },
+  J21: {badge:'§J.2.1', title:'Soldadura a Tope — CJP y PJP',
+    body: '<h3>J.2.1 — Soldadura a Tope</h3><p><strong>CJP (Penetración Completa):</strong> Fusión total. Resistencia = metal base. Para tracción ⊥: φ=0,90·Fy. La soldadura no controla: controla la pieza.</p><p><strong>PJP (Penetración Parcial):</strong> Resistencia reducida. φ=0,75·Fu. Espesor mínimo garganta efectiva por Tabla J.2.3.</p><table class="modal-table"><tr><th>t material más grueso (mm)</th><th>eg,min PJP (mm)</th></tr><tr><td>≤ 6</td><td>3</td></tr><tr><td>6–13</td><td>5</td></tr><tr><td>13–19</td><td>6</td></tr><tr><td>19–38</td><td>8</td></tr><tr><td>38–57</td><td>10</td></tr><tr><td>57–150</td><td>13</td></tr><tr><td>&gt;150</td><td>16</td></tr></table><div class="modal-note blue">Para CJP con tracción ⊥: Rd,base = φ·Fy·Ag = ELU Fluencia de la pieza. CJP es equipotente a la pieza base. El diseño lo controla siempre la pieza, nunca la soldadura.</div>'
+  }
+};
+
+function openModal(key) {
+  var n = NORMAS[key];
+  if (!n) return;
+  document.getElementById('m-badge').textContent = n.badge;
+  document.getElementById('m-title').textContent = n.title;
+  document.getElementById('m-body').innerHTML = n.body;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+function closeModalDirect() { document.getElementById('modal-overlay').classList.remove('show'); }
+function closeModal(e) { if (e.target === document.getElementById('modal-overlay')) closeModalDirect(); }
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeModalDirect(); });
+
+// ================================================================
+// TABS
+// ================================================================
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-pane').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ================================================================
+// SELECTOR PLANCHUELAS — nueva lógica
+// ================================================================
+function renderPlanch(prefix, selA, selE, suggE, availEsps, AgMin) {
+  var pgA = document.getElementById(prefix+'-anchos');
+  var pgE = document.getElementById(prefix+'-esps');
+  var sugg = document.getElementById(prefix+'-sugg');
+  var info = document.getElementById(prefix+'-info');
+  var agBadge = document.getElementById(prefix+'-ag-badge');
+
+  var Ag = selA * selE / 100;
+  var peso = getPeso(selA, selE);
+
+  // Badge del Ag actual
+  if (agBadge) agBadge.textContent = 'Ag=' + (Ag).toFixed(2) + ' cm²';
+  if (info) {
+    info.innerHTML = '<strong>' + labelAncho(selA) + ' × ' + labelEsp(selE) + '</strong>'
+      + '  (' + selA.toFixed(1) + 'mm × ' + selE.toFixed(2) + 'mm)'
+      + ' &nbsp;·&nbsp; Ag=<strong>' + Ag.toFixed(2) + ' cm²</strong>'
+      + (peso ? ' &nbsp;·&nbsp; ' + peso.toFixed(2) + ' kg/m' : '');
+  }
+
+  // Chips de ANCHO
+  pgA.innerHTML = '';
+  for (var i=0; i<ANCHOS.length; i++) {
+    var a = ANCHOS[i][0], lbl = ANCHOS[i][1];
+    var isSel = Math.abs(a-selA)<0.1;
+    var d = document.createElement('div');
+    d.className = 'pchip' + (isSel ? ' sel' : '');
+    d.innerHTML = lbl + '<div class="pp">' + a + 'mm</div>';
+    d.onclick = (function(aa){ return function(){ onSelectAncho(prefix, aa); }; })(a);
+    pgA.appendChild(d);
+  }
+
+  // Chips de ESPESOR (solo disponibles para el ancho elegido)
+  pgE.innerHTML = '';
+  var espsToShow = availEsps && availEsps.length > 0 ? availEsps : [];
+  for (var j=0; j<espsToShow.length; j++) {
+    var e = espsToShow[j];
+    var isSel2 = Math.abs(e-selE)<0.01;
+    var isSugg2 = suggE !== null && Math.abs(e-suggE)<0.01;
+    var isEnough = (selA * e / 100) >= AgMin;
+    var cls = 'pchip';
+    if (isSel2) cls += ' sel';
+    else if (isSugg2) cls += ' sugg';
+    else if (isEnough) cls += ' ok-enough';
+    var d2 = document.createElement('div');
+    d2.className = cls;
+    d2.title = 'Ag=' + (selA*e/100).toFixed(2) + ' cm²';
+    d2.innerHTML = labelEsp(e) + '<div class="pp">' + e + 'mm</div>';
+    d2.onclick = (function(ee){ return function(){ onSelectEsp(prefix, ee); }; })(e);
+    pgE.appendChild(d2);
+  }
+
+  // Hint
+  var txt = '';
+  if (suggE !== null && !isNaN(suggE) && Math.abs(suggE-selE)>0.01) {
+    txt = '⚠ Esp. mínimo recomendado: ' + labelEsp(suggE) + ' (' + suggE + 'mm) · Ag,min=' + AgMin.toFixed(2) + ' cm²';
+  } else if (Ag >= AgMin) {
+    txt = '✓ Ag=' + Ag.toFixed(2) + ' cm² ≥ Ag,min=' + AgMin.toFixed(2) + ' cm²';
+  }
+  sugg.textContent = txt;
+}
+
+function getPeso(a, e) {
+  for (var i=0; i<PLANCH.length; i++) {
+    if (Math.abs(PLANCH[i][0]-a)<0.1 && Math.abs(PLANCH[i][1]-e)<0.01) return PLANCH[i][3];
+  }
+  return null;
+}
+
+function onSelectAncho(prefix, a) {
+  if (prefix==='pc') {
+    gPC.a = a;
+    document.getElementById('b_mm').value = a;
+    var esps = espsParaAncho(a);
+    var found = false;
+    for(var i=0;i<esps.length;i++) if(Math.abs(esps[i]-gPC.e)<0.01){found=true;break;}
+    if(!found && esps.length>0) gPC.e = esps[0];
+    document.getElementById('t_mm').value = gPC.e;
+  } else {
+    gCJ.a = a;
+    document.getElementById('bc_mm').value = a;
+    var esps2 = espsParaAncho(a);
+    var found2 = false;
+    for(var i=0;i<esps2.length;i++) if(Math.abs(esps2[i]-gCJ.e)<0.01){found2=true;break;}
+    if(!found2 && esps2.length>0) gCJ.e = esps2[0];
+    document.getElementById('tc_mm').value = gCJ.e;
+  }
+  recalc();
+}
+
+function onSelectEsp(prefix, e) {
+  if (prefix==='pc') {
+    gPC.e = e;
+    document.getElementById('t_mm').value = e;
+  } else {
+    gCJ.e = e;
+    document.getElementById('tc_mm').value = e;
+  }
+  recalc();
+}
+
+// Sugerencia espesor mínimo que cumpla AgMin
+function calcSuggE(a, AgMin) {
+  var esps = espsParaAncho(a);
+  for(var i=0;i<esps.length;i++) {
+    if(a*esps[i]/100 >= AgMin) return esps[i];
+  }
+  return null;
+}
+
+// ================================================================
+// SELECTOR BULONES
+// ================================================================
+function setBulSistema(s) {
+  bulSistema = s;
+  gBul.sistema = s;
+  document.getElementById('bul-tab-mm').className = 'bul-tab'+(s==='mm'?' active':'');
+  document.getElementById('bul-tab-in').className = 'bul-tab'+(s==='in'?' active':'');
+  renderBulones();
+}
+
+function onAgujChange() {
+  // Recalcular dag con nuevo tipo de agujero
+  var lista = bulSistema==='mm' ? BUL_MM : BUL_IN;
+  var aguj = document.getElementById('aguj').value;
+  for(var i=0;i<lista.length;i++) {
+    if(Math.abs(lista[i][0]-gBul.dnom)<0.05) {
+      gBul.dag = aguj==='normal' ? lista[i][3] : lista[i][4];
+      break;
+    }
+  }
+  updateBulInfo();
+  recalc();
+}
+
+function renderBulones() {
+  var lista = bulSistema==='mm' ? BUL_MM : BUL_IN;
+  var tipo = document.getElementById('btipo').value;
+  var aguj = document.getElementById('aguj').value;
+  var container = document.getElementById('bul-chips');
+  container.innerHTML = '';
+  for (var i=0; i<lista.length; i++) {
+    var b = lista[i];
+    var isSel = Math.abs(b[0]-gBul.dnom)<0.05;
+    var lbl = bulSistema==='mm' ? b[1] : b[1]; // label
+    var dag = aguj==='normal' ? b[3] : b[4];
+    var Ab = Math.PI*Math.pow(b[0]/10,2)/4;
+    var d = document.createElement('div');
+    d.className = 'bchip'+(isSel?' sel':'');
+    d.innerHTML = '<div class="bd">'+lbl+'</div><div class="bs">d='+b[0].toFixed(1)+'<br>dag='+dag+'mm<br>Ab='+Ab.toFixed(2)+'cm²</div>';
+    d.onclick = (function(bb){ return function(){ onSelectBulon(bb); }; })(b);
+    container.appendChild(d);
+  }
+  updateBulInfo();
+}
+
+function onSelectBulon(b) {
+  var tipo = document.getElementById('btipo').value;
+  var aguj = document.getElementById('aguj').value;
+  gBul.dnom = b[0];
+  gBul.label = b[1];
+  gBul.dag = aguj==='normal' ? b[3] : b[4];
+  // Tb según tipo
+  var isA490 = tipo.indexOf('A490')>=0;
+  if (tipo==='A307') gBul.Tb = 0;
+  else if (!isA490) gBul.Tb = b[5]||0; // A325/ISO8.8
+  else gBul.Tb = b[6]||0;              // A490/ISO10.9
+  renderBulones();
+  recalc();
+}
+
+function onBtipoChange() {
+  var tipo = document.getElementById('btipo').value;
+  var lista = bulSistema==='mm' ? BUL_MM : BUL_IN;
+  var isA490 = tipo.indexOf('A490')>=0;
+  for(var i=0;i<lista.length;i++) {
+    if(Math.abs(lista[i][0]-gBul.dnom)<0.05) {
+      if(tipo==='A307') gBul.Tb=0;
+      else if(!isA490) gBul.Tb=lista[i][5]||0;
+      else gBul.Tb=lista[i][6]||0;
+      break;
+    }
+  }
+  updateBulInfo();
+  recalc();
+}
+
+function updateBulInfo() {
+  var tipo = document.getElementById('btipo').value;
+  var Fnv = FNV[tipo]||140;
+  var Ab = Math.PI*Math.pow(gBul.dnom/10,2)/4;
+  var aguj = document.getElementById('aguj').value;
+  var isA490 = tipo.indexOf('A490')>=0;
+  var lista = bulSistema==='mm' ? BUL_MM : BUL_IN;
+  var TbA325=0, TbA490=0;
+  for(var i=0;i<lista.length;i++) {
+    if(Math.abs(lista[i][0]-gBul.dnom)<0.05){ TbA325=lista[i][5]||0; TbA490=lista[i][6]||0; break; }
+  }
+  document.getElementById('bul-info').innerHTML =
+    '<strong>' + gBul.label + '</strong>  d=' + gBul.dnom.toFixed(1) + 'mm'
+    + ' · dag=' + gBul.dag + 'mm (' + aguj + ')'
+    + '<br>Ab=' + Ab.toFixed(3) + ' cm²  ·  Fnv=' + Fnv + ' MPa'
+    + '<br>Tb A325/8.8=' + TbA325 + ' kN  ·  Tb A490/10.9=' + (TbA490||'—') + ' kN';
+}
+
+// ================================================================
+// ACERO
+// ================================================================
+function applyAcero() {
+  var v = document.getElementById('acero_std').value;
+  if (v==='custom') return;
+  var d = ACEROS[v];
+  document.getElementById('Fy').value = d[0];
+  document.getElementById('Fu').value = d[1];
+  recalc();
+}
+
+// ================================================================
+// HELPERS CÁLCULO
+// ================================================================
+function f2(v){ return (Math.round(+v*100)/100).toFixed(2); }
+function f1(v){ return (Math.round(+v*10)/10).toFixed(1); }
+
+function makeNb(ref, key) {
+  return '<button class="nb" onclick="openModal(\''+key+'\')">'+ref+'</button>';
+}
+function makeFm(lbl, eq, res, unit) {
+  unit = unit||'kN';
+  return '<div class="fm"><div class="fm-lbl">'+lbl+'</div><div>'+eq+'</div><div class="fm-res">= '+f2(res)+' '+unit+'</div></div>';
+}
+function makeFmStr(lbl, content) {
+  return '<div class="fm"><div class="fm-lbl">'+lbl+'</div><div>'+content+'</div></div>';
+}
+function makeVr(ok, expr, vals) {
+  var cls=ok?'ok':'fail'; var lbl=ok?'VERIFICA':'NO VERIFICA';
+  return '<div class="vr '+cls+'"><span class="vb '+cls+'">'+lbl+'</span><span class="vr-txt">'+expr+'</span><span class="vr-val">'+vals+'</span></div>';
+}
+function makeKpi(elId, items) {
+  var c=['cr','cok','cb','cw'];
+  var h='';
+  for(var i=0;i<items.length;i++) h+='<div class="kpi '+c[i%4]+'"><div class="kpi-val">'+items[i].v+'</div><div class="kpi-lbl">'+items[i].l+'</div></div>';
+  document.getElementById(elId).innerHTML=h;
+}
+function makeH4(t){ return '<h4 style="font-family:Montserrat,sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#444;margin:12px 0 8px">'+t+'</h4>'; }
+function makeNota(h,cls){ return '<div class="nota'+(cls?' '+cls:'')+'">' +h+'</div>'; }
+
+function dbMin(dnom) {
+  var keys = Object.keys(DB_MIN).map(Number).sort(function(a,b){return a-b;});
+  for(var i=0;i<keys.length;i++) {
+    if(Math.abs(keys[i]-dnom)<0.1) return DB_MIN[keys[i]];
+  }
+  return [Math.ceil(1.75*dnom), Math.ceil(1.25*dnom)];
+}
+
+// ================================================================
+// SVG EMPALME
+// ================================================================
+function makeSvg(b,t,dnom,nFil,nCol,s,db,sf,dbp) {
+  var W=420,H=200,esc=0.55;
+  var bPx=Math.min(b*esc,90);
+  var tPx=Math.min((2*db+(nCol-1)*s)*esc+30,310);
+  var cx=W/2,cy=H/2,hB=bPx/2;
+  var svg='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+  svg+='<rect x="'+(cx-tPx/2)+'" y="'+(cy-hB)+'" width="'+tPx+'" height="'+bPx+'" fill="#f5f5f5" stroke="#888" stroke-width="1.2"/>';
+  svg+='<rect x="'+(cx-tPx/2)+'" y="'+(cy-hB)+'" width="'+tPx+'" height="'+(bPx/2)+'" fill="none" stroke="#E10600" stroke-width="0.8" stroke-dasharray="4,2" opacity="0.6"/>';
+  svg+='<line x1="'+cx+'" y1="'+(cy-hB-10)+'" x2="'+cx+'" y2="'+(cy+hB+10)+'" stroke="#E10600" stroke-width="1.5" stroke-dasharray="5,3"/>';
+  svg+='<text x="'+(cx+3)+'" y="'+(cy-hB-12)+'" fill="#E10600" font-family="Montserrat" font-size="8" font-weight="700">JUNTA</text>';
+  for(var r=0;r<nFil;r++) {
+    for(var c=0;c<nCol;c++) {
+      var bx=cx-tPx/2+db*esc+c*s*esc;
+      var by=cy-hB+dbp*esc+r*sf*esc;
+      var rr=Math.max(3.5,dnom*esc*0.3);
+      svg+='<circle cx="'+bx+'" cy="'+by+'" r="'+rr+'" fill="#fff" stroke="#1A1A1A" stroke-width="1.3"/>';
+      svg+='<line x1="'+(bx-rr*.65)+'" y1="'+by+'" x2="'+(bx+rr*.65)+'" y2="'+by+'" stroke="#444" stroke-width=".8"/>';
+      svg+='<line x1="'+bx+'" y1="'+(by-rr*.65)+'" x2="'+bx+'" y2="'+(by+rr*.65)+'" stroke="#444" stroke-width=".8"/>';
+    }
+  }
+  svg+='<defs><marker id="a1" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#444"/></marker>';
+  svg+='<marker id="a2" markerWidth="7" markerHeight="7" refX="1" refY="3" orient="auto"><path d="M7,0 L7,6 L0,3z" fill="#444"/></marker></defs>';
+  svg+='<line x1="'+(cx-tPx/2-40)+'" y1="'+cy+'" x2="'+(cx-tPx/2-2)+'" y2="'+cy+'" stroke="#444" stroke-width="2" marker-end="url(#a1)"/>';
+  svg+='<line x1="'+(cx+tPx/2+40)+'" y1="'+cy+'" x2="'+(cx+tPx/2+2)+'" y2="'+cy+'" stroke="#444" stroke-width="2" marker-end="url(#a2)"/>';
+  svg+='<text x="'+(cx-tPx/2-60)+'" y="'+(cy+4)+'" fill="#444" font-family="Montserrat" font-size="10" font-weight="700">Pu</text>';
+  svg+='<text x="'+(cx+tPx/2+44)+'" y="'+(cy+4)+'" fill="#444" font-family="Montserrat" font-size="10" font-weight="700">Pu</text>';
+  svg+='<text x="'+(cx-tPx/2)+'" y="'+(cy+hB+16)+'" fill="#666" font-family="JetBrains Mono" font-size="7.5">'+nCol+'x'+nFil+' bul. s='+s+'mm db='+db+'mm b='+f1(b)+'mm</text>';
+  svg+='</svg>';
+  return svg;
+}
+
+// ================================================================
+// RECALC PRINCIPAL
+// ================================================================
+function recalc() {
+  var Pu   = +document.getElementById('Pu').value;
+  var Fy   = +document.getElementById('Fy').value;
+  var Fu   = +document.getElementById('Fu').value;
+  var b    = +document.getElementById('b_mm').value;
+  var t    = +document.getElementById('t_mm').value;
+  var bc   = +document.getElementById('bc_mm').value;
+  var tc   = +document.getElementById('tc_mm').value;
+  var btipo= document.getElementById('btipo').value;
+  var aguj = document.getElementById('aguj').value;
+  var dnom = gBul.dnom;
+  var dag  = aguj==='normal' ? gBul.dag : gBul.dag; // dag ya actualizado
+  var nFil = Math.max(1,+document.getElementById('nFil').value);
+  var nCol = Math.max(1,+document.getElementById('nCol').value);
+  var nCorte=+document.getElementById('nCorte').value;
+  var s    = +document.getElementById('s_mm').value;
+  var db   = +document.getElementById('db_mm').value;
+  var sf   = +document.getElementById('sf_mm').value;
+  var dbp  = +document.getElementById('dbp_mm').value;
+  var claseSup=document.getElementById('claseSup').value;
+  var deform  =+document.getElementById('deform').value;
+  var Feex =+document.getElementById('Feex').value;
+  var w_mm =+document.getElementById('w_mm').value;
+  var nCL  =+document.getElementById('nCordLat').value;
+  var hasFront=+document.getElementById('hasFront').value;
+  var penTipo=document.getElementById('penTipo').value;
+  var Tb   = gBul.Tb;
+  var Fnv  = FNV[btipo]||140;
+
+  var dcalc = dag+2;
+  var nb    = nFil*nCol;
+  var Ag    = b*t/100;
+  var Agc   = bc*tc/100;
+  var Ab    = Math.PI*Math.pow(dnom/10,2)/4;
+  var An    = Math.max(0,(b-nFil*dcalc)*t/100);
+  var Ae    = Math.min(An, 0.85*Ag);
+  var phi_f = 0.90, phi_r = 0.75;
+  var AgMinF = Pu*10/(phi_f*Fy);
+  var AgMinR = Pu*10/(phi_r*Fu);
+  var AgMin  = Math.max(AgMinF, AgMinR);
+  var AgMinC = (Pu/2)*10/(phi_f*Fy);
+
+  // Sugerencias espesores
+  var suggE_PC = calcSuggE(gPC.a, AgMin);
+  var suggE_CJ = calcSuggE(gCJ.a, AgMinC);
+  var espsPC = espsParaAncho(gPC.a);
+  var espsCJ = espsParaAncho(gCJ.a);
+  renderPlanch('pc', gPC.a, gPC.e, suggE_PC, espsPC, AgMin);
+  renderPlanch('cj', gCJ.a, gCJ.e, suggE_CJ, espsCJ, AgMinC);
+
+  var dbMinArr = dbMin(dnom);
+  var dbMinVal = dbMinArr[1]; // soplete por defecto
+
+  calcA({Pu:Pu,Fy:Fy,Fu:Fu,b:b,t:t,tc:tc,bc:bc,Ag:Ag,Agc:Agc,An:An,Ae:Ae,
+         dnom:dnom,dag:dag,dcalc:dcalc,Ab:Ab,Fnv:Fnv,nb:nb,nFil:nFil,nCol:nCol,
+         nCorte:nCorte,s:s,db:db,sf:sf,dbp:dbp,AgMinF:AgMinF,AgMinR:AgMinR,AgMin:AgMin,
+         deform:deform,btipo:btipo,dbMinVal:dbMinVal});
+  calcB({Pu:Pu,Fy:Fy,Fu:Fu,b:b,t:t,tc:tc,bc:bc,Ag:Ag,Agc:Agc,An:An,Ae:Ae,
+         dnom:dnom,dag:dag,dcalc:dcalc,Ab:Ab,Fnv:Fnv,Tb:Tb,nb:nb,nFil:nFil,nCol:nCol,
+         nCorte:nCorte,s:s,db:db,sf:sf,dbp:dbp,AgMin:AgMin,claseSup:claseSup,
+         deform:deform,btipo:btipo,dbMinVal:dbMinVal});
+  calcC({Pu:Pu,Fy:Fy,Fu:Fu,b:b,t:t,tc:tc,bc:bc,Ag:Ag,AgMin:AgMin,
+         Feex:Feex,w_mm:w_mm,nCL:nCL,hasFront:hasFront});
+  calcD({Pu:Pu,Fy:Fy,Fu:Fu,b:b,t:t,Ag:Ag,AgMin:AgMin,Feex:Feex,penTipo:penTipo});
+}
+
+// ================================================================
+// VARIANTE A — APLASTAMIENTO
+// ================================================================
+function calcA(p) {
+  var Pu=p.Pu,Fy=p.Fy,Fu=p.Fu,b=p.b,t=p.t,tc=p.tc,bc=p.bc,Ag=p.Ag,Agc=p.Agc,An=p.An,Ae=p.Ae;
+  var dnom=p.dnom,dag=p.dag,dcalc=p.dcalc,Ab=p.Ab,Fnv=p.Fnv,nb=p.nb;
+  var nFil=p.nFil,nCol=p.nCol,nCorte=p.nCorte,s=p.s,db=p.db,sf=p.sf,dbp=p.dbp;
+  var AgMinF=p.AgMinF,AgMinR=p.AgMinR,AgMin=p.AgMin,deform=p.deform,dbMinVal=p.dbMinVal;
+
+  var bC=b/10,tC=t/10,sC=s/10,dbC=db/10,dcC=dcalc/10,dnC=dnom/10;
+  var phi_b=0.75;
+  var Rb1=phi_b*Fnv*Ab*1e-1;
+  var Rb=nCorte*Rb1;
+  var nbMin=Math.ceil(Pu/Rb);
+  var Pd_f=0.90*Fy*Ag*1e-1, Pd_r=0.75*Fu*Ae*1e-1;
+  var ok_f=Pd_f>=Pu, ok_r=Pd_r>=Pu;
+  var Lc=Math.max(0,dbC-dcC/2);
+  var Rn1,Rn2;
+  if(deform){Rn1=1.2*Lc*tC*Fu*1e-1;Rn2=2.4*dnC*tC*Fu*1e-1;}
+  else{Rn1=1.5*Lc*tC*Fu*1e-1;Rn2=3.0*dnC*tC*Fu*1e-1;}
+  var RnA=Math.min(Rn1,Rn2),RdA=0.75*RnA,ok_apl=RdA>=Pu/nb;
+  var Ubs=1.0;
+  var Agt=nFil*dbC*tC,Agv=nFil*((nCol-1)*sC+dbC)*tC;
+  var Ant=Math.max(0,Agt-nFil*(dcC/2)*tC);
+  var Anv=Math.max(0,Agv-nFil*(nCol-0.5)*dcC*tC);
+  var Rbc1=(0.6*Fu*Anv+Ubs*Fu*Ant)*1e-1,Rbc2=(0.6*Fy*Agv+Ubs*Fu*Ant)*1e-1;
+  var Rbc=Math.min(Rbc1,Rbc2),Rdbc=0.75*Rbc,ok_bc=Rdbc>=Pu;
+  var smin=3*dnC,smax=Math.min(24*(tc/10),30);
+  var ok_s=sC>=smin&&sC<=smax,ok_db=db>=dbMinVal;
+  var ok_sf=sf/10>=smin,ok_dbp=dbp>=dbMinVal;
+  var allOk=ok_f&&ok_r&&ok_apl&&ok_bc&&ok_s&&ok_db;
+
+  makeKpi('kA',[{v:f2(Ag)+' cm²',l:'Ag Pieza Central'},{v:f2(Rb)+' kN',l:'Resist./Bulón'},{v:nb+' bulones',l:nFil+'fil × '+nCol+'col'},{v:allOk?'OK':'Revisar',l:'Estado'}]);
+
+  document.getElementById('cA1').innerHTML =
+    makeNota(makeNb('§D.2','D2')+' — φt·Pn = min[(a) fluencia secc.bruta φ=0,90 ; (b) rotura secc.neta φ=0,75]')
+    +makeFm('(a) Ag,min — Fluencia','Pu×10/(φt·Fy) = '+Pu+'×10/(0,90×'+Fy+')',AgMinF,'cm²')
+    +makeFm('(b) Ag,min — Rotura','Pu×10/(φt·Fu) = '+Pu+'×10/(0,75×'+Fu+')',AgMinR,'cm²')
+    +'<div style="background:var(--red-bg);border-radius:5px;padding:9px;margin:8px 0;font-family:JetBrains Mono,monospace"><strong>Ag,min = max('+f2(AgMinF)+';'+f2(AgMinR)+') = '+f2(AgMin)+' cm²</strong></div>';
+
+  document.getElementById('cA2').innerHTML =
+    '<table><tr><th>Pieza</th><th>Ancho (mm)</th><th>Esp. (mm)</th><th>Ag (cm²)</th><th>Estado</th></tr>'
+    +'<tr><td>Central</td><td class="hi">'+f1(b)+'</td><td class="hi">'+f2(t)+'</td><td class="hi">'+f2(Ag)+'</td><td class="'+(Ag>=AgMin?'ok2':'fail2')+'">'+(Ag>=AgMin?'OK':'Insuf.')+'</td></tr>'
+    +'<tr><td>Cubrejuntas (×2)</td><td>'+f1(bc)+'</td><td class="hi">'+f2(tc)+'</td><td>'+f2(Agc)+'</td><td>'+(Agc>=Ag/2?'OK':'Rev.')+'</td></tr></table>'
+    +makeVr(Ag>=AgMin,'Ag ≥ Ag,min',f2(Ag)+' cm² ≥ '+f2(AgMin)+' cm²')
+    +makeNota(makeNb('§J.4.1','J41')+' — Para elementos auxiliares abulonados: Ae = An ≤ 0,85·Ag. Cada cubrejunta resiste Pu/2 = '+f2(Pu/2)+' kN.');
+
+  document.getElementById('cA3').innerHTML =
+    makeNota(makeNb('Tab.J.3.2','J32')+' — Fnv='+Fnv+' MPa ('+p.btipo+') · φb=0,75 · dag='+dag+'mm · dcalc=dag+2='+dcalc+'mm')
+    +'<table><tr><th>Parámetro</th><th>Valor</th><th>Unidad</th></tr>'
+    +'<tr><td>d,nom ('+gBul.label+')</td><td class="hi">'+f2(dnom)+'</td><td>mm</td></tr>'
+    +'<tr><td>d,ag ('+makeNb('Tab.J.3.3','J33tab')+')</td><td>'+dag+'</td><td>mm</td></tr>'
+    +'<tr><td>d,calc = dag+2</td><td>'+dcalc+'</td><td>mm</td></tr>'
+    +'<tr><td>Ab = π·d²/4</td><td>'+f2(Ab)+'</td><td>cm²</td></tr></table>'
+    +makeFm('Rb1 = φb·Fnv·Ab por plano '+makeNb('Ec.(J.3.1)','J32'),'0,75×'+Fnv+'×'+f2(Ab)+'×10⁻¹',Rb1,'kN/plano')
+    +makeFm('Rb = '+nCorte+' planos × Rb1',nCorte+'×'+f2(Rb1),Rb,'kN/bulón')
+    +'<div class="fm"><div class="fm-lbl">N° mínimo de bulones</div><div>nb,min = Pu/Rb = '+Pu+'/'+f2(Rb)+' = '+f2(Pu/Rb)+'</div><div class="fm-res">→ Adoptado: <strong>'+nb+' bulones ('+nFil+'×'+nCol+')</strong></div></div>'
+    +makeVr(nb>=nbMin,'nb ≥ nb,min',nb+' ≥ '+nbMin);
+
+  document.getElementById('cA4').innerHTML =
+    makeNota(makeNb('§J.3.3','J33')+' s,min='+f2(smin)+' cm · s,max='+f2(smax)+' cm &nbsp;|&nbsp; '+makeNb('§J.3.4','J34')+' db,min='+dbMinVal+'mm (borde soplete '+makeNb('Tab.J.3.4','J34')+')')
+    +'<table><tr><th>Parámetro</th><th>Límite</th><th>Adoptado</th><th>Estado</th></tr>'
+    +'<tr><td>Sep. longitudinal s</td><td>'+f2(smin)+'–'+f2(smax)+' cm</td><td class="hi">'+f2(sC)+' cm</td><td class="'+(ok_s?'ok2':'fail2')+'">'+(ok_s?'✓':'✗')+'</td></tr>'
+    +'<tr><td>Dist. borde long. db</td><td>≥'+dbMinVal+' mm</td><td class="hi">'+db+' mm</td><td class="'+(ok_db?'ok2':'fail2')+'">'+(ok_db?'✓':'✗')+'</td></tr>'
+    +'<tr><td>Sep. transversal sf</td><td>≥'+f2(smin)+' cm</td><td>'+f2(sf/10)+' cm</td><td class="'+(ok_sf?'ok2':'fail2')+'">'+(ok_sf?'✓':'✗')+'</td></tr>'
+    +'<tr><td>Dist. borde transv. dbp</td><td>≥'+dbMinVal+' mm</td><td>'+dbp+' mm</td><td class="'+(ok_dbp?'ok2':'fail2')+'">'+(ok_dbp?'✓':'✗')+'</td></tr></table>'
+    +'<div class="fm"><div class="fm-lbl">Longitud empalme</div><div class="fm-res">L = '+f2(2*dbC+(nCol-1)*sC)+' cm</div></div>';
+
+  document.getElementById('cA5').innerHTML =
+    makeH4('5.1 Fluencia Sección Bruta '+makeNb('§D.2(a)','D2'))
+    +makeFm('φt·Fy·Ag','0,90×'+Fy+'×'+f2(Ag)+'×10⁻¹',Pd_f,'kN')+makeVr(ok_f,'φt·Fy·Ag ≥ Pu',f2(Pd_f)+' kN ≥ '+Pu+' kN')
+    +makeH4('5.2 Rotura Sección Neta '+makeNb('§D.2(b)','D2')+' · '+makeNb('§J.4.1','J41'))
+    +makeNota(makeNb('§J.4.1','J41')+' — Ae=An≤0,85·Ag. dcalc='+dcalc+'mm (dag+2).')
+    +makeFmStr('An = (b−nFil·dcalc)·t/100','('+f2(bC)+'−'+nFil+'×'+f2(dcC)+')×'+f2(tC)+' = <strong>'+f2(An)+' cm²</strong>')
+    +makeFmStr('Ae = min(An ; 0,85·Ag)','min('+f2(An)+' ; '+f2(0.85*Ag)+') = <strong>'+f2(Ae)+' cm²</strong>')
+    +makeFm('φt·Fu·Ae','0,75×'+Fu+'×'+f2(Ae)+'×10⁻¹',Pd_r,'kN')+makeVr(ok_r,'φt·Fu·Ae ≥ Pu',f2(Pd_r)+' kN ≥ '+Pu+' kN')
+    +(!ok_r?makeNota('⚠ Sección neta insuficiente. El selector de espesor indica el mínimo recomendado en amarillo.','warn'):'')
+    +makeH4('5.3 Aplastamiento Chapa '+makeNb('§J.3.10','J310')+' · Ec.(J.3.6'+(deform?'a':'b')+')')
+    +makeNota('Lc = db−dcalc/2 = '+f2(dbC)+'−'+f2(dcC/2)+' = '+f2(Lc)+' cm')
+    +makeFm('Rn1 = '+(deform?'1,2':'1,5')+'·Lc·t·Fu',(deform?'1,2':'1,5')+'×'+f2(Lc)+'×'+f2(tC)+'×'+Fu+'×10⁻¹',Rn1,'kN')
+    +makeFm('Rn2 = '+(deform?'2,4':'3,0')+'·d·t·Fu',(deform?'2,4':'3,0')+'×'+f2(dnC)+'×'+f2(tC)+'×'+Fu+'×10⁻¹',Rn2,'kN')
+    +makeFm('Rd,apl = 0,75·min(Rn1;Rn2)','0,75×'+f2(RnA),RdA,'kN')+makeVr(ok_apl,'Rd,apl ≥ Pu/nb',f2(RdA)+' kN ≥ '+f2(Pu/nb)+' kN')
+    +makeH4('5.4 Bloque de Corte '+makeNb('§J.4.3','J43')+' · Ec.(J.4.5) · Ubs=1,0')
+    +makeNota(makeNb('§J.4.3','J43')+' — Rn=min(0,60·Fu·Anv+Ubs·Fu·Ant ; 0,60·Fy·Agv+Ubs·Fu·Ant)·10⁻¹ · φ=0,75 · Ubs=1,0')
+    +'<table><tr><th>Área</th><th>cm²</th></tr><tr><td>Agt</td><td>'+f2(Agt)+'</td></tr><tr><td>Agv</td><td>'+f2(Agv)+'</td></tr><tr><td>Ant</td><td>'+f2(Ant)+'</td></tr><tr><td>Anv</td><td>'+f2(Anv)+'</td></tr></table>'
+    +makeFm('Rn1 = 0,60·Fu·Anv+1,0·Fu·Ant','(0,60×'+Fu+'×'+f2(Anv)+'+1,0×'+Fu+'×'+f2(Ant)+')×10⁻¹',Rbc1,'kN')
+    +makeFm('Rn2 = 0,60·Fy·Agv+1,0·Fu·Ant','(0,60×'+Fy+'×'+f2(Agv)+'+1,0×'+Fu+'×'+f2(Ant)+')×10⁻¹',Rbc2,'kN')
+    +makeFm('Rd,bc = 0,75·min(Rn1;Rn2)','0,75×'+f2(Rbc),Rdbc,'kN')+makeVr(ok_bc,'Rd,bc ≥ Pu',f2(Rdbc)+' kN ≥ '+Pu+' kN');
+
+  document.getElementById('cA6').innerHTML='<div class="drawing">'+makeSvg(b,t,dnom,nFil,nCol,s,db,sf,dbp)+'</div>';
+  document.getElementById('sA').innerHTML='<h3>✦ Resumen 1A — '+(allOk?'VERIFICADO':'REVISAR')+'</h3><div class="summ-grid">'
+    +'<div><div class="si-lbl">Pieza Central</div><div class="si-val">'+f1(b)+'×'+f2(t)+'mm Ag='+f2(Ag)+'cm²</div></div>'
+    +'<div><div class="si-lbl">Cubrejuntas ×2</div><div class="si-val">'+f1(bc)+'×'+f2(tc)+'mm Agc='+f2(Agc)+'cm²</div></div>'
+    +'<div><div class="si-lbl">Bulones</div><div class="si-val">'+nb+' '+gBul.label+' ('+nFil+'×'+nCol+')</div></div>'
+    +'<div><div class="si-lbl">φPn,corte total</div><div class="si-val">'+f2(nb*Rb)+' kN '+(nb*Rb>=Pu?'≥':'<')+' '+Pu+'</div></div>'
+    +'<div><div class="si-lbl">φPn,neta</div><div class="si-val">'+f2(Pd_r)+' kN '+(Pd_r>=Pu?'≥':'<')+' '+Pu+'</div></div>'
+    +'<div><div class="si-lbl">φPn,bc</div><div class="si-val">'+f2(Rdbc)+' kN '+(Rdbc>=Pu?'≥':'<')+' '+Pu+'</div></div></div>';
+}
+
+// ================================================================
+// VARIANTE B — DESLIZAMIENTO CRÍTICO
+// ================================================================
+function calcB(p) {
+  var Pu=p.Pu,Fy=p.Fy,Fu=p.Fu,b=p.b,t=p.t,tc=p.tc,bc=p.bc,Ag=p.Ag,Agc=p.Agc,An=p.An,Ae=p.Ae;
+  var dnom=p.dnom,dag=p.dag,dcalc=p.dcalc,Ab=p.Ab,Fnv=p.Fnv,Tb=p.Tb,nb=p.nb;
+  var nFil=p.nFil,nCol=p.nCol,nCorte=p.nCorte,s=p.s,db=p.db,sf=p.sf,dbp=p.dbp;
+  var AgMin=p.AgMin,claseSup=p.claseSup,deform=p.deform,btipo=p.btipo,dbMinVal=p.dbMinVal;
+
+  if(btipo==='A307'||Tb===0) {
+    var msg=makeNota('Los bulones A307/ISO 4.6 no pueden usarse en uniones de deslizamiento crítico. Seleccionar A325M o A490M.');
+    ['kB','cB1','cB2','cB3','cB4','cB6'].forEach(function(id){var el=document.getElementById(id);if(el)el.innerHTML=msg;});
+    document.getElementById('sB').innerHTML='<h3>A307 — NO APLICA EN DESLIZAMIENTO</h3>';
+    return;
+  }
+
+  var bC=b/10,tC=t/10,sC=s/10,dbC=db/10,dcC=dcalc/10,dnC=dnom/10;
+  var mu=claseSup==='A'?0.30:0.50;
+  var Du=1.13,hf=1.0,Ns=nCorte,phi_str=1.0;
+  var Rstr=Du*mu*hf*Tb*Ns,RdStr=phi_str*Rstr;
+  var nbMin=Math.ceil(Pu/RdStr);
+  var Pd_f=0.90*Fy*Ag*1e-1,Pd_r=0.75*Fu*Ae*1e-1;
+  var ok_f=Pd_f>=Pu,ok_r=Pd_r>=Pu;
+  var Lc=Math.max(0,dbC-dcC/2);
+  var Rn1,Rn2;
+  if(deform){Rn1=1.2*Lc*tC*Fu*1e-1;Rn2=2.4*dnC*tC*Fu*1e-1;}
+  else{Rn1=1.5*Lc*tC*Fu*1e-1;Rn2=3.0*dnC*tC*Fu*1e-1;}
+  var RnA=Math.min(Rn1,Rn2),RdA=0.75*RnA,ok_apl=RdA>=Pu/nb;
+  var Ubs=1.0;
+  var Agt=nFil*dbC*tC,Agv=nFil*((nCol-1)*sC+dbC)*tC;
+  var Ant=Math.max(0,Agt-nFil*(dcC/2)*tC),Anv=Math.max(0,Agv-nFil*(nCol-0.5)*dcC*tC);
+  var Rbc1=(0.6*Fu*Anv+Ubs*Fu*Ant)*1e-1,Rbc2=(0.6*Fy*Agv+Ubs*Fu*Ant)*1e-1;
+  var Rbc=Math.min(Rbc1,Rbc2),Rdbc=0.75*Rbc,ok_bc=Rdbc>=Pu;
+  var smin=3*dnC,ok_s=sC>=smin,ok_db=db>=dbMinVal;
+  var allOk=ok_f&&ok_r&&ok_apl&&ok_bc;
+
+  makeKpi('kB',[{v:f2(Ag)+' cm²',l:'Ag Pieza'},{v:f2(Rstr)+' kN',l:'Rstr/Bulón'},{v:nbMin+' BAR min',l:'Nb mínimo'},{v:allOk?'OK':'Revisar',l:'Estado'}]);
+
+  document.getElementById('cB1').innerHTML=
+    makeNota(makeNb('§J.3.1(a)(3)','J32')+' — BAR totalmente pretensados. Tb='+Tb+' kN ('+makeNb('Tab.J.3.1','J31')+'). µ='+mu+' Clase '+claseSup+'.')
+    +'<table><tr><th>Pieza</th><th>b (mm)</th><th>t (mm)</th><th>Ag (cm²)</th><th>ELU Fluencia</th></tr>'
+    +'<tr><td>Central</td><td class="hi">'+f1(b)+'</td><td class="hi">'+f2(t)+'</td><td class="hi">'+f2(Ag)+'</td><td class="'+(ok_f?'ok2':'fail2')+'">'+f2(Pd_f)+' kN</td></tr>'
+    +'<tr><td>Cubrejuntas ×2</td><td>'+f1(bc)+'</td><td>'+f2(tc)+'</td><td>'+f2(Agc)+'</td><td>—</td></tr></table>'
+    +makeVr(Ag>=AgMin,'Ag ≥ Ag,min',f2(Ag)+' ≥ '+f2(AgMin)+' cm²');
+
+  document.getElementById('cB2').innerHTML=
+    makeNota(makeNb('§J.3.8','J38')+' · '+makeNb('Ec.(J.3.4)','J38')+' — Rstr=Du·µ·hf·Tb·Ns · φ=1,0 (agujeros normales)')
+    +'<table><tr><th>Parámetro</th><th>Símbolo</th><th>Valor</th></tr>'
+    +'<tr><td>Pretensión mínima ('+makeNb('Tab.J.3.1','J31')+')</td><td>Tb</td><td class="hi">'+Tb+' kN</td></tr>'
+    +'<tr><td>Factor pretensión</td><td>Du</td><td>'+Du+'</td></tr>'
+    +'<tr><td>Coef. rozamiento Clase '+claseSup+'</td><td>µ</td><td class="hi">'+mu+'</td></tr>'
+    +'<tr><td>Factor chapas relleno</td><td>hf</td><td>'+hf+'</td></tr>'
+    +'<tr><td>N° superficies rozamiento</td><td>Ns</td><td>'+Ns+'</td></tr></table>'
+    +makeFm('Rstr = Du·µ·hf·Tb·Ns',Du+'×'+mu+'×'+hf+'×'+Tb+'×'+Ns,Rstr,'kN/bulón')
+    +makeFm('Rd,str = φ·Rstr','1,0×'+f2(Rstr),RdStr,'kN/bulón')
+    +'<div class="fm"><div class="fm-lbl">N° mínimo de BAR</div><div>nb,min = Pu/Rd,str = '+Pu+'/'+f2(RdStr)+' = '+f2(Pu/RdStr)+'</div><div class="fm-res">nb,min = '+nbMin+' → Adoptado: <strong>'+nb+' BAR ('+nFil+'×'+nCol+')</strong></div></div>'
+    +makeVr(nb>=nbMin,'nb ≥ nb,min',nb+' ≥ '+nbMin)
+    +makeVr(nb*RdStr>=Pu,'φ·Rstr·nb ≥ Pu',f2(nb*RdStr)+' kN ≥ '+Pu+' kN')
+    +makeNota(makeNb('§J.3.8','J38')+' — Verificar también como aplastamiento para cargas mayoradas (§J.3.6 + §J.3.10).','blue');
+
+  document.getElementById('cB3').innerHTML=
+    '<table><tr><th>Parámetro</th><th>Límite</th><th>Adoptado</th><th>Estado</th></tr>'
+    +'<tr><td>Sep. s '+makeNb('§J.3.3','J33')+'</td><td>≥'+f2(smin)+' cm</td><td class="hi">'+f2(sC)+' cm</td><td class="'+(ok_s?'ok2':'fail2')+'">'+(ok_s?'✓':'✗')+'</td></tr>'
+    +'<tr><td>Dist. borde db '+makeNb('§J.3.4','J34')+'</td><td>≥'+dbMinVal+' mm</td><td class="hi">'+db+' mm</td><td class="'+(ok_db?'ok2':'fail2')+'">'+(ok_db?'✓':'✗')+'</td></tr>'
+    +'<tr><td>Sep. transv. sf</td><td>≥'+f2(smin)+' cm</td><td>'+f2(sf/10)+' cm</td><td class="'+(sf/10>=smin?'ok2':'fail2')+'">'+(sf/10>=smin?'✓':'✗')+'</td></tr></table>'
+    +'<div class="fm"><div class="fm-lbl">Longitud empalme</div><div class="fm-res">L = '+f2(2*dbC+(nCol-1)*sC)+' cm</div></div>';
+
+  document.getElementById('cB4').innerHTML=
+    makeH4('ELU Tracción '+makeNb('§D.2','D2'))
+    +makeFm('φt·Fu·Ae','0,75×'+Fu+'×'+f2(Ae)+'×10⁻¹',Pd_r,'kN')+makeVr(ok_r,'φt·Fu·Ae ≥ Pu',f2(Pd_r)+' kN ≥ '+Pu+' kN')
+    +makeH4('Aplastamiento '+makeNb('§J.3.10','J310'))
+    +makeFm('Rd,apl = 0,75·min(Rn1;Rn2)','0,75×'+f2(RnA),RdA,'kN')+makeVr(ok_apl,'Rd,apl ≥ Pu/nb',f2(RdA)+' kN ≥ '+f2(Pu/nb)+' kN')
+    +makeH4('Bloque de Corte '+makeNb('§J.4.3','J43')+' · Ec.(J.4.5)')
+    +'<table><tr><th>Área</th><th>cm²</th></tr><tr><td>Agt</td><td>'+f2(Agt)+'</td></tr><tr><td>Agv</td><td>'+f2(Agv)+'</td></tr><tr><td>Ant</td><td>'+f2(Ant)+'</td></tr><tr><td>Anv</td><td>'+f2(Anv)+'</td></tr></table>'
+    +makeFm('Rd,bc = 0,75·min(Rn1;Rn2)','0,75×'+f2(Rbc),Rdbc,'kN')+makeVr(ok_bc,'Rd,bc ≥ Pu',f2(Rdbc)+' kN ≥ '+Pu+' kN');
+
+  document.getElementById('cB6').innerHTML='<div class="drawing">'+makeSvg(b,t,dnom,nFil,nCol,s,db,sf,dbp)+'</div>';
+  document.getElementById('sB').innerHTML='<h3>✦ Resumen 1B — '+(allOk?'VERIFICADO':'REVISAR')+'</h3><div class="summ-grid">'
+    +'<div><div class="si-lbl">Pieza Central</div><div class="si-val">'+f1(b)+'×'+f2(t)+'mm</div></div>'
+    +'<div><div class="si-lbl">BAR Adoptados</div><div class="si-val">'+nb+' '+gBul.label+' ('+nFil+'×'+nCol+')</div></div>'
+    +'<div><div class="si-lbl">Clase / µ</div><div class="si-val">'+claseSup+' / '+mu+'</div></div>'
+    +'<div><div class="si-lbl">Rd,despl. total</div><div class="si-val">'+f2(nb*RdStr)+' kN '+(nb*RdStr>=Pu?'≥':'<')+' '+Pu+'</div></div>'
+    +'<div><div class="si-lbl">Rd,apl/bulón</div><div class="si-val">'+f2(RdA)+' kN</div></div>'
+    +'<div><div class="si-lbl">Rd,bc</div><div class="si-val">'+f2(Rdbc)+' kN '+(Rdbc>=Pu?'≥':'<')+' '+Pu+'</div></div></div>';
+}
+
+// ================================================================
+// VARIANTE C — SOLDADURA FILETE
+// ================================================================
+function calcC(p) {
+  var Pu=p.Pu,Fy=p.Fy,Fu=p.Fu,b=p.b,t=p.t,tc=p.tc,bc=p.bc,Ag=p.Ag,AgMin=p.AgMin;
+  var Feex=p.Feex,w_mm=p.w_mm,nCL=p.nCL,hasFront=p.hasFront;
+
+  var wC=w_mm/10,bcC=bc/10,tC=t/10,tcC=tc/10;
+  var eg=wC/Math.sqrt(2),phi_w=0.75,Fw=0.6*Feex;
+  var wMinTab=t<=6?3:t<=12?5:t<=19?6:8;
+  var wMaxReg=t-2;
+  var ok_w=w_mm>=wMinTab&&w_mm<=wMaxReg;
+  var LwMin=4*wC;
+  var Pd_f=0.90*Fy*Ag*1e-1,Pd_r=0.75*Fu*Ag*1e-1;
+  var ok_f=Pd_f>=Pu,ok_r=Pd_r>=Pu;
+  var LwNeed=(Pu/2*100)/(phi_w*Fw*eg);
+  var LwFront=hasFront?bcC:0;
+  var LwLatRaw=Math.max(0,(LwNeed-LwFront)/nCL);
+  var LwLat=Math.max(LwLatRaw,LwMin);
+  var LwLatAd=Math.ceil(LwLat*10)/10;
+  var ratio=LwLatAd/wC;
+  var beta=ratio<=100?1.0:ratio<=300?Math.max(0,1.2-0.002*ratio):180*wC/LwLatAd;
+  var Le=beta*LwLatAd,ok_lmin=LwLatAd>=LwMin;
+  var AwCub=(nCL*Le+LwFront)*eg;
+  var RdW=phi_w*Fw*AwCub*2*1e-1,ok_sold=RdW>=Pu;
+  var Ubs=1.0,AntW=bcC*tcC,AgvW=2*(LwLatAd+0.5)*tcC;
+  var Rbc1=(0.6*Fu*AgvW+Ubs*Fu*AntW)*1e-1,Rbc2=(0.6*Fy*AgvW+Ubs*Fu*AntW)*1e-1;
+  var Rbc=Math.min(Rbc1,Rbc2),Rdbc=0.75*Rbc,ok_bc=Rdbc>=Pu;
+  var allOk=ok_f&&ok_r&&ok_sold&&ok_bc&&ok_w;
+
+  makeKpi('kC',[{v:f2(Ag)+' cm²',l:'Ag Pieza'},{v:f2(LwLatAd)+' cm',l:'Long. cord. lat.'},{v:f2(RdW)+' kN',l:'Rd,w Total'},{v:allOk?'OK':'Revisar',l:'Estado'}]);
+
+  document.getElementById('cC1').innerHTML=
+    makeNota('Sin descuento de agujeros: Ae=Ag. '+makeNb('§D.2','D2'))
+    +makeFm('φt·Fy·Ag — φ=0,90','0,90×'+Fy+'×'+f2(Ag)+'×10⁻¹',Pd_f,'kN')+makeVr(ok_f,'φt·Fy·Ag ≥ Pu',f2(Pd_f)+' kN ≥ '+Pu+' kN')
+    +makeFm('φt·Fu·Ag — φ=0,75','0,75×'+Fu+'×'+f2(Ag)+'×10⁻¹',Pd_r,'kN')+makeVr(ok_r,'φt·Fu·Ag ≥ Pu',f2(Pd_r)+' kN ≥ '+Pu+' kN')
+    +'<table><tr><th>Pieza</th><th>Ancho (mm)</th><th>Esp. (mm)</th><th>Ag (cm²)</th></tr>'
+    +'<tr><td>Central</td><td class="hi">'+f1(b)+'</td><td class="hi">'+f2(t)+'</td><td class="hi">'+f2(Ag)+'</td></tr>'
+    +'<tr><td>Cubrejuntas ×2</td><td class="hi">'+f1(bc)+'</td><td class="hi">'+f2(tc)+'</td><td>'+f2(bc*tc/100)+'</td></tr></table>';
+
+  document.getElementById('cC2').innerHTML=
+    makeNota(makeNb('§J.2.2(b)','J22')+' · Tab.J.2.4 — Limitaciones de lado del cordón')
+    +'<table><tr><th>Parámetro</th><th>Límite</th><th>Adoptado</th><th>Estado</th></tr>'
+    +'<tr><td>w,min (Tab.J.2.4)</td><td>≥'+wMinTab+' mm</td><td class="hi">'+w_mm+' mm</td><td class="'+(w_mm>=wMinTab?'ok2':'fail2')+'">'+(w_mm>=wMinTab?'✓':'✗')+'</td></tr>'
+    +'<tr><td>w,max = t−2</td><td>≤'+f2(wMaxReg)+' mm</td><td>'+w_mm+' mm</td><td class="'+(w_mm<=wMaxReg?'ok2':'fail2')+'">'+(w_mm<=wMaxReg?'✓':'✗')+'</td></tr>'
+    +'<tr><td>Lw,min = 4·w</td><td>≥'+f2(LwMin)+' cm</td><td>'+f2(LwLatAd)+' cm</td><td class="'+(ok_lmin?'ok2':'fail2')+'">'+(ok_lmin?'✓':'✗')+'</td></tr></table>'
+    +makeFmStr('Espesor garganta efectivo','eg = w/√2 = '+f2(wC)+'/√2 = <strong>'+f2(eg)+' cm</strong>');
+
+  document.getElementById('cC3').innerHTML=
+    makeNota(makeNb('§J.2.4','J24')+' · '+makeNb('Tab.J.2.5','J24')+' — Fw=0,60×'+Feex+'='+f2(Fw)+' MPa · φ=0,75')
+    +makeFm('Lw total necesario por cubrejunta (Pu/2 por rama)','('+Pu+'/2×100)/(0,75×'+f2(Fw)+'×'+f2(eg)+')',LwNeed,'cm')
+    +'<table><tr><th>Tipo cordón</th><th>N°</th><th>Long. unit.</th><th>Le (β='+f2(beta)+')</th></tr>'
+    +(hasFront?'<tr><td>Frontal</td><td>1</td><td>'+f2(LwFront)+' cm</td><td>'+f2(LwFront)+' cm</td></tr>':'')
+    +'<tr><td>Laterales</td><td>'+nCL+'</td><td>'+f2(LwLatAd)+' cm</td><td>'+f2(Le)+' cm</td></tr></table>'
+    +makeNota(makeNb('Ec.(J.2.1)','J22')+' — β='+f2(beta)+' (L/w='+f2(ratio)+'). '+(ratio<=100?'L≤100w → β=1,0':ratio<=300?'β=1,2−0,002·(L/w)':'L>300w → Le=180·w'),'blue')
+    +makeFm('Rd,w total (×2 cubrejuntas)','0,75×'+f2(Fw)+'×'+f2(AwCub)+'×2×10⁻¹',RdW,'kN')+makeVr(ok_sold,'Rd,w ≥ Pu',f2(RdW)+' kN ≥ '+Pu+' kN');
+
+  document.getElementById('cC4').innerHTML=
+    makeNota(makeNb('§J.4.3','J43')+' · '+makeNb('Ec.(J.4.5)','J43')+' — Soldadura sin agujeros: An=Ag. Ubs=1,0.')
+    +'<table><tr><th>Área</th><th>Fórmula</th><th>cm²</th></tr><tr><td>Ant=bc·tc</td><td>'+f2(bcC)+'×'+f2(tcC)+'</td><td class="hi">'+f2(AntW)+'</td></tr><tr><td>Agv=2·(Lw,lat+0,5)·tc</td><td>2×('+f2(LwLatAd)+'+0,5)×'+f2(tcC)+'</td><td class="hi">'+f2(AgvW)+'</td></tr></table>'
+    +makeFm('Rd,bc = 0,75·min(Rn1;Rn2)','0,75×'+f2(Rbc),Rdbc,'kN')+makeVr(ok_bc,'Rd,bc ≥ Pu',f2(Rdbc)+' kN ≥ '+Pu+' kN');
+
+  document.getElementById('sC').innerHTML='<h3>✦ Resumen 1C — '+(allOk?'VERIFICADO':'REVISAR')+'</h3><div class="summ-grid">'
+    +'<div><div class="si-lbl">Pieza Central</div><div class="si-val">'+f1(b)+'×'+f2(t)+'mm</div></div>'
+    +'<div><div class="si-lbl">Electrodo</div><div class="si-val">FEEX='+Feex+'MPa w='+w_mm+'mm</div></div>'
+    +'<div><div class="si-lbl">Cord. lat. ×'+nCL+'</div><div class="si-val">'+f2(LwLatAd)+' cm · Le='+f2(Le)+' cm</div></div>'
+    +'<div><div class="si-lbl">Cord. frontal</div><div class="si-val">'+(hasFront?f2(LwFront)+' cm':'—')+'</div></div>'
+    +'<div><div class="si-lbl">Rd,w</div><div class="si-val">'+f2(RdW)+' kN '+(RdW>=Pu?'≥':'<')+' '+Pu+'</div></div>'
+    +'<div><div class="si-lbl">Rd,bc</div><div class="si-val">'+f2(Rdbc)+' kN '+(Rdbc>=Pu?'≥':'<')+' '+Pu+'</div></div></div>';
+}
+
+// ================================================================
+// VARIANTE D — SOLDADURA A TOPE
+// ================================================================
+function calcD(p) {
+  var Pu=p.Pu,Fy=p.Fy,Fu=p.Fu,b=p.b,t=p.t,Ag=p.Ag,AgMin=p.AgMin,Feex=p.Feex,penTipo=p.penTipo;
+  var Pd_f=0.90*Fy*Ag*1e-1,Pd_r=0.75*Fu*Ag*1e-1;
+  var ok_f=Pd_f>=Pu,ok_r=Pd_r>=Pu;
+  var phi_base=penTipo==='completa'?0.90:0.75;
+  var Fn_base=penTipo==='completa'?Fy:Fu;
+  var Fn_elec=0.6*Feex;
+  var RdBase=phi_base*Fn_base*Ag*1e-1;
+  var RdElec=0.60*Fn_elec*Ag*1e-1;
+  var ok_sold=RdBase>=Pu,ok_elec=RdElec>=Pu;
+  var egMin=t<=6?3:t<=13?5:t<=19?6:t<=38?8:t<=57?10:13;
+  var allOk=ok_f&&ok_r&&ok_sold&&ok_elec;
+
+  makeKpi('kD',[{v:f2(Ag)+' cm²',l:'Área Efectiva Aw'},{v:(penTipo==='completa'?'φ=0,90·Fy':'φ=0,75·Fu'),l:makeNb('Tab.J.2.5','J24')},{v:f2(RdBase)+' kN',l:'Rd Soldadura'},{v:allOk?'OK':'Revisar',l:'Estado'}]);
+
+  document.getElementById('cD1').innerHTML=
+    makeNota('Sin cubrejuntas — junta directa. Control por pieza base. '+makeNb('§D.2','D2'))
+    +makeFm('φt·Fy·Ag — φ=0,90','0,90×'+Fy+'×'+f2(Ag)+'×10⁻¹',Pd_f,'kN')+makeVr(ok_f,'φt·Fy·Ag ≥ Pu',f2(Pd_f)+' kN ≥ '+Pu+' kN')
+    +makeFm('φt·Fu·Ag — φ=0,75','0,75×'+Fu+'×'+f2(Ag)+'×10⁻¹',Pd_r,'kN')+makeVr(ok_r,'φt·Fu·Ag ≥ Pu',f2(Pd_r)+' kN ≥ '+Pu+' kN');
+
+  document.getElementById('cD2').innerHTML=
+    makeNota(makeNb('§J.2.1','J21')+' · '+makeNb('Tab.J.2.5','J24'))
+    +'<table><tr><th>Tipo</th><th>φ base</th><th>Fn base</th><th>φ electrodo</th><th>Fn electrodo</th></tr>'
+    +'<tr style="'+(penTipo==='completa'?'font-weight:700;color:var(--red)':'')+'"><td>CJP (penetración completa)</td><td>0,90</td><td>Fy='+Fy+' MPa</td><td>0,60</td><td>0,60·FEXX</td></tr>'
+    +'<tr style="'+(penTipo==='parcial'?'font-weight:700;color:var(--red)':'')+'"><td>PJP (penetración parcial)</td><td>0,75</td><td>Fu='+Fu+' MPa</td><td>0,60</td><td>0,60·FEXX</td></tr></table>'
+    +(penTipo==='parcial'?'<div class="fm"><div class="fm-lbl">eg,min PJP (Tab.J.2.3) para t='+f2(t)+'mm</div><div class="fm-res">eg,min = '+egMin+' mm</div></div>':'')
+    +makeNota('<strong>'+(penTipo==='completa'?'CJP seleccionada — φ=0,90·Fy: equivale al ELU Fluencia de la pieza. La soldadura no controla.':'PJP seleccionada — φ=0,75·Fu: resistencia reducida. Controlar espesor garganta eg,min='+egMin+' mm.')+'</strong>','blue');
+
+  document.getElementById('cD3').innerHTML=
+    makeNota(makeNb('Tab.J.2.5','J24')+' — '+(penTipo==='completa'?'CJP':'PJP'))
+    +'<table><tr><th>Verificación</th><th>Material</th><th>φ</th><th>Fn</th><th>Aw (cm²)</th></tr>'
+    +'<tr><td>Tracción ⊥ área ef.</td><td>Base</td><td class="hi">'+phi_base+'</td><td class="hi">'+(penTipo==='completa'?'Fy='+Fy:'Fu='+Fu)+' MPa</td><td>'+f2(Ag)+'</td></tr>'
+    +'<tr><td>Corte en área ef.</td><td>Electrodo</td><td>0,60</td><td>0,60×'+Feex+'='+f2(Fn_elec)+' MPa</td><td>'+f2(Ag)+'</td></tr></table>'
+    +makeFm('Rd (tracción ⊥, base) = φ·Fn·Ag',phi_base+'×'+Fn_base+'×'+f2(Ag)+'×10⁻¹',RdBase,'kN')
+    +makeFm('Rd (corte, electrodo) = 0,60·0,60·FEXX·Ag','0,60×'+f2(Fn_elec)+'×'+f2(Ag)+'×10⁻¹',RdElec,'kN');
+
+  document.getElementById('cD4').innerHTML=
+    makeVr(ok_f,'(a) ELU Fluencia pieza: φ·Fy·Ag ≥ Pu',f2(Pd_f)+' kN ≥ '+Pu+' kN')
+    +makeVr(ok_r,'(b) ELU Rotura pieza: φ·Fu·Ag ≥ Pu',f2(Pd_r)+' kN ≥ '+Pu+' kN')
+    +makeVr(ok_sold,'(c) Rd soldadura (base, tracción ⊥) ≥ Pu',f2(RdBase)+' kN ≥ '+Pu+' kN')
+    +makeVr(ok_elec,'(d) Rd soldadura (electrodo, corte) ≥ Pu',f2(RdElec)+' kN ≥ '+Pu+' kN')
+    +(penTipo==='completa'?makeNota('Conclusión CJP — Rd,base=φ·Fy·Ag='+f2(RdBase)+' kN ≡ ELU Fluencia de la pieza. La soldadura CJP es equipotente a la pieza. El diseño lo controla la pieza, no la soldadura.','blue'):makeNota('Conclusión PJP — Rd,base=φ·Fu·Ag='+f2(RdBase)+' kN con φ=0,75. Puede ser más restrictiva que la pieza si Pu/Ag es elevado.'));
+
+  document.getElementById('sD').innerHTML='<h3>✦ Resumen 1C\' — '+(allOk?'VERIFICADO':'REVISAR')+'</h3><div class="summ-grid">'
+    +'<div><div class="si-lbl">Pieza</div><div class="si-val">'+f1(b)+'×'+f2(t)+'mm</div></div>'
+    +'<div><div class="si-lbl">Tipo penetración</div><div class="si-val">'+(penTipo==='completa'?'CJP':'PJP')+'</div></div>'
+    +'<div><div class="si-lbl">FEEX</div><div class="si-val">'+Feex+' MPa</div></div>'
+    +'<div><div class="si-lbl">Rd base</div><div class="si-val">'+f2(RdBase)+' kN '+(RdBase>=Pu?'≥':'<')+' '+Pu+'</div></div>'
+    +'<div><div class="si-lbl">Rd electrodo</div><div class="si-val">'+f2(RdElec)+' kN '+(RdElec>=Pu?'≥':'<')+' '+Pu+'</div></div>'
+    +'<div><div class="si-lbl">Sin cubrejuntas</div><div class="si-val">Junta directa</div></div></div>';
+}
+
+// ================================================================
+// INIT
+// ================================================================
+renderBulones();
+recalc();
+</script>
+</body>
+</html>
 
