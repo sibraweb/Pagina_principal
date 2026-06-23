@@ -4,1061 +4,1069 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sibratech Group — Ingeniería, Gestión, Tecnología y Visión Estratégica</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800;900&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<meta name="description" content="Sibratech Group integra ingeniería, construcción, gestión de proyectos, tecnología, comercio exterior y asesoría financiera para estructurar proyectos con método y visión sistémica.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700;800;900&family=Libre+Franklin:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/@formspree/ajax@1" defer></script>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: 'Raleway', sans-serif;
-  background: #ffffff;
-  color: #1a1a1a;
-  line-height: 1.6;
+/* ── TOKENS ──────────────────────────────────────────────── */
+:root {
+  --red-500:  #E10600;
+  --red-600:  #b80500;
+  --red-700:  #8f0400;
+  --red-050:  #fdecea;
+  --black:    #0B0B0B;
+  --ink-900:  #0B0B0B;
+  --ink-800:  #1a1a1a;
+  --gray-700: #5A6060;
+  --gray-600: #666666;
+  --gray-500: #9AA0A0;
+  --gray-400: #9AA0A0;
+  --gray-300: #d9dada;
+  --gray-200: #eaeaea;
+  --gray-100: #F5F5F5;
+  --gray-050: #f9f9f9;
+  --white:    #FFFFFF;
+
+  --text-strong:    var(--ink-800);
+  --text-body:      var(--gray-700);
+  --text-muted:     var(--gray-400);
+  --text-accent:    var(--red-500);
+  --surface-alt:    var(--gray-100);
+  --surface-dark:   var(--black);
+  --border-hairline: var(--gray-200);
+  --border-brand:   var(--red-500);
+
+  --shadow-card:  0 2px 10px rgba(0,0,0,0.08);
+  --shadow-hover: 0 8px 25px rgba(225,6,0,0.15);
+  --t-base: 0.3s ease;
+
+  --font-display: 'Jost', 'Century Gothic', system-ui, sans-serif;
+  --font-body:    'Jost', 'Century Gothic', system-ui, sans-serif;
+  --font-aux:     'Libre Franklin', system-ui, sans-serif;
+
+  --gutter: 5%;
+  --nav-h:  72px;
 }
+
+/* ── RESET ───────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--font-body); color: var(--text-strong); background: #fff; line-height: 1.6; }
+img { display: block; max-width: 100%; }
+a { color: inherit; }
 
 ::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: #f5f5f5; }
-::-webkit-scrollbar-thumb { background: #E10600; border-radius: 4px; }
+::-webkit-scrollbar-track { background: var(--gray-100); }
+::-webkit-scrollbar-thumb { background: var(--red-500); border-radius: 4px; }
 
-/* NAV */
-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  background: #ffffff;
-  border-bottom: 1px solid #efefef;
-  padding: 1.2rem 5%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+/* ── UTILITIES ───────────────────────────────────────────── */
+.eyebrow {
+  font-family: var(--font-display); font-weight: 700; font-size: 0.7rem;
+  letter-spacing: 1.5px; text-transform: uppercase; color: var(--red-500);
+}
+.h2 {
+  font-family: var(--font-display); font-weight: 700; font-size: 2rem;
+  line-height: 1.15; letter-spacing: -0.3px; color: var(--text-strong);
+}
+.red-bar {
+  width: 56px; height: 3px; background: var(--red-500); margin: 0 0 1.6rem;
+}
+
+/* ── BUTTONS ─────────────────────────────────────────────── */
+.sbt-cta {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: var(--red-500); color: #fff; border: none; cursor: pointer;
+  font-family: var(--font-display); font-weight: 700; font-size: 0.72rem;
+  letter-spacing: 1px; text-transform: uppercase;
+  padding: 0.8rem 1.7rem; border-radius: 3px;
+  transition: background var(--t-base); text-decoration: none;
+}
+.sbt-cta:hover { background: var(--red-600); }
+.sbt-cta--ghost {
+  background: transparent; color: var(--text-strong);
+  border: 1.5px solid var(--text-strong);
+}
+.sbt-cta--ghost:hover { background: var(--text-strong); color: #fff; }
+.sbt-cta--outline-dark {
+  background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,0.4);
+}
+.sbt-cta--outline-dark:hover { background: rgba(255,255,255,0.08); }
+
+/* ── FORM FIELDS ─────────────────────────────────────────── */
+.sbt-field {
+  width: 100%; padding: 0.75rem 0.9rem;
+  font-family: var(--font-body); font-size: 0.88rem;
+  color: var(--text-strong); background: var(--surface-alt);
+  border: 1px solid var(--border-hairline); border-radius: 3px;
+  outline: none; transition: border-color var(--t-base), background var(--t-base);
+}
+.sbt-field::placeholder { color: var(--text-muted); }
+.sbt-field:focus { border-color: var(--red-500); background: #fff; }
+
+/* ── NAV ─────────────────────────────────────────────────── */
+.site-nav {
+  position: sticky; top: 0; z-index: 1000;
+  background: #fff; border-bottom: 1px solid var(--border-hairline);
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 0 var(--gutter);
+  height: var(--nav-h);
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
 }
-
 .nav-brand {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  text-decoration: none;
+  display: inline-flex; align-items: center; gap: 10px;
+  text-decoration: none; flex-shrink: 0;
 }
-
-.nav-logo-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+.brand-mosaic {
+  display: grid; grid-template-columns: repeat(3, 11px);
+  grid-template-rows: repeat(3, 11px); gap: 2px;
 }
-
-.nav-logo-text .brand {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 900;
-  font-size: 1rem;
-  color: #1a1a1a;
-  letter-spacing: -0.5px;
+.brand-mosaic span { display: block; }
+.brand-wordmark {
+  display: flex; flex-direction: column; line-height: 1;
 }
-
-.nav-logo-text .brand span {
-  color: #E10600;
+.brand-wordmark strong {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 1.1rem; letter-spacing: 0.02em; color: var(--text-strong);
+  white-space: nowrap;
 }
-
-.nav-logo-text .sub {
-  font-size: 0.4rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  font-weight: 700;
-  color: #999;
-  margin-top: -3px;
+.brand-wordmark strong .sibra { color: var(--red-500); }
+.brand-wordmark small {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 0.4rem; letter-spacing: 0.42em;
+  color: var(--gray-700); margin-top: 3px; padding-left: 2px;
 }
-
 .nav-links {
-  display: flex;
-  gap: 2.5rem;
-  list-style: none;
-  flex: 1;
-  margin-left: 4rem;
+  display: flex; gap: 1.7rem; list-style: none;
+  flex: 1; justify-content: center; flex-wrap: wrap;
 }
-
 .nav-links a {
-  color: #1a1a1a;
-  text-decoration: none;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  transition: color 0.3s;
+  color: var(--text-strong); text-decoration: none;
+  font-family: var(--font-display); font-size: 0.78rem;
+  font-weight: 600; letter-spacing: 0.2px; white-space: nowrap;
+  transition: color var(--t-base);
 }
-
-.nav-links a:hover {
-  color: #E10600;
+.nav-links a:hover, .nav-links a.active { color: var(--red-500); }
+.nav-toggle {
+  display: none; flex-direction: column; gap: 5px;
+  background: none; border: none; cursor: pointer; padding: 4px; flex-shrink: 0;
 }
-
-.nav-btn {
-  background: #E10600;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.4rem;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 700;
-  font-size: 0.6rem;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background 0.3s;
-  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+.nav-toggle span {
+  display: block; width: 22px; height: 2px;
+  background: var(--text-strong); transition: all var(--t-base);
 }
+.nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-toggle.open span:nth-child(2) { opacity: 0; }
+.nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-.nav-btn:hover {
-  background: #b50500;
-}
-
-/* HERO */
+/* ── HERO ────────────────────────────────────────────────── */
 .hero {
-  margin-top: 80px;
-  padding: 4rem 5% 3rem;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3rem;
-  align-items: center;
-  background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
+  padding: 4.5rem var(--gutter) 4rem;
+  display: grid; grid-template-columns: 1.05fr 1fr;
+  gap: 3.5rem; align-items: center; background: #fff;
 }
-
-.hero-content h1 {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 3.2rem;
-  font-weight: 900;
-  line-height: 1.15;
-  margin-bottom: 1.5rem;
-  color: #1a1a1a;
-  letter-spacing: -1px;
+.hero h1 {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 3rem; line-height: 1.1; letter-spacing: -0.5px;
+  color: var(--text-strong); margin: 0 0 1.4rem;
 }
-
-.hero-content h1 .red {
-  color: #E10600;
+.hero h1 .accent { color: var(--red-500); }
+.hero p {
+  font-size: 1rem; line-height: 1.75;
+  color: var(--text-body); margin: 0 0 2rem; max-width: 520px;
 }
-
-.hero-content p {
-  font-size: 1rem;
-  line-height: 1.8;
-  color: #666;
-  margin-bottom: 2rem;
-}
-
-.hero-btns {
-  display: flex;
-  gap: 1rem;
-}
-
-.btn-primary {
-  background: #E10600;
-  color: white;
-  border: none;
-  padding: 0.8rem 2rem;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 700;
-  font-size: 0.7rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  cursor: pointer;
-  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
-  transition: background 0.3s;
-}
-
-.btn-primary:hover {
-  background: #b50500;
-}
-
-.btn-secondary {
-  background: transparent;
-  color: #1a1a1a;
-  border: 2px solid #1a1a1a;
-  padding: 0.6rem 1.8rem;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 700;
-  font-size: 0.7rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.btn-secondary:hover {
-  background: #1a1a1a;
-  color: white;
-}
-
-.hero-image {
-  width: 100%;
-  height: 400px;
-  background: linear-gradient(135deg, #E10600, #b50500);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 6rem;
-  opacity: 0.9;
-}
-
-/* SECCIÓN QUIÉNES SOMOS */
-.about-section {
-  padding: 5rem 5%;
-  background: #f9f9f9;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3rem;
-  align-items: start;
-}
-
-.about-section h2 {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 2.8rem;
-  font-weight: 900;
-  line-height: 1.15;
-  margin-bottom: 1.5rem;
-  color: #1a1a1a;
-}
-
-.about-section h2 .red {
-  color: #E10600;
-}
-
-.about-section p {
-  font-size: 0.95rem;
-  line-height: 1.8;
-  color: #666;
-  margin-bottom: 1.5rem;
-}
-
-.about-link {
-  display: inline-block;
-  color: #E10600;
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 0.8rem;
-  letter-spacing: 1px;
-  transition: color 0.3s;
-}
-
-.about-link:hover {
-  color: #b50500;
-}
-
-.values-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-}
-
-.value-card {
-  background: white;
-  padding: 2rem;
-  border-radius: 6px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-}
-
-.value-card h4 {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #E10600;
-  margin-bottom: 0.8rem;
-}
-
-.value-card p {
-  font-size: 0.85rem;
-  line-height: 1.6;
-  color: #666;
-  margin-bottom: 0;
-}
-
-/* UNIDADES DE NEGOCIO */
-.units-section {
-  padding: 5rem 5%;
-  background: white;
-}
-
-.units-section h2 {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 2.8rem;
-  font-weight: 900;
-  margin-bottom: 3rem;
-  color: #1a1a1a;
-}
-
-.units-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-}
-
-.unit-card {
-  background: white;
-  border: 1px solid #efefef;
-  padding: 2.5rem 2rem;
-  transition: all 0.3s;
-  text-decoration: none;
-  color: inherit;
-  cursor: pointer;
-}
-
-.unit-card:hover {
-  border-color: #E10600;
-  box-shadow: 0 8px 25px rgba(225,6,0,0.15);
-  transform: translateY(-5px);
-}
-
-.unit-icon {
-  width: 50px;
-  height: 50px;
-  background: #f0f0f0;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.8rem;
-  margin-bottom: 1.5rem;
-  transition: background 0.3s;
-}
-
-.unit-card:hover .unit-icon {
-  background: #E10600;
-  color: white;
-}
-
-.unit-card h3 {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 1rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  color: #1a1a1a;
-}
-
-.unit-card p {
-  font-size: 0.85rem;
-  line-height: 1.6;
-  color: #666;
-  margin-bottom: 1.5rem;
-}
-
-.unit-link {
-  color: #E10600;
-  font-weight: 700;
-  font-size: 0.75rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  transition: transform 0.3s;
-  display: inline-block;
-}
-
-.unit-card:hover .unit-link {
-  transform: translateX(5px);
-}
-
-/* CURSOS */
-.courses-section {
-  padding: 5rem 5%;
-  background: #f9f9f9;
-}
-
-.courses-section h2 {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 2.8rem;
-  font-weight: 900;
-  margin-bottom: 0.5rem;
-  color: #1a1a1a;
-}
-
-.courses-section h2 .red {
-  color: #E10600;
-}
-
-.courses-subtitle {
-  font-size: 0.9rem;
-  color: #999;
-  margin-bottom: 3rem;
-}
-
-.courses-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 2rem;
-  margin-bottom: 3rem;
-}
-
-.course-card {
-  background: white;
+.hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+.hero-visual {
+  position: relative; height: 380px; border-radius: 6px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  transition: transform 0.3s;
+  background: linear-gradient(135deg,#e9eaea 0%, #d4d6d6 60%, #c4c7c7 100%);
+}
+.hero-visual .icon-bg {
+  position: absolute; inset: 0; display: flex;
+  align-items: flex-end; justify-content: center;
+  color: rgba(11,11,11,0.08); overflow: hidden;
+}
+.hero-visual .icon-bg i { width: 300px; height: 300px; }
+.hero-bar-red {
+  position: absolute; top: 50%; left: 50%;
+  width: 230px; height: 56px;
+  background: var(--red-500);
+  transform: translate(-50%,-50%) rotate(45deg);
+  box-shadow: 0 12px 30px rgba(225,6,0,0.35);
+}
+.hero-bar-dark {
+  position: absolute; top: 50%; left: 50%;
+  width: 230px; height: 56px;
+  background: var(--black); opacity: 0.92;
+  transform: translate(-50%,-50%) rotate(-45deg);
 }
 
-.course-card:hover {
+/* ── QUIÉNES SOMOS ───────────────────────────────────────── */
+.about {
+  padding: 4.5rem var(--gutter);
+  background: var(--surface-alt);
+  display: grid; grid-template-columns: 0.85fr 1.15fr;
+  gap: 3rem; align-items: start;
+}
+.about p {
+  font-size: 0.92rem; line-height: 1.8; color: var(--text-body); margin: 0 0 1.2rem;
+}
+.mvv-cards { display: flex; flex-direction: column; gap: 1.2rem; }
+.mvv-card {
+  position: relative; background: #fff;
+  border-left: 4px solid var(--red-500);
+  box-shadow: var(--shadow-card);
+  padding: 1.5rem 1.8rem; overflow: hidden;
+}
+.mvv-card .watermark {
+  position: absolute; right: 18px; top: 50%; transform: translateY(-50%);
+  font-family: var(--font-display); font-weight: 800; font-size: 4.5rem;
+  color: rgba(225,6,0,0.06); line-height: 1; pointer-events: none;
+}
+.mvv-card-head {
+  display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.6rem;
+}
+.mvv-card-head i { color: var(--red-500); width: 20px; height: 20px; }
+.mvv-card-head span {
+  font-family: var(--font-display); font-weight: 700; font-size: 0.82rem;
+  letter-spacing: 0.5px; text-transform: uppercase; color: var(--red-500);
+}
+.mvv-card p {
+  margin: 0; font-size: 0.85rem; line-height: 1.65;
+  color: var(--text-body); position: relative;
+}
+
+/* ── UNIDADES ────────────────────────────────────────────── */
+.units { padding: 4.5rem var(--gutter); background: #fff; }
+.units-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1.4rem; margin-top: 2.4rem;
+}
+.unit-card {
+  background: #fff; border: 1px solid var(--border-hairline);
+  padding: 1.8rem 1.5rem; display: flex; flex-direction: column;
+  cursor: pointer; text-decoration: none; color: inherit;
+  transition: all var(--t-base);
+}
+.unit-card:hover {
+  border-color: var(--red-500); box-shadow: var(--shadow-hover);
   transform: translateY(-5px);
 }
-
-.course-img {
-  width: 100%;
-  height: 150px;
-  background: linear-gradient(135deg, #E10600, #b50500);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.5rem;
-  color: white;
+.unit-card-logo {
+  height: 72px; display: flex; align-items: center; margin-bottom: 0.4rem;
 }
-
-.course-content {
-  padding: 1.5rem;
+.unit-card-logo img { max-height: 72px; object-fit: contain; }
+.unit-card-descriptor {
+  font-family: var(--font-display); font-weight: 700; font-size: 0.82rem;
+  color: var(--text-strong); margin: 0.2rem 0 0.7rem; min-height: 2.2em;
 }
-
-.course-content h4 {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 700;
-  margin-bottom: 0.8rem;
-  color: #1a1a1a;
-  line-height: 1.4;
+.unit-card p {
+  font-size: 0.8rem; line-height: 1.55; color: var(--text-body);
+  margin: 0 0 1.2rem; flex: 1;
 }
+.unit-card-link {
+  color: var(--red-500); font-family: var(--font-display); font-weight: 700;
+  font-size: 0.72rem; letter-spacing: 0.5px; text-transform: uppercase;
+  transition: transform var(--t-base); display: inline-block;
+}
+.unit-card:hover .unit-card-link { transform: translateX(4px); }
 
+/* unit-mark (brand mosaic en primera card) */
+.unit-mark {
+  display: grid; grid-template-columns: repeat(3, 16px);
+  grid-template-rows: repeat(3, 16px); gap: 3px;
+}
+.unit-mark span { display: block; }
+
+/* ── CURSOS ──────────────────────────────────────────────── */
+.courses {
+  padding: 4.5rem var(--gutter); background: var(--surface-alt); text-align: center;
+}
+.courses-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 1.2rem; margin: 2.4rem 0 2rem;
+}
+.course-card {
+  background: #fff; border: 1px solid var(--border-hairline);
+  display: flex; flex-direction: column; text-align: left;
+  transition: all var(--t-base);
+}
+.course-card:hover {
+  box-shadow: var(--shadow-hover); transform: translateY(-4px);
+}
+.course-card.featured { border-color: var(--red-500); }
+.course-thumb {
+  position: relative; height: 130px;
+  background: linear-gradient(135deg,#ededed,#dcdede);
+  display: flex; align-items: center; justify-content: center;
+}
+.course-thumb i { color: var(--gray-700); width: 44px; height: 44px; }
+.course-thumb .featured-badge {
+  position: absolute; top: 0; left: 0;
+  background: var(--red-500); color: #fff;
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 0.6rem; letter-spacing: 1px; text-transform: uppercase;
+  padding: 0.32rem 0.7rem;
+}
+.course-thumb .thumb-line {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 3px; background: var(--red-500);
+}
+.course-body { padding: 1.1rem 1.1rem 1.3rem; display: flex; flex-direction: column; flex: 1; }
+.course-body h4 {
+  font-family: var(--font-display); font-size: 0.85rem; font-weight: 700;
+  margin: 0 0 0.6rem; color: var(--text-strong); line-height: 1.35;
+}
+.course-body p {
+  font-size: 0.78rem; line-height: 1.55; color: var(--text-body);
+  margin: 0 0 0.9rem; flex: 1;
+}
 .course-meta {
-  display: flex;
-  gap: 1rem;
-  font-size: 0.65rem;
-  color: #999;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0.3rem 0.6rem; margin-bottom: 0.9rem;
+}
+.course-meta span {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-size: 0.68rem; color: var(--text-muted);
+}
+.course-meta span i { width: 12px; height: 12px; }
+.course-link {
+  color: var(--red-500); font-family: var(--font-display); font-weight: 700;
+  font-size: 0.72rem; letter-spacing: 0.5px; text-transform: uppercase;
 }
 
-.view-courses {
-  text-align: center;
+/* ── PRODUCCIONES Y RECURSOS ─────────────────────────────── */
+.recursos {
+  padding: 4.5rem var(--gutter); background: #fff;
+}
+.recursos-grid {
+  display: grid; grid-template-columns: 1fr 1fr 0.9fr;
+  gap: 2.6rem; align-items: start;
+}
+.recursos h3 {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 1.55rem; line-height: 1.2; color: var(--text-strong);
+  margin: 0.5rem 0 1rem;
+}
+.recursos h3 .accent { color: var(--red-500); }
+.recursos p {
+  font-size: 0.88rem; line-height: 1.7; color: var(--text-body); margin: 0 0 1.6rem;
+}
+.recursos ul { list-style: none; }
+.recursos ul li {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.5rem 0; font-size: 0.85rem; color: var(--text-body);
+  border-bottom: 1px solid var(--border-hairline);
+}
+.recursos ul li:last-child { border-bottom: none; }
+.recursos ul li i { color: var(--red-500); width: 16px; height: 16px; flex-shrink: 0; }
+.biblioteca-card {
+  background: var(--surface-alt); border: 1px solid var(--border-hairline);
+  padding: 1.8rem 1.6rem; text-align: center;
+}
+.biblioteca-icon {
+  width: 52px; height: 52px; border-radius: 6px;
+  background: var(--red-050); color: var(--red-500);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1rem;
+}
+.biblioteca-icon i { width: 26px; height: 26px; }
+.biblioteca-card h4 {
+  font-family: var(--font-display); font-weight: 700; font-size: 1rem;
+  color: var(--text-strong); margin-bottom: 0.5rem;
+}
+.biblioteca-card p {
+  font-size: 0.82rem; line-height: 1.6; color: var(--text-body);
+  margin: 0 0 0.2rem;
+}
+.biblioteca-card .promo {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 0.85rem; color: var(--red-500); margin: 0 0 1.1rem;
+}
+.biblioteca-card .sbt-cta { width: 100%; justify-content: center; margin-bottom: 1.1rem; }
+.format-tags {
+  display: flex; gap: 0.4rem; justify-content: center; flex-wrap: wrap;
+}
+.format-tag {
+  font-family: var(--font-display); font-weight: 700; font-size: 0.6rem;
+  letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-muted);
+  border: 1px solid var(--border-hairline); padding: 0.28rem 0.55rem;
 }
 
-.view-courses a {
-  display: inline-block;
-  background: #E10600;
-  color: white;
-  padding: 0.8rem 2rem;
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 0.7rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
-  transition: background 0.3s;
+/* ── REDES ───────────────────────────────────────────────── */
+.redes {
+  padding: 4rem var(--gutter); background: var(--surface-alt);
+  display: grid; grid-template-columns: 0.9fr 1.4fr;
+  gap: 3rem; align-items: center;
+}
+.redes h3 {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 1.55rem; line-height: 1.2; color: var(--text-strong);
+  margin: 0.5rem 0 0.8rem;
+}
+.redes h3 .accent { color: var(--red-500); }
+.redes p { font-size: 0.86rem; line-height: 1.7; color: var(--text-body); margin: 0; }
+.redes-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;
+}
+.red-card {
+  background: #fff; border: 1px solid var(--border-hairline);
+  padding: 1.6rem 1rem; text-align: center; text-decoration: none;
+  transition: all var(--t-base); display: block;
+}
+.red-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-card); }
+.red-card i { width: 28px; height: 28px; display: block; margin: 0 auto 0.6rem; }
+.red-card span {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 0.78rem; color: var(--text-strong); display: block;
 }
 
-.view-courses a:hover {
-  background: #b50500;
+/* ── CONTACTO ────────────────────────────────────────────── */
+.contact {
+  padding: 4.5rem var(--gutter); background: #fff;
+  display: grid; grid-template-columns: 0.8fr 1.2fr;
+  gap: 3.5rem; align-items: start;
 }
-
-/* PRODUCCIONES Y RECURSOS */
-.prod-resources {
-  padding: 5rem 5%;
-  background: white;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 5rem;
+.contact h3 {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 1.7rem; line-height: 1.2; color: var(--text-strong);
+  margin: 0.5rem 0 1.6rem;
 }
+.contact-info { display: flex; flex-direction: column; gap: 1.1rem; }
+.contact-item { display: flex; gap: 0.8rem; align-items: flex-start; }
+.contact-item i { color: var(--red-500); width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px; }
+.contact-item span { font-size: 0.88rem; color: var(--text-body); }
+.contact-form { display: flex; flex-direction: column; gap: 0.9rem; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+.contact-form select.sbt-field { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239AA0A0' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.9rem center; padding-right: 2rem; cursor: pointer; }
+textarea.sbt-field { resize: vertical; }
+.form-sent { color: var(--red-500); font-weight: 700; font-size: 0.88rem; }
 
-.prod-resources h3 {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-  color: #1a1a1a;
+/* ── FOOTER ──────────────────────────────────────────────── */
+.site-footer {
+  position: relative; background: var(--surface-dark);
+  color: var(--gray-400); padding: 3rem var(--gutter) 1.6rem;
+  overflow: hidden;
 }
-
-.prod-resources h3 .red {
-  color: #E10600;
+.footer-swoosh {
+  position: absolute; right: -40px; top: 24px; opacity: 0.5; pointer-events: none;
 }
-
-.prod-resources p {
-  font-size: 0.95rem;
-  line-height: 1.8;
-  color: #666;
-  margin-bottom: 2rem;
-}
-
-.prod-resources ul {
-  list-style: none;
-  margin-bottom: 2rem;
-}
-
-.prod-resources li {
-  font-size: 0.85rem;
-  color: #666;
-  padding: 0.5rem 0;
-  padding-left: 1.5rem;
-  position: relative;
-}
-
-.prod-resources li::before {
-  content: '■';
-  position: absolute;
-  left: 0;
-  color: #E10600;
-}
-
-.sec-btn {
-  display: inline-block;
-  background: #E10600;
-  color: white;
-  padding: 0.7rem 1.8rem;
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 0.65rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
-  transition: background 0.3s;
-}
-
-.sec-btn:hover {
-  background: #b50500;
-}
-
-/* REDES */
-.networks-section {
-  padding: 5rem 5%;
-  background: #f9f9f9;
-}
-
-.networks-section h2 {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 2.8rem;
-  font-weight: 900;
-  margin-bottom: 3rem;
-  color: #1a1a1a;
-  text-align: center;
-}
-
-.networks-section h2 .red {
-  color: #E10600;
-}
-
-.networks-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2rem;
-  text-align: center;
-}
-
-.network-card {
-  padding: 2rem;
-}
-
-.network-icon {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-}
-
-.network-card h3 {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 1rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  color: #1a1a1a;
-}
-
-.network-card p {
-  font-size: 0.85rem;
-  color: #666;
-  margin-bottom: 1rem;
-}
-
-.network-card a {
-  color: #E10600;
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 0.75rem;
-  letter-spacing: 1px;
-  transition: color 0.3s;
-}
-
-.network-card a:hover {
-  color: #b50500;
-}
-
-/* CONTACTO */
-.contact-section {
-  padding: 5rem 5%;
-  background: #1a1a1a;
-  color: white;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4rem;
-}
-
-.contact-section h2 {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 2rem;
-  font-weight: 900;
-  margin-bottom: 2rem;
-}
-
-.contact-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.contact-item {
-  display: flex;
-  gap: 1rem;
-}
-
-.contact-icon {
-  font-size: 1.5rem;
-  color: #E10600;
-  flex-shrink: 0;
-}
-
-.contact-item p {
-  font-size: 0.9rem;
-  line-height: 1.6;
-}
-
-.contact-item strong {
-  display: block;
-  margin-bottom: 0.3rem;
-}
-
-.contact-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-input, textarea {
-  width: 100%;
-  padding: 0.8rem 1rem;
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.2);
-  color: white;
-  font-family: 'Raleway', sans-serif;
-  font-size: 0.9rem;
-  transition: all 0.3s;
-}
-
-input::placeholder, textarea::placeholder {
-  color: rgba(255,255,255,0.5);
-}
-
-input:focus, textarea:focus {
-  outline: none;
-  background: rgba(255,255,255,0.15);
-  border-color: #E10600;
-}
-
-textarea {
-  grid-column: 1 / -1;
-  resize: vertical;
-  min-height: 100px;
-}
-
-.form-submit {
-  background: #E10600;
-  color: white;
-  border: none;
-  padding: 0.8rem 2rem;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 700;
-  font-size: 0.7rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  cursor: pointer;
-  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
-  transition: background 0.3s;
-  width: fit-content;
-}
-
-.form-submit:hover {
-  background: #b50500;
-}
-
-/* FOOTER */
-footer {
-  padding: 3rem 5%;
-  background: #0f0f0f;
-  border-top: 2px solid #E10600;
-  color: #999;
-}
-
 .footer-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 3rem;
-  margin-bottom: 2rem;
+  display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 2.5rem; margin-bottom: 2rem; position: relative;
 }
-
+.footer-brand a { text-decoration: none; display: inline-flex; }
+.footer-brand p {
+  font-size: 0.82rem; line-height: 1.7; margin-top: 1rem; max-width: 240px;
+}
 .footer-col h4 {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: white;
-  margin-bottom: 1.5rem;
+  font-family: var(--font-display); font-size: 0.74rem; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; color: #fff;
+  margin: 0 0 1.1rem;
 }
-
 .footer-col a {
-  display: block;
-  color: #999;
-  text-decoration: none;
-  font-size: 0.8rem;
-  margin-bottom: 0.8rem;
-  transition: color 0.3s;
+  display: block; color: var(--gray-400); text-decoration: none;
+  font-size: 0.8rem; margin-bottom: 0.6rem; transition: color var(--t-base);
 }
-
-.footer-col a:hover {
-  color: #E10600;
+.footer-col a:hover { color: var(--red-500); }
+.footer-socials { display: flex; gap: 0.7rem; }
+.footer-social {
+  width: 34px; height: 34px; border-radius: 4px;
+  background: rgba(255,255,255,0.08); color: var(--gray-400);
+  display: inline-flex; align-items: center; justify-content: center;
+  text-decoration: none; transition: all var(--t-base);
 }
-
+.footer-social:hover { background: var(--red-500); color: #fff; }
+.footer-social i { width: 16px; height: 16px; }
 .footer-bottom {
-  border-top: 1px solid rgba(255,255,255,0.1);
-  padding-top: 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.75rem;
+  border-top: 1px solid rgba(255,255,255,0.10);
+  padding-top: 1.4rem;
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.6rem;
+  font-size: 0.72rem; position: relative;
+}
+.footer-rule {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 4px; background: var(--red-500);
 }
 
-.footer-bottom a {
-  color: #999;
-  text-decoration: none;
-  transition: color 0.3s;
-  margin-left: 1rem;
-}
-
-.footer-bottom a:hover {
-  color: #E10600;
-}
-
-/* RESPONSIVE */
-@media (max-width: 1024px) {
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media (max-width: 1080px) {
+  .h2 { font-size: 1.6rem; }
   .hero { grid-template-columns: 1fr; }
-  .about-section { grid-template-columns: 1fr; }
+  .hero-visual { height: 280px; }
+  .about { grid-template-columns: 1fr; }
   .units-grid { grid-template-columns: repeat(2, 1fr); }
   .courses-grid { grid-template-columns: repeat(3, 1fr); }
-  .prod-resources { grid-template-columns: 1fr; gap: 3rem; }
-  .networks-grid { grid-template-columns: repeat(2, 1fr); }
-  .contact-section { grid-template-columns: 1fr; }
-  .form-row { grid-template-columns: 1fr; }
+  .recursos-grid { grid-template-columns: 1fr 1fr; }
+  .recursos-grid > :last-child { grid-column: 1 / -1; }
+  .redes { grid-template-columns: 1fr; }
+  .contact { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 768px) {
-  nav { flex-direction: column; gap: 1rem; }
-  .nav-links { margin-left: 0; gap: 1.5rem; flex-wrap: wrap; }
-  .hero { margin-top: 140px; }
-  .hero-content h1 { font-size: 2rem; }
+  :root { --gutter: 4%; }
+  .nav-links { display: none; flex-direction: column; gap: 0; }
+  .nav-links.open {
+    display: flex; position: absolute; top: var(--nav-h); left: 0; right: 0;
+    background: #fff; border-bottom: 1px solid var(--border-hairline);
+    padding: 1rem var(--gutter); gap: 0;
+  }
+  .nav-links.open li { border-bottom: 1px solid var(--border-hairline); }
+  .nav-links.open li:last-child { border-bottom: none; }
+  .nav-links.open a { display: block; padding: 0.8rem 0; font-size: 0.9rem; }
+  .nav-toggle { display: flex; }
+  .site-nav .sbt-cta { display: none; }
+  .hero h1 { font-size: 2rem; }
   .courses-grid { grid-template-columns: repeat(2, 1fr); }
-  .networks-grid { grid-template-columns: 1fr; }
-  .footer-grid { grid-template-columns: 1fr; }
-  .footer-bottom { flex-direction: column; gap: 1rem; }
+  .redes-grid { grid-template-columns: repeat(2, 1fr); }
+  .form-row { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 480px) {
-  .nav-links { display: none; }
-  .hero-content h1 { font-size: 1.5rem; }
+  .hero h1 { font-size: 1.6rem; }
   .courses-grid { grid-template-columns: 1fr; }
   .units-grid { grid-template-columns: 1fr; }
+  .redes-grid { grid-template-columns: repeat(2, 1fr); }
+  .recursos-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 <body>
 
-<!-- NAVBAR -->
-<nav>
-  <a href="#" class="nav-brand">
-    <div class="nav-logo-text">
-      <div class="brand">SIBRA<span class="red">TECH</span> GROUP</div>
-      <div class="sub">Group</div>
+<!-- ── NAV ────────────────────────────────────────────────── -->
+<nav class="site-nav" id="nav">
+  <a href="#inicio" class="nav-brand" aria-label="Sibratech Group">
+    <div class="brand-mosaic">
+      <!-- 3×3: 2×2 red block top-left, then ink + grays -->
+      <span style="background:var(--red-500)"></span>
+      <span style="background:var(--red-500)"></span>
+      <span style="background:var(--ink-900)"></span>
+      <span style="background:var(--red-500)"></span>
+      <span style="background:var(--red-500)"></span>
+      <span style="background:var(--gray-500)"></span>
+      <span style="background:var(--ink-900)"></span>
+      <span style="background:var(--gray-500)"></span>
+      <span style="background:#b0b0b0"></span>
+    </div>
+    <div class="brand-wordmark">
+      <strong><span class="sibra">SIBRA</span>TECH</strong>
+      <small>GROUP</small>
     </div>
   </a>
-  <ul class="nav-links">
+
+  <button class="nav-toggle" id="nav-toggle" aria-label="Abrir menú" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+
+  <ul class="nav-links" id="nav-menu">
     <li><a href="#inicio">Inicio</a></li>
-    <li><a href="quienes-somos/">Quiénes somos</a></li>
+    <li><a href="#nosotros">Quiénes somos</a></li>
     <li><a href="#unidades">Unidades de negocio</a></li>
     <li><a href="#cursos">Cursos y charlas</a></li>
     <li><a href="#producciones">Producciones</a></li>
     <li><a href="#recursos">Recursos</a></li>
     <li><a href="#contacto">Contacto</a></li>
   </ul>
-  <button class="nav-btn">Hablemos</button>
+
+  <button class="sbt-cta" onclick="scrollTo('contacto')">Hablemos</button>
 </nav>
 
-<!-- HERO -->
+
+<!-- ── HERO ───────────────────────────────────────────────── -->
 <section class="hero" id="inicio">
-  <div class="hero-content">
-    <h1>Ingeniería, gestión, tecnología y <span class="red">visión estratégica</span></h1>
-    <p>Sibratech Group integra consultoría, gestión, formación, inversión, desarrollo tecnológico y negocios internacionales para crear soluciones que generan valor y construyen oportunidades.</p>
+  <div>
+    <h1>Ingeniería, gestión, tecnología y <span class="accent">visión estratégica</span></h1>
+    <p>Sibratech Group integra construcción, gestión, formación, inversión, desarrollo tecnológico y negocios internacionales para crear soluciones que generan valor y construyen oportunidades.</p>
     <div class="hero-btns">
-      <button class="btn-primary">Conocer unidades</button>
-      <button class="btn-secondary">Contactar ahora</button>
+      <button class="sbt-cta" onclick="scrollTo('unidades')">Conocer unidades</button>
+      <button class="sbt-cta sbt-cta--ghost" onclick="scrollTo('contacto')">Contactar ahora</button>
     </div>
   </div>
-  <div class="hero-image">🏢</div>
+  <div class="hero-visual">
+    <div class="icon-bg">
+      <i data-lucide="building-2" style="stroke-width:1"></i>
+    </div>
+    <div class="hero-bar-red"></div>
+    <div class="hero-bar-dark"></div>
+  </div>
 </section>
 
-<!-- QUIÉNES SOMOS -->
-<section class="about-section">
+
+<!-- ── QUIÉNES SOMOS ──────────────────────────────────────── -->
+<section class="about" id="nosotros">
   <div>
-    <h2>Un grupo que <span class="red">integra</span> cada etapa</h2>
+    <div class="eyebrow">Quiénes somos</div>
+    <h2 class="h2" style="margin:0.6rem 0 1.4rem">
+      Un grupo que <span style="color:var(--red-500)">integra</span> cada etapa
+    </h2>
+    <div class="red-bar"></div>
     <p>Somos un colectivo multidisciplinario de empresas enfocadas en la estructuración integral de proyectos, desde la concepción y el desarrollo hasta la formación, la inversión, la estrategia y la innovación tecnológica.</p>
-    <p>Trabajamos con visión sistémica, consistencia, método y compromiso al servicio del valor. Integramos ingeniería, gestión, administración, emprendimiento e inversión para crear soluciones que perduran en el tiempo.</p>
-    <a href="quienes-somos/" class="about-link">Ver más →</a>
+    <p style="margin:0">Trabajamos con visión sistémica, excelencia, método y compromiso al servicio del valor. Integramos ingeniería, gestión, administración, emprendimiento e inversión para crear soluciones que perduran en el tiempo.</p>
   </div>
-  <div class="values-grid">
-    <div class="value-card">
-      <h4>🎯 Nuestra Misión</h4>
-      <p>Crear soluciones de innovación y desarrollo que transformen oportunidades en realidades concretas, generando valor para personas, empresas y comunidades.</p>
+  <div class="mvv-cards">
+    <div class="mvv-card">
+      <span class="watermark">M</span>
+      <div class="mvv-card-head">
+        <i data-lucide="target"></i>
+        <span>Nuestra Misión</span>
+      </div>
+      <p>Crear soluciones de inversión y desarrollo que transformen oportunidades en realidades sostenibles, generando valor para las personas, las empresas y las comunidades.</p>
     </div>
-    <div class="value-card">
-      <h4>👁️ Nuestra Visión</h4>
-      <p>Ser el grupo de referencia en multidisciplinariedad e integralidad de proyectos en Latinoamérica, reconocidos por transparencia e innovación.</p>
+    <div class="mvv-card">
+      <span class="watermark">V</span>
+      <div class="mvv-card-head">
+        <i data-lucide="eye"></i>
+        <span>Nuestra Visión</span>
+      </div>
+      <p>Ser el grupo de referencia en multidisciplinariedad e integralidad de proyectos en Latinoamérica, reconocidos por nuestro método, transparencia e innovación.</p>
     </div>
-    <div class="value-card">
-      <h4>💎 Nuestros Valores</h4>
-      <p>Integridad, consistencia técnica, orientación a resultados y construcción de relaciones en las que ganemos todos.</p>
+    <div class="mvv-card">
+      <span class="watermark">V</span>
+      <div class="mvv-card-head">
+        <i data-lucide="gem"></i>
+        <span>Nuestros Valores</span>
+      </div>
+      <p>Integridad, excelencia técnica, orientación a resultados y construcción de relaciones en las que ganar sea común; hacerlas sólidas es estratégico.</p>
     </div>
   </div>
 </section>
 
-<!-- UNIDADES DE NEGOCIO -->
-<section class="units-section" id="unidades">
-  <h2>Soluciones integrales. Visión multidisciplinaria.</h2>
+
+<!-- ── UNIDADES DE NEGOCIO ────────────────────────────────── -->
+<section class="units" id="unidades">
+  <div class="eyebrow">Unidades de negocio</div>
+  <h2 class="h2" style="margin:0.6rem 0 0">
+    Soluciones <span style="color:var(--red-500)">integrales.</span> Visión multidisciplinaria.
+  </h2>
   <div class="units-grid">
-    <a href="unidades-de-negocio/sibratech-estructuras/" class="unit-card">
-      <div class="unit-icon">🏗️</div>
-      <h3>Sibratech Estructuras Metálicas de Proyectos</h3>
-      <p>Desarrollo y estructuración de proyectos inmobiliarios, incluyendo ingeniería especializada de estructuras metálicas.</p>
-      <div class="unit-link">Ver más →</div>
+
+    <!-- Sibratech Group (master brand mark) -->
+    <a href="unidades-de-negocio/" class="unit-card">
+      <div class="unit-card-logo">
+        <div class="unit-mark">
+          <span style="background:var(--red-500)"></span>
+          <span style="background:var(--red-500)"></span>
+          <span style="background:var(--ink-900)"></span>
+          <span style="background:var(--red-500)"></span>
+          <span style="background:var(--red-500)"></span>
+          <span style="background:var(--gray-500)"></span>
+          <span style="background:var(--ink-900)"></span>
+          <span style="background:var(--gray-500)"></span>
+          <span style="background:#b0b0b0"></span>
+        </div>
+      </div>
+      <div class="unit-card-descriptor">Estructuración Integral de Proyectos</div>
+      <p>Desarrollo y estructuración de proyectos inmobiliarios y de infraestructura, integrando todas las disciplinas del grupo.</p>
+      <span class="unit-card-link">Ver más →</span>
     </a>
-    <a href="unidades-de-negocio/sibratech-obras-industria/" class="unit-card">
-      <div class="unit-icon">⚙️</div>
-      <h3>Sibratech Obra - Industria - Estructura</h3>
-      <p>Ejecución de obras civiles, industriales y estructurales para optimizar procesos y proyectos.</p>
-      <div class="unit-link">Ver más →</div>
+
+    <a href="unidades-de-negocio/sibratech-constructora/" class="unit-card">
+      <div class="unit-card-logo">
+        <img src="assets/logos/sibratech-constructora-trans.png" alt="Sibratech Constructora">
+      </div>
+      <div class="unit-card-descriptor">Obra · Industria · Estructura</div>
+      <p>Ejecución de obras civiles, industriales y estructuras metálicas con método y precisión técnica.</p>
+      <span class="unit-card-link">Ver más →</span>
     </a>
-    <a href="unidades-de-negocio/sibratech-gestion-proyectos/" class="unit-card">
-      <div class="unit-icon">📊</div>
-      <h3>Sibratech Gestión de Proyectos Consultores</h3>
-      <p>Dirección, control y gestión integral de proyectos para optimizar procesos y alcanzar objetivos.</p>
-      <div class="unit-link">Ver más →</div>
+
+    <a href="unidades-de-negocio/sibratech-gestion/" class="unit-card">
+      <div class="unit-card-logo">
+        <img src="assets/logos/sibratech-gestion-trans.png" alt="Sibratech Gestión">
+      </div>
+      <div class="unit-card-descriptor">Gestión de Proyectos · Consultoría</div>
+      <p>Dirección, control y gestión integral de proyectos para optimizar procesos y alcanzar resultados.</p>
+      <span class="unit-card-link">Ver más →</span>
     </a>
+
     <a href="unidades-de-negocio/sibra-investors/" class="unit-card">
-      <div class="unit-icon">💰</div>
-      <h3>Sibra Investors Asesoría Financiera</h3>
-      <p>Soluciones financieras para empresas, inversores y negocios internacionales con transparencia e innovación.</p>
-      <div class="unit-link">Ver más →</div>
+      <div class="unit-card-logo">
+        <img src="assets/logos/sibratech-investors-trans.png" alt="Sibra Investors">
+      </div>
+      <div class="unit-card-descriptor">Asesoría Financiera</div>
+      <p>Soluciones financieras para empresas, inversores y personas con transparencia e innovación.</p>
+      <span class="unit-card-link">Ver más →</span>
     </a>
-    <a href="unidades-de-negocio/sibratech-internacionales/" class="unit-card">
-      <div class="unit-icon">🌍</div>
-      <h3>Sibratech Internacionales Consultor Externo</h3>
-      <p>Conexión global para ejecutar oportunidades en Latinoamérica y mercados emergentes.</p>
-      <div class="unit-link">Ver más →</div>
+
+    <a href="unidades-de-negocio/sibratech-internacional/" class="unit-card">
+      <div class="unit-card-logo">
+        <img src="assets/logos/sibratech-internacional-trans.png" alt="Sibratech Internacional">
+      </div>
+      <div class="unit-card-descriptor">Importaciones · Comercio Exterior</div>
+      <p>Conexión global para impulsar oportunidades de negocio en Latinoamérica y mercados emergentes.</p>
+      <span class="unit-card-link">Ver más →</span>
     </a>
-    <a href="unidades-de-negocio/sibratech-consultoria/" class="unit-card">
-      <div class="unit-icon">🔧</div>
-      <h3>Sibratech Consultoría - Transformación Digital - Observatorio Externo</h3>
-      <p>Tecnología y consultoría para transformar ideas en modelos de negocio sostenibles e innovadores.</p>
-      <div class="unit-link">Ver más →</div>
+
+    <a href="unidades-de-negocio/sibratech-consultoria-it/" class="unit-card">
+      <div class="unit-card-logo">
+        <img src="assets/logos/sibratech-consultoria-it-trans.png" alt="Sibratech Consultoría & IT">
+      </div>
+      <div class="unit-card-descriptor">Consultoría · Transformación Digital</div>
+      <p>Tecnología y consultoría para transformar ideas en soluciones a medida y modelos de negocio sostenibles.</p>
+      <span class="unit-card-link">Ver más →</span>
     </a>
+
   </div>
 </section>
 
-<!-- CURSOS Y CHARLAS -->
-<section class="courses-section" id="cursos">
-  <h2>Formación que <span class="red">transforma</span></h2>
-  <p class="courses-subtitle">Cursos y charlas con expertos para proteger tu aprendizaje profesional</p>
+
+<!-- ── CURSOS Y CHARLAS ───────────────────────────────────── -->
+<section class="courses" id="cursos">
+  <div class="eyebrow">Cursos y charlas</div>
+  <h2 class="h2" style="margin:0.6rem 0 0">
+    Formación que <span style="color:var(--red-500)">transforma.</span>
+  </h2>
   <div class="courses-grid">
-    <div class="course-card">
-      <div class="course-img">🏗️</div>
-      <div class="course-content">
+
+    <div class="course-card featured">
+      <div class="course-thumb">
+        <i data-lucide="hard-hat" style="stroke-width:1.4"></i>
+        <span class="featured-badge">Destacado</span>
+        <div class="thumb-line"></div>
+      </div>
+      <div class="course-body">
         <h4>Construcciones Metálicas y de Madera</h4>
+        <p>Ejercicios interactivos con todo el contenido universitario para que practiques a tu ritmo.</p>
         <div class="course-meta">
-          <span>👥 E-presencial</span>
-          <span>📹 Grabación</span>
+          <span><i data-lucide="clock"></i> 6 semanas</span>
+          <span><i data-lucide="wifi"></i> Online</span>
+          <span><i data-lucide="award"></i> Certificado</span>
+          <span><i data-lucide="gift"></i> ¡Gratuito!</span>
         </div>
+        <a href="cursos-charlas/" class="sbt-cta" style="font-size:0.66rem;padding:0.55rem 1.2rem;align-self:flex-start">Entrar →</a>
       </div>
     </div>
+
     <div class="course-card">
-      <div class="course-img">🤖</div>
-      <div class="course-content">
+      <div class="course-thumb">
+        <i data-lucide="cpu" style="stroke-width:1.4"></i>
+        <div class="thumb-line"></div>
+      </div>
+      <div class="course-body">
         <h4>IA e Ingeniería</h4>
-        <div class="course-meta">
-          <span>👥 Online</span>
-          <span>📹 Grabación</span>
-        </div>
+        <p>Aplicaciones prácticas de inteligencia artificial en proyectos y procesos de ingeniería.</p>
+        <span class="course-link">Ver más →</span>
       </div>
     </div>
+
     <div class="course-card">
-      <div class="course-img">📈</div>
-      <div class="course-content">
-        <h4>Finanzas para Emprendedores</h4>
-        <div class="course-meta">
-          <span>👥 Presencial</span>
-          <span>📹 Grabación</span>
-        </div>
+      <div class="course-thumb">
+        <i data-lucide="trending-up" style="stroke-width:1.4"></i>
+        <div class="thumb-line"></div>
+      </div>
+      <div class="course-body">
+        <h4>Finanzas para emprendedores</h4>
+        <p>Herramientas financieras para tomar mejores decisiones y hacer crecer tu negocio.</p>
+        <span class="course-link">Ver más →</span>
       </div>
     </div>
+
     <div class="course-card">
-      <div class="course-img">💻</div>
-      <div class="course-content">
-        <h4>Herramientas Digitales y Gestión</h4>
-        <div class="course-meta">
-          <span>👥 Online</span>
-          <span>📹 Streaming</span>
-        </div>
+      <div class="course-thumb">
+        <i data-lucide="monitor" style="stroke-width:1.4"></i>
+        <div class="thumb-line"></div>
+      </div>
+      <div class="course-body">
+        <h4>Herramientas digitales y gestión</h4>
+        <p>Tecnologías y metodologías para optimizar procesos y eficiencia profesional.</p>
+        <span class="course-link">Ver más →</span>
       </div>
     </div>
+
     <div class="course-card">
-      <div class="course-img">📋</div>
-      <div class="course-content">
-        <h4>Gestión de Obras y Procesos</h4>
-        <div class="course-meta">
-          <span>👥 Presencial</span>
-          <span>📹 Video</span>
-        </div>
+      <div class="course-thumb">
+        <i data-lucide="building" style="stroke-width:1.4"></i>
+        <div class="thumb-line"></div>
+      </div>
+      <div class="course-body">
+        <h4>Gestión de obras y procesos</h4>
+        <p>Planificación, control y seguimiento para obras exitosas y rentables.</p>
+        <span class="course-link">Ver más →</span>
       </div>
     </div>
+
   </div>
-  <div class="view-courses">
-    <a href="cursos-charlas/">Ver todos los cursos</a>
+  <button class="sbt-cta sbt-cta--ghost" onclick="location.href='cursos-charlas/'">Ver todos los cursos</button>
+</section>
+
+
+<!-- ── PRODUCCIONES Y RECURSOS ────────────────────────────── -->
+<section class="recursos" id="producciones">
+  <div class="recursos-grid">
+
+    <div>
+      <div class="eyebrow">Producciones y recursos</div>
+      <h3>Ideas, herramientas y <span class="accent">conocimiento.</span></h3>
+      <p>Accedé a material audiovisual, artículos y recursos prácticos para potenciar tu aprendizaje profesional.</p>
+      <a href="producciones/" class="sbt-cta sbt-cta--ghost">Ver todas las producciones</a>
+    </div>
+
+    <div id="recursos">
+      <div class="eyebrow">Recursos gratuitos</div>
+      <h3>Material para descargar</h3>
+      <ul>
+        <li><i data-lucide="file-text"></i> Modelos de cálculo y demolición</li>
+        <li><i data-lucide="file-text"></i> Plantillas de actas técnicas</li>
+        <li><i data-lucide="file-text"></i> Checklists de inspección</li>
+        <li><i data-lucide="file-text"></i> Fichas técnicas y tablas de cálculo</li>
+      </ul>
+    </div>
+
+    <div class="biblioteca-card">
+      <div class="biblioteca-icon">
+        <i data-lucide="folder-open"></i>
+      </div>
+      <h4>Biblioteca de Recursos</h4>
+      <p>Más de 50 documentos disponibles para consulta inmediata.</p>
+      <p class="promo">¡Accedé hoy y avanzá!</p>
+      <a href="recursos/" class="sbt-cta">Acceder →</a>
+      <div class="format-tags">
+        <span class="format-tag">PDF</span>
+        <span class="format-tag">Excel</span>
+        <span class="format-tag">Videos</span>
+        <span class="format-tag">PPT</span>
+      </div>
+    </div>
+
   </div>
 </section>
 
-<!-- PRODUCCIONES Y RECURSOS -->
-<section class="prod-resources" id="producciones">
+
+<!-- ── NUESTRO EQUIPO ──────────────────────────────────────── -->
+<section class="equipo" id="equipo" style="padding:4.5rem var(--gutter);background:#fff;text-align:center">
+  <div class="eyebrow">Las personas detrás del grupo</div>
+  <h2 class="h2" style="margin:0.6rem auto 1rem;max-width:560px">
+    Conocé nuestro <span style="color:var(--red-500)">equipo.</span>
+  </h2>
+  <p style="font-size:0.95rem;line-height:1.8;color:var(--text-body);max-width:560px;margin:0 auto 2.2rem">
+    Un grupo multidisciplinario de profesionales comprometidos con la integralidad, el método y la visión sistémica en cada proyecto que emprendemos.
+  </p>
+  <a href="quienes-somos/" class="sbt-cta">
+    <i data-lucide="users" style="width:18px;height:18px"></i>
+    Ver el equipo completo
+  </a>
+</section>
+
+
+<!-- ── REDES Y PLATAFORMAS ────────────────────────────────── -->
+<section class="redes">
   <div>
-    <h3>Ideas, herramientas y <span class="red">conocimiento</span>.</h3>
-    <p>Accede a selecciones exclusivas de modelos, plantillas y guías de trabajo en diferentes formatos para potenciar tu aprendizaje profesional.</p>
-    <a href="producciones/" class="sec-btn">Ver todas las producciones</a>
+    <div class="eyebrow">Redes y plataformas</div>
+    <h3>Conectamos, compartimos, creamos <span class="accent">oportunidades.</span></h3>
+    <p>Seguinos en nuestras redes para estar al día con novedades, ideas, cursos, obras y contenido de valor.</p>
   </div>
-  <div id="recursos">
-    <h3>Material para <span class="red">descargar</span></h3>
-    <ul>
-      <li>✓ Modelos de cálculo y dimensionado</li>
-      <li>✓ Plantillas de acción técnica</li>
-      <li>✓ Checklists de inspección</li>
-      <li>✓ Fichas técnicas y de cálculo</li>
-    </ul>
-    <a href="recursos/" class="sec-btn">Acceder a recursos</a>
-  </div>
-</section>
-
-<!-- REDES -->
-<section class="networks-section">
-  <h2>Conectamos, compartimos, creamos <span class="red">oportunidades</span></h2>
-  <div class="networks-grid">
-    <div class="network-card">
-      <div class="network-icon">💼</div>
-      <h3>LinkedIn</h3>
-      <p>Síguenos para estar al día con novedades</p>
-      <a href="https://linkedin.com/company/sibratech" target="_blank">Seguir →</a>
-    </div>
-    <div class="network-card">
-      <div class="network-icon">📸</div>
-      <h3>Instagram</h3>
-      <p>Contenido visual de nuestros proyectos</p>
-      <a href="https://instagram.com/sibratech" target="_blank">Seguir →</a>
-    </div>
-    <div class="network-card">
-      <div class="network-icon">🎥</div>
-      <h3>YouTube</h3>
-      <p>Cursos, charlas y contenido educativo</p>
-      <a href="https://youtube.com/@sibratech" target="_blank">Suscribir →</a>
-    </div>
-    <div class="network-card">
-      <div class="network-icon">💬</div>
-      <h3>WhatsApp</h3>
-      <p>Atención directa para consultas</p>
-      <a href="https://wa.me/5491126161864" target="_blank">Escribir →</a>
-    </div>
+  <div class="redes-grid">
+    <a href="https://linkedin.com/company/sibratech" target="_blank" rel="noopener" class="red-card" style="--hover:#0A66C2">
+      <i data-lucide="linkedin" style="color:#0A66C2"></i>
+      <span>LinkedIn</span>
+    </a>
+    <a href="https://instagram.com/sibratech" target="_blank" rel="noopener" class="red-card" style="--hover:#E4405F">
+      <i data-lucide="instagram" style="color:#E4405F"></i>
+      <span>Instagram</span>
+    </a>
+    <a href="https://youtube.com/@sibratech" target="_blank" rel="noopener" class="red-card" style="--hover:#FF0000">
+      <i data-lucide="youtube" style="color:#FF0000"></i>
+      <span>YouTube</span>
+    </a>
+    <a href="https://wa.me/5493794403615" target="_blank" rel="noopener" class="red-card" style="--hover:#25D366">
+      <i data-lucide="message-circle" style="color:#25D366"></i>
+      <span>WhatsApp</span>
+    </a>
   </div>
 </section>
 
-<!-- CONTACTO -->
-<section class="contact-section" id="contacto">
+
+<!-- ── CONTACTO ───────────────────────────────────────────── -->
+<section class="contact" id="contacto">
   <div>
-    <h2>Hablemos de tu proyecto o consulta</h2>
+    <div class="eyebrow">Contacto</div>
+    <h3>Hablemos de tu proyecto o consulta.</h3>
     <div class="contact-info">
       <div class="contact-item">
-        <div class="contact-icon">📍</div>
-        <p><strong>Ubicación:</strong><br>Sarmiento, Buenos Aires</p>
+        <i data-lucide="phone"></i>
+        <span>+54 9 379 4403615</span>
       </div>
       <div class="contact-item">
-        <div class="contact-icon">📞</div>
-        <p><strong>Teléfono:</strong><br>+54 911 2165 1864</p>
+        <i data-lucide="mail"></i>
+        <span>info@sibratech.com</span>
       </div>
       <div class="contact-item">
-        <div class="contact-icon">✉️</div>
-        <p><strong>Email:</strong><br>info@sibratech.com</p>
+        <i data-lucide="map-pin"></i>
+        <span>Arturo Jauretche 2555, Corrientes, Argentina</span>
       </div>
       <div class="contact-item">
-        <div class="contact-icon">⏰</div>
-        <p><strong>Atención:</strong><br>Lunes a Viernes 9:00 - 18:00</p>
+        <i data-lucide="clock"></i>
+        <span>Lunes a Viernes · 9:00–18:00</span>
       </div>
     </div>
   </div>
-  <form class="contact-form">
+  <div data-fs-success style="display:none;padding:1.2rem;background:var(--red-050);border:1px solid var(--red-500);border-radius:3px;color:var(--red-700);font-size:0.9rem;font-weight:600">
+    ✓ Mensaje enviado. Nos contactamos a la brevedad.
+  </div>
+  <div data-fs-error style="display:none;padding:1rem;background:#fff0f0;border:1px solid #ffaaaa;border-radius:3px;color:#a00;font-size:0.85rem"></div>
+
+  <form class="contact-form" id="contact-form">
     <div class="form-row">
-      <input type="text" placeholder="Nombre" required>
-      <input type="email" placeholder="Email" required>
+      <input class="sbt-field" type="text" name="nombre" placeholder="Nombre" required data-fs-field>
+      <input class="sbt-field" type="text" name="empresa" placeholder="Empresa / Institución">
     </div>
     <div class="form-row">
-      <input type="text" placeholder="Empresa / Institución">
+      <input class="sbt-field" type="email" name="email" placeholder="Email" required data-fs-field>
+      <input class="sbt-field" type="tel" name="telefono" placeholder="Teléfono / WhatsApp">
     </div>
-    <textarea placeholder="Cuéntanos sobre tu proyecto o consulta..." required></textarea>
-    <button type="submit" class="form-submit">Enviar mensaje</button>
+    <select class="sbt-field" name="motivo" required data-fs-field>
+      <option value="" disabled selected>Motivo de contacto</option>
+      <option>Consulta general</option>
+      <option>Proyecto / Obra</option>
+      <option>Asesoría financiera</option>
+      <option>Cursos y charlas</option>
+    </select>
+    <textarea class="sbt-field" name="mensaje" placeholder="Mensaje" rows="4" required data-fs-field></textarea>
+    <span data-fs-error="mensaje" style="font-size:0.78rem;color:#a00"></span>
+    <button type="submit" class="sbt-cta" style="justify-content:center;padding:0.85rem" data-fs-submit-btn>Enviar mensaje</button>
   </form>
 </section>
 
-<!-- FOOTER -->
-<footer>
+
+<!-- ── FOOTER ─────────────────────────────────────────────── -->
+<footer class="site-footer">
+
+  <!-- Swoosh SVG -->
+  <svg class="footer-swoosh" viewBox="0 0 400 70" width="420" height="73"
+    fill="none" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M2 52 C 90 28, 150 70, 230 44 S 350 16, 398 40"
+      stroke="var(--gray-400)" stroke-width="5" stroke-linecap="round"/>
+    <path d="M2 40 C 90 14, 150 58, 232 30 S 352 2, 398 26"
+      stroke="var(--red-500)" stroke-width="9" stroke-linecap="round"/>
+  </svg>
+
   <div class="footer-grid">
+
+    <div class="footer-brand">
+      <a href="#inicio" class="nav-brand" aria-label="Sibratech Group">
+        <div class="brand-mosaic">
+          <span style="background:var(--red-500)"></span>
+          <span style="background:var(--red-500)"></span>
+          <span style="background:rgba(255,255,255,0.22)"></span>
+          <span style="background:var(--red-500)"></span>
+          <span style="background:var(--red-500)"></span>
+          <span style="background:rgba(255,255,255,0.42)"></span>
+          <span style="background:rgba(255,255,255,0.22)"></span>
+          <span style="background:rgba(255,255,255,0.42)"></span>
+          <span style="background:rgba(255,255,255,0.62)"></span>
+        </div>
+        <div class="brand-wordmark">
+          <strong style="color:#fff"><span class="sibra">SIBRA</span>TECH</strong>
+          <small style="color:var(--gray-400)">GROUP</small>
+        </div>
+      </a>
+      <p>Construyendo el presente, pensando en el futuro.</p>
+    </div>
+
     <div class="footer-col">
       <h4>Navegación</h4>
       <a href="#inicio">Inicio</a>
-      <a href="quienes-somos/">Quiénes somos</a>
+      <a href="#nosotros">Quiénes somos</a>
       <a href="#unidades">Unidades de negocio</a>
       <a href="#cursos">Cursos y charlas</a>
     </div>
+
     <div class="footer-col">
       <h4>Recursos</h4>
-      <a href="cursos-charlas/">Cursos y charlas</a>
       <a href="producciones/">Producciones</a>
       <a href="recursos/">Recursos</a>
       <a href="#contacto">Contacto</a>
     </div>
-    <div class="footer-col">
-      <h4>Unidades</h4>
-      <a href="unidades-de-negocio/sibratech-estructuras/">Estructuras Metálicas</a>
-      <a href="unidades-de-negocio/sibratech-obras-industria/">Obras e Industria</a>
-      <a href="unidades-de-negocio/sibratech-gestion-proyectos/">Gestión de Proyectos</a>
-      <a href="unidades-de-negocio/sibra-investors/">Sibra Investors</a>
-    </div>
+
     <div class="footer-col">
       <h4>Síguenos</h4>
-      <a href="https://linkedin.com/company/sibratech" target="_blank">LinkedIn</a>
-      <a href="https://instagram.com/sibratech" target="_blank">Instagram</a>
-      <a href="https://youtube.com/@sibratech" target="_blank">YouTube</a>
-      <a href="https://wa.me/5491126161864" target="_blank">WhatsApp</a>
+      <div class="footer-socials">
+        <a href="https://linkedin.com/company/sibratech" target="_blank" rel="noopener" class="footer-social" aria-label="LinkedIn">
+          <i data-lucide="linkedin"></i>
+        </a>
+        <a href="https://instagram.com/sibratech" target="_blank" rel="noopener" class="footer-social" aria-label="Instagram">
+          <i data-lucide="instagram"></i>
+        </a>
+        <a href="https://youtube.com/@sibratech" target="_blank" rel="noopener" class="footer-social" aria-label="YouTube">
+          <i data-lucide="youtube"></i>
+        </a>
+        <a href="https://wa.me/5493794403615" target="_blank" rel="noopener" class="footer-social" aria-label="WhatsApp">
+          <i data-lucide="message-circle"></i>
+        </a>
+      </div>
     </div>
   </div>
+
   <div class="footer-bottom">
-    <p>&copy; 2024 Sibratech Group. Todos los derechos reservados.</p>
-    <div>
-      <a href="#">Términos y condiciones</a> | <a href="#">Política de privacidad</a>
-    </div>
+    <span>© 2025 Sibratech Group. Todos los derechos reservados.</span>
+    <span>www.sibratech.com · CUIT 30-71556869-9</span>
   </div>
+
+  <div class="footer-rule"></div>
 </footer>
 
+
+<script>
+  // ── Lucide icons
+  lucide.createIcons();
+
+  // ── Smooth scroll helper
+  function scrollTo(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const top = el.getBoundingClientRect().top + window.scrollY - parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'));
+    window.scrollTo({ top, behavior: 'smooth' });
+  }
+
+  // ── Nav: active link on scroll
+  const navLinks = document.querySelectorAll('.nav-links a');
+  const sections = ['inicio','nosotros','unidades','cursos','producciones','recursos','contacto']
+    .map(id => document.getElementById(id)).filter(Boolean);
+
+  function setActive() {
+    const scrollY = window.scrollY + 100;
+    let current = sections[0]?.id;
+    for (const s of sections) {
+      if (s.offsetTop <= scrollY) current = s.id;
+    }
+    navLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  }
+  window.addEventListener('scroll', setActive, { passive: true });
+  setActive();
+
+  // ── Nav: smooth scroll on link click
+  navLinks.forEach(a => {
+    a.addEventListener('click', e => {
+      const href = a.getAttribute('href');
+      if (href && href.startsWith('#')) {
+        e.preventDefault();
+        scrollTo(href.slice(1));
+        // close mobile menu if open
+        menu.classList.remove('open');
+        toggle.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+  });
+
+  // ── Mobile hamburger
+  const toggle = document.getElementById('nav-toggle');
+  const menu   = document.getElementById('nav-menu');
+  toggle.addEventListener('click', () => {
+    const open = menu.classList.toggle('open');
+    toggle.classList.toggle('open', open);
+    toggle.setAttribute('aria-expanded', open);
+  });
+
+  // ── Formspree init
+  window.formspree = window.formspree || function () { (formspree.q = formspree.q || []).push(arguments); };
+  formspree('initForm', { formElement: '#contact-form', formId: 'mlgzqqke' });
+</script>
 </body>
 </html>
