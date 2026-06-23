@@ -587,13 +587,120 @@ textarea.sbt-field { resize: vertical; }
       <button class="sbt-cta sbt-cta--ghost" onclick="scrollTo('contacto')">Contactar ahora</button>
     </div>
   </div>
-  <div class="hero-visual">
-    <div class="icon-bg">
-      <i data-lucide="building-2" style="stroke-width:1"></i>
-    </div>
-    <div class="hero-bar-red"></div>
-    <div class="hero-bar-dark"></div>
+  <div class="hero-visual" style="background:#f9f9f9;display:flex;align-items:center;justify-content:center;overflow:visible">
+    <svg id="hero-svg" viewBox="0 0 420 380" width="420" height="380" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <style>
+        .hs-line { stroke:#d9dada; stroke-width:1.2; stroke-dasharray:200; stroke-dashoffset:200; }
+        .hs-line.go { animation: drawLine 0.8s ease forwards; }
+        .hs-node { opacity:0; }
+        .hs-node.go { animation: fadeUp 0.5s ease forwards; }
+        .hs-pulse { transform-origin:center; }
+        .hs-pulse.go { animation: pulse 2.8s ease-in-out 1.2s infinite; }
+        @keyframes drawLine { to { stroke-dashoffset:0; } }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes pulse { 0%,100%{opacity:.18} 50%{opacity:.38} }
+      </style>
+
+      <!-- Pulse ring behind center -->
+      <circle class="hs-pulse" cx="210" cy="190" r="52" fill="none" stroke="#E10600" stroke-width="1" opacity=".18"/>
+      <circle class="hs-pulse" cx="210" cy="190" r="72" fill="none" stroke="#E10600" stroke-width="0.6" opacity=".10"/>
+
+      <!-- Connection lines from center (210,190) to each node -->
+      <!-- Constructora  top-center  210,72 -->
+      <line class="hs-line" x1="210" y1="166" x2="210" y2="90"/>
+      <!-- Gestión       top-right   330,112 -->
+      <line class="hs-line" x1="228" y1="172" x2="312" y2="126"/>
+      <!-- Investors     bot-right   330,268 -->
+      <line class="hs-line" x1="228" y1="208" x2="312" y2="254"/>
+      <!-- Internacional bot-center  210,308 -->
+      <line class="hs-line" x1="210" y1="214" x2="210" y2="290"/>
+      <!-- Consultoría   bot-left    90,268 -->
+      <line class="hs-line" x1="192" y1="208" x2="108" y2="254"/>
+      <!-- Group Mark    top-left    90,112 -->
+      <line class="hs-line" x1="192" y1="172" x2="108" y2="126"/>
+
+      <!-- ── CENTER MARK (3×3 mosaic) ── -->
+      <g transform="translate(183,163)">
+        <!-- 3×3 grid, cell=16px, gap=3px -->
+        <rect x="0"  y="0"  width="16" height="16" fill="#E10600"/>
+        <rect x="19" y="0"  width="16" height="16" fill="#E10600"/>
+        <rect x="38" y="0"  width="16" height="16" fill="#0B0B0B"/>
+        <rect x="0"  y="19" width="16" height="16" fill="#E10600"/>
+        <rect x="19" y="19" width="16" height="16" fill="#E10600"/>
+        <rect x="38" y="19" width="16" height="16" fill="#9AA0A0"/>
+        <rect x="0"  y="38" width="16" height="16" fill="#0B0B0B"/>
+        <rect x="19" y="38" width="16" height="16" fill="#9AA0A0"/>
+        <rect x="38" y="38" width="16" height="16" fill="#c8c8c8"/>
+      </g>
+      <!-- CENTER LABEL -->
+      <text x="210" y="227" text-anchor="middle" font-family="Jost,sans-serif" font-weight="700" font-size="7.5" letter-spacing="1.5" fill="#0B0B0B" text-transform="uppercase">SIBRATECH GROUP</text>
+
+      <!-- ── NODE: Constructora (top center, 210,72) ── -->
+      <g class="hs-node" transform="translate(210,72)" style="animation-delay:.15s">
+        <circle cx="0" cy="0" r="28" fill="#fff" stroke="#eaeaea" stroke-width="1.2"/>
+        <circle cx="0" cy="0" r="28" fill="none" stroke="#E10600" stroke-width="1.5" opacity="0" class="node-ring"/>
+        <!-- chevron / ascending lines icon -->
+        <polyline points="-10,6 -5,0 0,-6 5,0 10,6" stroke="#E10600" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <polyline points="-10,2 -5,-4 0,-10 5,-4 10,2" stroke="#0B0B0B" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".35"/>
+        <text y="44" text-anchor="middle" font-family="Jost,sans-serif" font-weight="600" font-size="8" fill="#5A6060">Constructora</text>
+      </g>
+
+      <!-- ── NODE: Gestión (top right, 330,112) ── -->
+      <g class="hs-node" transform="translate(330,112)" style="animation-delay:.25s">
+        <circle cx="0" cy="0" r="28" fill="#fff" stroke="#eaeaea" stroke-width="1.2"/>
+        <!-- network nodes icon -->
+        <circle cx="0" cy="-8" r="4" fill="#E10600"/>
+        <circle cx="-9" cy="6" r="3" fill="#0B0B0B" opacity=".6"/>
+        <circle cx="9" cy="6" r="3" fill="#0B0B0B" opacity=".6"/>
+        <line x1="0" y1="-4" x2="-7" y2="4" stroke="#9AA0A0" stroke-width="1.2"/>
+        <line x1="0" y1="-4" x2="7" y2="4" stroke="#9AA0A0" stroke-width="1.2"/>
+        <line x1="-6" y1="6" x2="6" y2="6" stroke="#9AA0A0" stroke-width="1.2"/>
+        <text y="44" text-anchor="middle" font-family="Jost,sans-serif" font-weight="600" font-size="8" fill="#5A6060">Gestión</text>
+      </g>
+
+      <!-- ── NODE: Investors (bottom right, 330,268) ── -->
+      <g class="hs-node" transform="translate(330,268)" style="animation-delay:.35s">
+        <circle cx="0" cy="0" r="28" fill="#fff" stroke="#eaeaea" stroke-width="1.2"/>
+        <!-- ascending bars icon -->
+        <rect x="-10" y="4"  width="5" height="6"  fill="#0B0B0B" opacity=".4" rx="1"/>
+        <rect x="-3"  y="-1" width="5" height="11" fill="#0B0B0B" opacity=".55" rx="1"/>
+        <rect x="4"   y="-7" width="5" height="17" fill="#E10600" rx="1"/>
+        <text y="44" text-anchor="middle" font-family="Jost,sans-serif" font-weight="600" font-size="8" fill="#5A6060">Investors</text>
+      </g>
+
+      <!-- ── NODE: Internacional (bottom center, 210,308) ── -->
+      <g class="hs-node" transform="translate(210,308)" style="animation-delay:.45s">
+        <circle cx="0" cy="0" r="28" fill="#fff" stroke="#eaeaea" stroke-width="1.2"/>
+        <!-- globe icon -->
+        <circle cx="0" cy="0" r="11" stroke="#E10600" stroke-width="1.6" fill="none"/>
+        <ellipse cx="0" cy="0" rx="5" ry="11" stroke="#9AA0A0" stroke-width="1.1" fill="none"/>
+        <line x1="-11" y1="0" x2="11" y2="0" stroke="#9AA0A0" stroke-width="1.1"/>
+        <text y="44" text-anchor="middle" font-family="Jost,sans-serif" font-weight="600" font-size="8" fill="#5A6060">Internacional</text>
+      </g>
+
+      <!-- ── NODE: Consultoría IT (bottom left, 90,268) ── -->
+      <g class="hs-node" transform="translate(90,268)" style="animation-delay:.55s">
+        <circle cx="0" cy="0" r="28" fill="#fff" stroke="#eaeaea" stroke-width="1.2"/>
+        <!-- S-circuit / code icon -->
+        <polyline points="-8,-8 -8,-4 8,-4 8,4 -8,4 -8,8" stroke="#E10600" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <circle cx="-8" cy="-8" r="2.2" fill="#0B0B0B" opacity=".5"/>
+        <circle cx="8"  cy="8"  r="2.2" fill="#0B0B0B" opacity=".5"/>
+        <text y="44" text-anchor="middle" font-family="Jost,sans-serif" font-weight="600" font-size="8" fill="#5A6060">Consultoría IT</text>
+      </g>
+
+      <!-- ── NODE: Formación (top left, 90,112) ── -->
+      <g class="hs-node" transform="translate(90,112)" style="animation-delay:.65s">
+        <circle cx="0" cy="0" r="28" fill="#fff" stroke="#eaeaea" stroke-width="1.2"/>
+        <!-- book / graduation icon -->
+        <rect x="-9" y="-8" width="18" height="14" rx="2" stroke="#E10600" stroke-width="1.6" fill="none"/>
+        <line x1="0" y1="-8" x2="0" y2="6" stroke="#9AA0A0" stroke-width="1.1"/>
+        <polyline points="-4,8 0,12 4,8" stroke="#0B0B0B" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".5"/>
+        <text y="44" text-anchor="middle" font-family="Jost,sans-serif" font-weight="600" font-size="8" fill="#5A6060">Formación</text>
+      </g>
+
+    </svg>
   </div>
+
 </section>
 
 
@@ -1063,6 +1170,21 @@ textarea.sbt-field { resize: vertical; }
     toggle.classList.toggle('open', open);
     toggle.setAttribute('aria-expanded', open);
   });
+
+  // ── Hero SVG animation
+  (function () {
+    var lines  = document.querySelectorAll('#hero-svg .hs-line');
+    var nodes  = document.querySelectorAll('#hero-svg .hs-node');
+    var pulses = document.querySelectorAll('#hero-svg .hs-pulse');
+    lines.forEach(function (l, i) { setTimeout(function () { l.classList.add('go'); }, i * 80); });
+    nodes.forEach(function (n, i) { setTimeout(function () { n.classList.add('go'); }, 150 + i * 100); });
+    pulses.forEach(function (p) { p.classList.add('go'); });
+    document.querySelectorAll('#hero-svg g.hs-node').forEach(function (g) {
+      var circ = g.querySelector('circle');
+      g.addEventListener('mouseenter', function () { circ.setAttribute('stroke', '#E10600'); });
+      g.addEventListener('mouseleave', function () { circ.setAttribute('stroke', '#eaeaea'); });
+    });
+  })();
 
   // ── Formspree init
   window.formspree = window.formspree || function () { (formspree.q = formspree.q || []).push(arguments); };
