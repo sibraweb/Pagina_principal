@@ -9,7 +9,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700;800;900&family=Libre+Franklin:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-<script src="https://unpkg.com/@formspree/ajax@1" defer></script>
 <style>
 /* ── TOKENS ──────────────────────────────────────────────── */
 :root {
@@ -443,6 +442,14 @@ a { color: inherit; }
 .contact-form select.sbt-field { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239AA0A0' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.9rem center; padding-right: 2rem; cursor: pointer; }
 textarea.sbt-field { resize: vertical; }
 .form-sent { color: var(--red-500); font-weight: 700; font-size: 0.88rem; }
+
+/* ── CONTADOR VISITAS ────────────────────────────────────── */
+.visit-counter {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-size: 0.68rem; color: rgba(255,255,255,0.35);
+  font-family: var(--font-display);
+}
+.visit-counter span { color: rgba(255,255,255,0.55); font-weight: 600; }
 
 /* ── FOOTER ──────────────────────────────────────────────── */
 .site-footer {
@@ -1011,30 +1018,31 @@ textarea.sbt-field { resize: vertical; }
       </div>
     </div>
   </div>
-  <div data-fs-success style="display:none;padding:1.2rem;background:var(--red-050);border:1px solid var(--red-500);border-radius:3px;color:var(--red-700);font-size:0.9rem;font-weight:600">
+  <div id="form-success" style="display:none;padding:1.2rem;background:var(--red-050);border:1px solid var(--red-500);border-radius:3px;color:var(--red-700);font-size:0.9rem;font-weight:600">
     ✓ Mensaje enviado. Nos contactamos a la brevedad.
   </div>
-  <div data-fs-error style="display:none;padding:1rem;background:#fff0f0;border:1px solid #ffaaaa;border-radius:3px;color:#a00;font-size:0.85rem"></div>
+  <div id="form-error" style="display:none;padding:1rem;background:#fff0f0;border:1px solid #ffaaaa;border-radius:3px;color:#a00;font-size:0.85rem">
+    Hubo un problema al enviar. Por favor intentá nuevamente o escribinos a info@sibratech.com
+  </div>
 
-  <form class="contact-form" id="contact-form">
+  <form class="contact-form" id="contact-form" action="https://formspree.io/f/mlgzqqke" method="POST" novalidate>
     <div class="form-row">
-      <input class="sbt-field" type="text" name="nombre" placeholder="Nombre" required data-fs-field>
+      <input class="sbt-field" type="text" name="nombre" placeholder="Nombre" required>
       <input class="sbt-field" type="text" name="empresa" placeholder="Empresa / Institución">
     </div>
     <div class="form-row">
-      <input class="sbt-field" type="email" name="email" placeholder="Email" required data-fs-field>
+      <input class="sbt-field" type="email" name="email" placeholder="Email" required>
       <input class="sbt-field" type="tel" name="telefono" placeholder="Teléfono / WhatsApp">
     </div>
-    <select class="sbt-field" name="motivo" required data-fs-field>
+    <select class="sbt-field" name="motivo" required>
       <option value="" disabled selected>Motivo de contacto</option>
       <option>Consulta general</option>
       <option>Proyecto / Obra</option>
       <option>Asesoría financiera</option>
       <option>Cursos y charlas</option>
     </select>
-    <textarea class="sbt-field" name="mensaje" placeholder="Mensaje" rows="4" required data-fs-field></textarea>
-    <span data-fs-error="mensaje" style="font-size:0.78rem;color:#a00"></span>
-    <button type="submit" class="sbt-cta" style="justify-content:center;padding:0.85rem" data-fs-submit-btn>Enviar mensaje</button>
+    <textarea class="sbt-field" name="mensaje" placeholder="Mensaje" rows="4" required></textarea>
+    <button type="submit" id="form-btn" class="sbt-cta" style="justify-content:center;padding:0.85rem">Enviar mensaje</button>
   </form>
 </section>
 
@@ -1109,7 +1117,11 @@ textarea.sbt-field { resize: vertical; }
   </div>
 
   <div class="footer-bottom">
-    <span>© 2025 Sibratech Group. Todos los derechos reservados.</span>
+    <span>© 2026 Sibratech Group. Todos los derechos reservados.</span>
+    <span class="visit-counter">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".6"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span id="visit-count">–</span> visitas
+    </span>
     <span>sibratech.com.ar · CUIT 33-71553663-9</span>
   </div>
 
@@ -1186,9 +1198,48 @@ textarea.sbt-field { resize: vertical; }
     });
   })();
 
-  // ── Formspree init
-  window.formspree = window.formspree || function () { (formspree.q = formspree.q || []).push(arguments); };
-  formspree('initForm', { formElement: '#contact-form', formId: 'mlgzqqke' });
+  // ── Formspree: envío AJAX con feedback visual
+  (function () {
+    var form    = document.getElementById('contact-form');
+    var btn     = document.getElementById('form-btn');
+    var success = document.getElementById('form-success');
+    var error   = document.getElementById('form-error');
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      btn.textContent = 'Enviando…'; btn.disabled = true;
+      success.style.display = 'none'; error.style.display = 'none';
+      try {
+        var res = await fetch('https://formspree.io/f/mlgzqqke', {
+          method: 'POST',
+          headers: { 'Accept': 'application/json' },
+          body: new FormData(form)
+        });
+        if (res.ok) {
+          success.style.display = 'block';
+          form.reset(); form.style.display = 'none';
+        } else {
+          var data = await res.json();
+          error.textContent = (data && data.errors)
+            ? data.errors.map(function(x){ return x.message; }).join(', ')
+            : 'Error al enviar. Intentá nuevamente.';
+          error.style.display = 'block';
+          btn.textContent = 'Enviar mensaje'; btn.disabled = false;
+        }
+      } catch (err) {
+        error.style.display = 'block';
+        btn.textContent = 'Enviar mensaje'; btn.disabled = false;
+      }
+    });
+  })();
+
+  // ── Contador de visitas (CountAPI)
+  (function () {
+    var el = document.getElementById('visit-count');
+    fetch('https://api.countapi.xyz/hit/sibratech.com.ar/visits')
+      .then(function(r){ return r.json(); })
+      .then(function(d){ if (d && d.value) el.textContent = d.value.toLocaleString('es-AR'); })
+      .catch(function(){ if (el) el.parentElement.style.display = 'none'; });
+  })();
 </script>
 </body>
 </html>
