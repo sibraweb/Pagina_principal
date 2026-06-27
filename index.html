@@ -571,13 +571,13 @@ textarea.sbt-field { resize: vertical; }
   </button>
 
   <ul class="nav-links" id="nav-menu">
-    <li><a href="#inicio">Inicio</a></li>
-    <li><a href="#nosotros">Quiénes somos</a></li>
-    <li><a href="#unidades">Unidades de negocio</a></li>
-    <li><a href="#cursos">Cursos y charlas</a></li>
-    <li><a href="#producciones">Producciones</a></li>
-    <li><a href="#recursos">Recursos</a></li>
-    <li><a href="#contacto">Contacto</a></li>
+    <li><a href="#inicio" onclick="sbtScroll('inicio');return false">Inicio</a></li>
+    <li><a href="#nosotros" onclick="sbtScroll('nosotros');return false">Quiénes somos</a></li>
+    <li><a href="#unidades" onclick="sbtScroll('unidades');return false">Unidades de negocio</a></li>
+    <li><a href="#cursos" onclick="sbtScroll('cursos');return false">Cursos y charlas</a></li>
+    <li><a href="#producciones" onclick="sbtScroll('producciones');return false">Producciones</a></li>
+    <li><a href="#recursos" onclick="sbtScroll('recursos');return false">Recursos</a></li>
+    <li><a href="#contacto" onclick="sbtScroll('contacto');return false">Contacto</a></li>
   </ul>
 
   <a href="https://wa.me/5491166582523" target="_blank" rel="noopener" class="sbt-cta">Hablemos</a>
@@ -590,8 +590,8 @@ textarea.sbt-field { resize: vertical; }
     <h1>Ingeniería, gestión, tecnología y <span class="accent">visión estratégica</span></h1>
     <p>Sibratech Group integra construcción, gestión, formación, inversión, desarrollo tecnológico y negocios internacionales para crear soluciones que generan valor y construyen oportunidades.</p>
     <div class="hero-btns">
-      <button class="sbt-cta" onclick="scrollTo('unidades')">Conocer unidades</button>
-      <button class="sbt-cta sbt-cta--ghost" onclick="scrollTo('contacto')">Contactar ahora</button>
+      <button class="sbt-cta" onclick="sbtScroll('unidades')">Conocer unidades</button>
+      <button class="sbt-cta sbt-cta--ghost" onclick="sbtScroll('contacto')">Contactar ahora</button>
     </div>
   </div>
   <div class="hero-visual" style="background:url('assets/hero-bg.png') center/cover no-repeat;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:6px;">
@@ -1134,7 +1134,7 @@ textarea.sbt-field { resize: vertical; }
   lucide.createIcons();
 
   // ── Smooth scroll helper
-  function scrollTo(id) {
+  function sbtScroll(id) {
     const el = document.getElementById(id);
     if (!el) return;
     const top = el.getBoundingClientRect().top + window.scrollY - parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'));
@@ -1165,7 +1165,7 @@ textarea.sbt-field { resize: vertical; }
       const href = a.getAttribute('href');
       if (href && href.startsWith('#')) {
         e.preventDefault();
-        scrollTo(href.slice(1));
+        sbtScroll(href.slice(1));
         // close mobile menu if open
         menu.classList.remove('open');
         toggle.classList.remove('open');
