@@ -199,39 +199,36 @@ a { color: inherit; text-decoration: none; }
 /* Hero visual */
 .hero-visual {
   position: relative; height: 420px; border-radius: 6px; overflow: hidden;
-  background: var(--black);
+  background: linear-gradient(135deg, #e9eaea 0%, #d4d6d6 60%, #c8cbcb 100%);
 }
 .hero-visual-inner {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
 }
-
-/* SVG skyline / construcción */
-.hero-svg-bg {
-  position: absolute; bottom: 0; left: 0; width: 100%; opacity: 0.15;
-}
 .hero-logo-big {
-  position: absolute; bottom: 1.5rem; right: 1.5rem; opacity: 0.9;
-  width: 110px;
+  position: absolute; bottom: 1.8rem; left: 50%; transform: translateX(-50%);
+  width: 180px; opacity: 0.92; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.12));
 }
 .hero-stat-badge {
   position: absolute; top: 1.5rem; left: 1.5rem;
   background: var(--red-500); color: #fff;
   padding: 0.6rem 1rem; border-radius: 3px;
   font-family: var(--font-display); font-weight: 700;
+  box-shadow: 0 4px 14px rgba(225,6,0,0.3);
 }
 .hero-stat-badge strong { font-size: 1.6rem; display: block; line-height: 1; }
-.hero-stat-badge span { font-size: 0.6rem; letter-spacing: 1px; text-transform: uppercase; opacity: 0.85; }
+.hero-stat-badge span { font-size: 0.6rem; letter-spacing: 1px; text-transform: uppercase; opacity: 0.88; }
 .hero-pill {
-  position: absolute; bottom: 1.5rem; left: 1.5rem;
-  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
-  backdrop-filter: blur(6px); color: #fff;
-  padding: 0.5rem 1rem; border-radius: 2rem;
-  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.5px;
+  position: absolute; bottom: 1.5rem; right: 1.5rem;
+  background: rgba(255,255,255,0.75); border: 1px solid rgba(0,0,0,0.08);
+  backdrop-filter: blur(6px); color: var(--text-strong);
+  padding: 0.45rem 1rem; border-radius: 2rem;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.4px;
   display: flex; align-items: center; gap: 0.4rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
-.hero-pill::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #4ade80; display: block; }
+.hero-pill::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--red-500); display: block; }
 
 /* ── SECCIÓN PRECIOS BANNER ─────────────────────────────── */
 .precios-banner {
@@ -551,86 +548,106 @@ textarea.sbt-field { resize: vertical; min-height: 120px; }
 
   <div class="hero-visual">
     <div class="hero-visual-inner">
-      <!-- Skyline SVG constructora -->
       <svg viewBox="0 0 560 420" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;">
-        <!-- Fondo degradado oscuro -->
-        <rect width="560" height="420" fill="url(#grad-hero)"/>
         <defs>
-          <linearGradient id="grad-hero" x1="0" y1="0" x2="560" y2="420" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="#141414"/>
-            <stop offset="100%" stop-color="#0b0b0b"/>
-          </linearGradient>
-          <linearGradient id="grad-red" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
-            <stop offset="0%" stop-color="#E10600"/>
-            <stop offset="100%" stop-color="#8f0400"/>
+          <linearGradient id="bg-grad" x1="0" y1="0" x2="560" y2="420" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#eaeaea"/>
+            <stop offset="100%" stop-color="#d0d2d2"/>
           </linearGradient>
         </defs>
+        <rect width="560" height="420" fill="url(#bg-grad)"/>
 
-        <!-- Grilla fondo perspectiva -->
-        <g opacity="0.06" stroke="#fff" stroke-width="0.5">
-          <line x1="0" y1="310" x2="560" y2="310"/>
-          <line x1="0" y1="280" x2="560" y2="280"/>
-          <line x1="80" y1="420" x2="280" y2="310"/>
-          <line x1="200" y1="420" x2="280" y2="310"/>
-          <line x1="320" y1="420" x2="280" y2="310"/>
-          <line x1="440" y1="420" x2="280" y2="310"/>
-          <line x1="0" y1="380" x2="280" y2="310"/>
-          <line x1="560" y1="380" x2="280" y2="310"/>
+        <!-- Grilla perspectiva suave -->
+        <g stroke="#b0b4b4" stroke-width="0.6" opacity="0.5">
+          <!-- horizontales -->
+          <line x1="0" y1="320" x2="560" y2="320"/>
+          <line x1="0" y1="290" x2="560" y2="290"/>
+          <line x1="0" y1="260" x2="560" y2="260"/>
+          <!-- radiales desde punto de fuga -->
+          <line x1="280" y1="160" x2="0"   y2="420"/>
+          <line x1="280" y1="160" x2="100" y2="420"/>
+          <line x1="280" y1="160" x2="200" y2="420"/>
+          <line x1="280" y1="160" x2="360" y2="420"/>
+          <line x1="280" y1="160" x2="460" y2="420"/>
+          <line x1="280" y1="160" x2="560" y2="420"/>
         </g>
 
-        <!-- Edificios de fondo (silueta) -->
-        <rect x="30" y="220" width="50" height="200" fill="#1f1f1f"/>
-        <rect x="90" y="180" width="40" height="240" fill="#242424"/>
-        <rect x="140" y="240" width="60" height="180" fill="#1c1c1c"/>
-        <rect x="370" y="200" width="55" height="220" fill="#1f1f1f"/>
-        <rect x="435" y="160" width="45" height="260" fill="#242424"/>
-        <rect x="490" y="230" width="50" height="190" fill="#1c1c1c"/>
+        <!-- Plano base -->
+        <rect x="0" y="318" width="560" height="102" fill="#c8cbcb" opacity="0.5"/>
 
-        <!-- Edificio principal (centro-derecha) -->
-        <rect x="215" y="80" width="130" height="340" fill="#1a1a1a" stroke="rgba(225,6,0,0.2)" stroke-width="1"/>
-        <!-- Ventanas edificio -->
-        <g fill="rgba(255,255,150,0.15)">
-          <rect x="225" y="95" width="15" height="20"/>
-          <rect x="248" y="95" width="15" height="20"/>
-          <rect x="271" y="95" width="15" height="20"/>
-          <rect x="294" y="95" width="15" height="20"/>
-          <rect x="225" y="125" width="15" height="20"/>
-          <rect x="248" y="125" width="15" height="20"/>
-          <rect x="271" y="125" width="15" height="20"/>
-          <rect x="294" y="125" width="15" height="20"/>
-          <rect x="225" y="155" width="15" height="20"/>
-          <rect x="271" y="155" width="15" height="20"/>
-          <rect x="225" y="185" width="15" height="20"/>
-          <rect x="248" y="185" width="15" height="20"/>
-          <rect x="294" y="185" width="15" height="20"/>
-          <rect x="225" y="215" width="15" height="20"/>
-          <rect x="271" y="215" width="15" height="20"/>
-          <rect x="225" y="245" width="15" height="20"/>
-          <rect x="248" y="245" width="15" height="20"/>
-          <rect x="294" y="245" width="15" height="20"/>
+        <!-- Edificio fondo izq -->
+        <rect x="28" y="170" width="52" height="152" fill="#c2c5c5" stroke="#b8bbbb" stroke-width="0.5"/>
+        <g fill="#b0b3b3" opacity="0.6">
+          <rect x="36" y="180" width="10" height="14"/><rect x="52" y="180" width="10" height="14"/><rect x="68" y="180" width="10" height="14"/>
+          <rect x="36" y="202" width="10" height="14"/><rect x="52" y="202" width="10" height="14"/><rect x="68" y="202" width="10" height="14"/>
+          <rect x="36" y="224" width="10" height="14"/><rect x="68" y="224" width="10" height="14"/>
+          <rect x="36" y="246" width="10" height="14"/><rect x="52" y="246" width="10" height="14"/>
         </g>
-        <!-- Línea roja lateral edificio -->
-        <rect x="215" y="80" width="4" height="340" fill="url(#grad-red)" opacity="0.7"/>
-        <!-- Antena edificio -->
-        <rect x="278" y="55" width="4" height="28" fill="#E10600"/>
-        <circle cx="280" cy="53" r="4" fill="#E10600"/>
+
+        <!-- Edificio fondo der -->
+        <rect x="480" y="145" width="52" height="175" fill="#c2c5c5" stroke="#b8bbbb" stroke-width="0.5"/>
+        <g fill="#b0b3b3" opacity="0.6">
+          <rect x="488" y="155" width="10" height="14"/><rect x="504" y="155" width="10" height="14"/><rect x="520" y="155" width="10" height="14"/>
+          <rect x="488" y="177" width="10" height="14"/><rect x="504" y="177" width="10" height="14"/><rect x="520" y="177" width="10" height="14"/>
+          <rect x="488" y="199" width="10" height="14"/><rect x="520" y="199" width="10" height="14"/>
+          <rect x="504" y="221" width="10" height="14"/><rect x="520" y="221" width="10" height="14"/>
+        </g>
+
+        <!-- Edificio principal centro — cara frontal -->
+        <rect x="168" y="72" width="148" height="248" fill="#d6d8d8" stroke="#c4c7c7" stroke-width="1"/>
+        <!-- cara lateral derecha perspectiva -->
+        <polygon points="316,72 380,108 380,356 316,320" fill="#c4c7c7" stroke="#b8bbbb" stroke-width="0.5"/>
+        <!-- techo -->
+        <polygon points="168,72 316,72 380,108 232,108" fill="#bebfc0" stroke="#b4b5b6" stroke-width="0.5"/>
+
+        <!-- Franja roja izquierda del edificio (firma de marca) -->
+        <rect x="168" y="72" width="5" height="248" fill="#E10600" opacity="0.85"/>
+
+        <!-- Ventanas frente -->
+        <g fill="#fff" opacity="0.55">
+          <rect x="182" y="90"  width="18" height="24"/><rect x="210" y="90"  width="18" height="24"/>
+          <rect x="238" y="90"  width="18" height="24"/><rect x="266" y="90"  width="18" height="24"/>
+          <rect x="182" y="124" width="18" height="24"/><rect x="210" y="124" width="18" height="24"/>
+          <rect x="238" y="124" width="18" height="24"/><rect x="266" y="124" width="18" height="24"/>
+          <rect x="182" y="158" width="18" height="24"/><rect x="238" y="158" width="18" height="24"/>
+          <rect x="266" y="158" width="18" height="24"/>
+          <rect x="182" y="192" width="18" height="24"/><rect x="210" y="192" width="18" height="24"/>
+          <rect x="266" y="192" width="18" height="24"/>
+          <rect x="182" y="226" width="18" height="24"/><rect x="238" y="226" width="18" height="24"/>
+          <rect x="266" y="226" width="18" height="24"/>
+          <rect x="182" y="260" width="18" height="24"/><rect x="210" y="260" width="18" height="24"/>
+          <rect x="238" y="260" width="18" height="24"/>
+        </g>
+        <!-- Ventanas lateral -->
+        <g fill="#fff" opacity="0.25">
+          <rect x="328" y="118" width="14" height="20"/><rect x="350" y="125" width="14" height="20"/>
+          <rect x="328" y="148" width="14" height="20"/><rect x="350" y="155" width="14" height="20"/>
+          <rect x="328" y="178" width="14" height="20"/><rect x="350" y="185" width="14" height="20"/>
+          <rect x="328" y="208" width="14" height="20"/><rect x="350" y="215" width="14" height="20"/>
+        </g>
+
+        <!-- Puerta y acceso -->
+        <rect x="222" y="278" width="40" height="42" fill="#b8bbbb"/>
+        <rect x="222" y="278" width="2"  height="42" fill="#E10600" opacity="0.6"/>
 
         <!-- Grúa torre -->
-        <rect x="350" y="100" width="6" height="220" fill="#2a2a2a" stroke="#3a3a3a" stroke-width="0.5"/>
-        <rect x="295" y="105" width="120" height="5" fill="#E10600" opacity="0.8"/>
-        <line x1="350" y1="108" x2="295" y2="180" stroke="#666" stroke-width="1.5"/>
-        <line x1="350" y1="108" x2="415" y2="150" stroke="#666" stroke-width="1.5"/>
-        <!-- Gancho grúa -->
-        <line x1="380" y1="110" x2="380" y2="160" stroke="#888" stroke-width="1"/>
-        <rect x="375" y="160" width="10" height="6" fill="#555"/>
+        <rect x="390" y="88" width="7" height="232" fill="#c0c3c3" stroke="#b4b7b7" stroke-width="0.5"/>
+        <!-- pluma horizontal -->
+        <rect x="330" y="90" width="130" height="6" fill="#b8bbbb" stroke="#aeafaf" stroke-width="0.5"/>
+        <!-- acento rojo pluma -->
+        <rect x="330" y="90" width="130" height="2" fill="#E10600" opacity="0.7"/>
+        <!-- tirantes -->
+        <line x1="390" y1="93" x2="330" y2="150" stroke="#acacac" stroke-width="1.2"/>
+        <line x1="390" y1="93" x2="460" y2="140" stroke="#acacac" stroke-width="1.2"/>
+        <!-- cable gancho -->
+        <line x1="430" y1="96" x2="430" y2="148" stroke="#b8b8b8" stroke-width="1"/>
+        <rect x="424" y="148" width="12" height="7" rx="1" fill="#c0c0c0" stroke="#aeaeae" stroke-width="0.5"/>
+        <!-- contrapeso -->
+        <rect x="330" y="92" width="20" height="16" fill="#c4c4c4" stroke="#b4b4b4" stroke-width="0.5"/>
 
-        <!-- Suelo / base -->
-        <rect x="0" y="385" width="560" height="35" fill="#0f0f0f"/>
-        <rect x="0" y="383" width="560" height="3" fill="rgba(225,6,0,0.3)"/>
-
-        <!-- Línea roja swoosh inferior -->
-        <path d="M0 370 C 120 350, 200 390, 320 360 S 460 330, 560 355" stroke="#E10600" stroke-width="3" fill="none" opacity="0.5"/>
-        <path d="M0 380 C 120 362, 200 400, 320 372 S 460 342, 560 367" stroke="#9AA0A0" stroke-width="1.5" fill="none" opacity="0.3"/>
+        <!-- Swoosh roja marca — parte inferior -->
+        <path d="M0 390 C 120 368, 240 408, 360 382 S 490 354, 560 374" stroke="#E10600" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.6"/>
+        <path d="M0 402 C 120 382, 240 418, 360 394 S 490 368, 560 386" stroke="#9AA0A0" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.35"/>
       </svg>
     </div>
 
@@ -639,7 +656,7 @@ textarea.sbt-field { resize: vertical; min-height: 120px; }
       <span>años de obras</span>
     </div>
     <div class="hero-pill">Corrientes Capital · Argentina</div>
-    <img src="../../assets/logos/sibratech-constructora-trans.png" alt="Sibratech Constructora" class="hero-logo-big">
+    <img src="../../assets/logos/sibratech-constructora.png" alt="Sibratech Constructora" class="hero-logo-big">
   </div>
 </section>
 
