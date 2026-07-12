@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sibratech Constructora — Obras, Proyectos y Dirección de Obra</title>
+<meta name="description" content="Sibratech Constructora ejecuta obras civiles, proyectos de arquitectura e ingeniería, dirección técnica e ingeniería administrativa. Precios de referencia actualizados.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700;800;900&family=Libre+Franklin:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+/* ── TOKENS ───────────────────────────────────────────────── */
+:root {
+  --red-500:  #E10600;
+  --red-600:  #b80500;
+  --red-700:  #8f0400;
+  --red-050:  #fdecea;
+  --black:    #0B0B0B;
+  --ink-900:  #0B0B0B;
+  --ink-800:  #1a1a1a;
+  --gray-700: #5A6060;
+  --gray-600: #666666;
+  --gray-500: #9AA0A0;
+  --gray-400: #9AA0A0;
+  --gray-300: #d9dada;
+  --gray-200: #eaeaea;
+  --gray-100: #F5F5F5;
+  --gray-050: #f9f9f9;
+  --white:    #FFFFFF;
+
+  --text-strong:    var(--ink-800);
+  --text-body:      var(--gray-700);
+  --text-muted:     var(--gray-400);
+  --text-accent:    var(--red-500);
+  --surface-alt:    var(--gray-100);
+  --surface-dark:   var(--black);
+  --border-hairline: var(--gray-200);
+  --border-brand:   var(--red-500);
+
+  --shadow-card:  0 2px 10px rgba(0,0,0,0.08);
+  --shadow-hover: 0 8px 25px rgba(225,6,0,0.15);
+  --t-base: 0.3s ease;
+
+  --font-display: 'Jost', 'Century Gothic', system-ui, sans-serif;
+  --font-body:    'Jost', 'Century Gothic', system-ui, sans-serif;
+  --font-aux:     'Libre Franklin', system-ui, sans-serif;
+
+  --gutter: 5%;
+  --nav-h:  72px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--font-body); color: var(--text-strong); background: #fff; line-height: 1.6; }
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--gray-100); }
+::-webkit-scrollbar-thumb { background: var(--red-500); border-radius: 4px; }
+
+/* ── UTILS ────────────────────────────────────────────────── */
+.eyebrow {
+  font-family: var(--font-display); font-weight: 700; font-size: 0.7rem;
+  letter-spacing: 1.5px; text-transform: uppercase; color: var(--red-500);
+}
+.h2 {
+  font-family: var(--font-display); font-weight: 700; font-size: 2rem;
+  line-height: 1.15; letter-spacing: -0.3px; color: var(--text-strong);
+}
+.red-bar { width: 56px; height: 3px; background: var(--red-500); margin: 0 0 1.6rem; }
+
+/* ── BUTTONS ──────────────────────────────────────────────── */
+.sbt-cta {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: var(--red-500); color: #fff; border: none; cursor: pointer;
+  font-family: var(--font-display); font-weight: 700; font-size: 0.72rem;
+  letter-spacing: 1px; text-transform: uppercase;
+  padding: 0.8rem 1.7rem; border-radius: 3px;
+  transition: background var(--t-base), transform var(--t-base), box-shadow var(--t-base);
+}
+.sbt-cta:hover { background: var(--red-600); transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+.sbt-cta--ghost {
+  background: transparent; color: var(--text-strong);
+  border: 1.5px solid var(--gray-300);
+}
+.sbt-cta--ghost:hover { border-color: var(--red-500); color: var(--red-500); background: transparent; transform: none; box-shadow: none; }
+.sbt-cta--outline-dark {
+  background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,0.4);
+}
+.sbt-cta--outline-dark:hover { background: rgba(255,255,255,0.08); transform: none; }
+
+/* ── NAV ──────────────────────────────────────────────────── */
+.site-nav {
+  position: sticky; top: 0; z-index: 1000;
+  background: #fff; border-bottom: 1px solid var(--border-hairline);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 0 var(--gutter);
+  height: var(--nav-h);
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+}
+.nav-brand {
+  display: inline-flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0;
+}
+.brand-mosaic {
+  display: grid; grid-template-columns: repeat(3, 11px);
+  grid-template-rows: repeat(3, 11px); gap: 2px;
+}
+.brand-mosaic span { display: block; }
+.brand-wordmark { display: flex; flex-direction: column; line-height: 1; }
+.brand-wordmark strong {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 1.1rem; letter-spacing: 0.02em; color: var(--text-strong);
+}
+.brand-wordmark strong .sibra { color: var(--red-500); }
+.brand-wordmark small {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 0.4rem; letter-spacing: 0.42em;
+  color: var(--gray-700); margin-top: 3px; padding-left: 2px;
+}
+.nav-links {
+  display: flex; gap: 1.7rem; list-style: none;
+  flex: 1; justify-content: center; flex-wrap: wrap;
+}
+.nav-links a {
+  color: var(--text-strong); text-decoration: none;
+  font-family: var(--font-display); font-size: 0.78rem;
+  font-weight: 600; letter-spacing: 0.2px; white-space: nowrap;
+  transition: color var(--t-base);
+}
+.nav-links a:hover, .nav-links a.active { color: var(--red-500); }
+.nav-toggle {
+  display: none; flex-direction: column; gap: 5px;
+  background: none; border: none; cursor: pointer; padding: 4px; flex-shrink: 0;
+}
+.nav-toggle span { display: block; width: 22px; height: 2px; background: var(--text-strong); transition: all var(--t-base); }
+.nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-toggle.open span:nth-child(2) { opacity: 0; }
+.nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+.nav-mobile {
+  display: none; position: fixed; inset: 0; top: var(--nav-h);
+  background: #fff; z-index: 999; padding: 2rem var(--gutter);
+  flex-direction: column; gap: 1.4rem;
+  border-top: 3px solid var(--red-500);
+}
+.nav-mobile.open { display: flex; }
+.nav-mobile a {
+  font-family: var(--font-display); font-weight: 600; font-size: 1rem;
+  color: var(--text-strong); text-decoration: none; padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+/* ── HERO ─────────────────────────────────────────────────── */
+.hero {
+  padding: 4.5rem var(--gutter) 4rem;
+  display: grid; grid-template-columns: 1.1fr 1fr;
+  gap: 3.5rem; align-items: center; background: #fff;
+}
+.hero-breadcrumb {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.5px;
+  color: var(--text-muted); text-transform: uppercase; margin-bottom: 1.2rem;
+}
+.hero-breadcrumb a { color: var(--red-500); }
+.hero-breadcrumb span { color: var(--gray-300); }
+.hero h1 {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 2.8rem; line-height: 1.08; letter-spacing: -0.5px;
+  color: var(--text-strong); margin: 0 0 1.2rem;
+}
+.hero h1 .accent { color: var(--red-500); }
+.hero-tagline {
+  font-family: var(--font-display); font-weight: 300; font-size: 1rem;
+  color: var(--text-body); margin: 0 0 0.5rem; letter-spacing: 0.3px;
+}
+.hero p {
+  font-size: 0.95rem; line-height: 1.8;
+  color: var(--text-body); margin: 0 0 2rem; max-width: 520px;
+}
+.hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+/* Botón destacado precios */
+.sbt-cta--precios {
+  background: var(--black); color: #fff; position: relative; overflow: hidden;
+  border: 2px solid var(--red-500);
+  padding: 0.9rem 2rem; font-size: 0.8rem;
+}
+.sbt-cta--precios::before {
+  content: ''; position: absolute; inset: 0;
+  background: var(--red-500);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.3s ease;
+}
+.sbt-cta--precios:hover::before { transform: scaleX(1); }
+.sbt-cta--precios > * { position: relative; z-index: 1; }
+.sbt-cta--precios span, .sbt-cta--precios i { position: relative; z-index: 1; }
+
+/* Hero visual */
+.hero-visual {
+  position: relative; height: 420px; border-radius: 6px; overflow: hidden;
+  background: var(--black);
+}
+.hero-visual-inner {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+
+/* SVG skyline / construcción */
+.hero-svg-bg {
+  position: absolute; bottom: 0; left: 0; width: 100%; opacity: 0.15;
+}
+.hero-logo-big {
+  position: absolute; bottom: 1.5rem; right: 1.5rem; opacity: 0.9;
+  width: 110px;
+}
+.hero-stat-badge {
+  position: absolute; top: 1.5rem; left: 1.5rem;
+  background: var(--red-500); color: #fff;
+  padding: 0.6rem 1rem; border-radius: 3px;
+  font-family: var(--font-display); font-weight: 700;
+}
+.hero-stat-badge strong { font-size: 1.6rem; display: block; line-height: 1; }
+.hero-stat-badge span { font-size: 0.6rem; letter-spacing: 1px; text-transform: uppercase; opacity: 0.85; }
+.hero-pill {
+  position: absolute; bottom: 1.5rem; left: 1.5rem;
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+  backdrop-filter: blur(6px); color: #fff;
+  padding: 0.5rem 1rem; border-radius: 2rem;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.5px;
+  display: flex; align-items: center; gap: 0.4rem;
+}
+.hero-pill::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #4ade80; display: block; }
+
+/* ── SECCIÓN PRECIOS BANNER ─────────────────────────────── */
+.precios-banner {
+  background: var(--red-500);
+  padding: 2.2rem var(--gutter);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 2rem; flex-wrap: wrap;
+}
+.precios-banner-text { color: #fff; }
+.precios-banner-text strong {
+  font-family: var(--font-display); font-weight: 700; font-size: 1.3rem;
+  display: block; margin-bottom: 0.3rem;
+}
+.precios-banner-text span {
+  font-size: 0.88rem; opacity: 0.88; line-height: 1.5;
+}
+.sbt-cta--banner {
+  background: #fff; color: var(--red-600); flex-shrink: 0;
+  font-size: 0.78rem; padding: 0.9rem 2rem;
+}
+.sbt-cta--banner:hover { background: var(--gray-100); transform: translateY(-1px); }
+
+/* ── SERVICIOS ────────────────────────────────────────────── */
+.section { padding: 5rem var(--gutter); }
+.section--alt { background: var(--gray-050); }
+.section-header { margin-bottom: 3rem; max-width: 560px; }
+.section-header .h2 { margin-top: 0.6rem; }
+
+.servicios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+.servicio-card {
+  background: #fff; border: 1px solid var(--border-hairline);
+  border-radius: 6px; padding: 2rem 1.8rem;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--t-base), box-shadow var(--t-base), border-color var(--t-base);
+  position: relative; overflow: hidden;
+}
+.servicio-card::before {
+  content: ''; position: absolute; top: 0; left: 0;
+  width: 4px; height: 100%; background: var(--red-500);
+  transform: scaleY(0); transform-origin: top;
+  transition: transform var(--t-base);
+}
+.servicio-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); border-color: var(--red-500); }
+.servicio-card:hover::before { transform: scaleY(1); }
+.servicio-icon {
+  width: 48px; height: 48px; border-radius: 4px;
+  background: var(--red-050); display: flex; align-items: center; justify-content: center;
+  color: var(--red-500); margin-bottom: 1.2rem;
+}
+.servicio-icon i { width: 24px; height: 24px; }
+.servicio-card h3 {
+  font-family: var(--font-display); font-weight: 700; font-size: 1rem;
+  margin-bottom: 0.6rem; color: var(--text-strong);
+}
+.servicio-card p { font-size: 0.88rem; color: var(--text-body); line-height: 1.7; }
+
+/* ── POR QUÉ ELEGIRNOS ────────────────────────────────────── */
+.diferencial-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 2rem;
+}
+.diferencial-item { display: flex; gap: 1rem; align-items: flex-start; }
+.diferencial-num {
+  font-family: var(--font-display); font-weight: 900; font-size: 2rem;
+  color: var(--red-500); line-height: 1; flex-shrink: 0; width: 2rem;
+  opacity: 0.35;
+}
+.diferencial-item h4 {
+  font-family: var(--font-display); font-weight: 700; font-size: 0.9rem;
+  margin-bottom: 0.35rem; color: var(--text-strong);
+}
+.diferencial-item p { font-size: 0.83rem; color: var(--text-body); line-height: 1.65; }
+
+/* ── PROCESO ──────────────────────────────────────────────── */
+.proceso-steps {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0; position: relative;
+}
+.proceso-steps::before {
+  content: ''; position: absolute; top: 28px; left: 0; right: 0; height: 2px;
+  background: var(--gray-200); z-index: 0;
+}
+.proceso-step { padding: 0 1.5rem 2rem; position: relative; z-index: 1; }
+.proceso-step:first-child { padding-left: 0; }
+.proceso-dot {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: #fff; border: 2px solid var(--gray-200);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 1.2rem; transition: border-color var(--t-base), background var(--t-base);
+  color: var(--gray-500);
+}
+.proceso-step:hover .proceso-dot { border-color: var(--red-500); background: var(--red-050); color: var(--red-500); }
+.proceso-dot i { width: 22px; height: 22px; }
+.proceso-step h4 {
+  font-family: var(--font-display); font-weight: 700; font-size: 0.88rem;
+  margin-bottom: 0.4rem; color: var(--text-strong);
+}
+.proceso-step p { font-size: 0.8rem; color: var(--text-body); line-height: 1.6; }
+
+/* ── PRECIOS SECTION ──────────────────────────────────────── */
+.precios-section {
+  background: var(--black); padding: 5rem var(--gutter);
+  position: relative; overflow: hidden;
+}
+.precios-section::before {
+  content: ''; position: absolute; top: -60px; right: -60px;
+  width: 300px; height: 300px; border-radius: 50%;
+  background: var(--red-500); opacity: 0.07;
+}
+.precios-inner {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;
+  position: relative; z-index: 1;
+}
+.precios-content .eyebrow { color: var(--red-500); }
+.precios-content .h2 { color: #fff; margin-top: 0.6rem; margin-bottom: 1.2rem; }
+.precios-content p { color: rgba(255,255,255,0.65); font-size: 0.92rem; line-height: 1.8; margin-bottom: 2rem; }
+.precios-features { display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 2.2rem; }
+.precios-feature {
+  display: flex; align-items: center; gap: 0.75rem;
+  font-size: 0.85rem; color: rgba(255,255,255,0.8);
+}
+.precios-feature i { color: var(--red-500); flex-shrink: 0; width: 16px; height: 16px; }
+
+.precios-card {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; padding: 2.5rem;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: 1.2rem;
+}
+.precios-card-icon {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: var(--red-500); display: flex; align-items: center; justify-content: center;
+  color: #fff;
+}
+.precios-card-icon i { width: 32px; height: 32px; }
+.precios-card h3 {
+  font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; color: #fff;
+}
+.precios-card p { font-size: 0.83rem; color: rgba(255,255,255,0.55); line-height: 1.65; }
+.sbt-cta--precios-big {
+  background: var(--red-500); color: #fff; width: 100%;
+  justify-content: center; font-size: 0.82rem; padding: 1rem;
+  margin-top: 0.4rem;
+}
+.sbt-cta--precios-big:hover { background: var(--red-600); }
+
+/* ── CONTACTO ─────────────────────────────────────────────── */
+.contacto-section {
+  padding: 5rem var(--gutter);
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start;
+}
+.contacto-info .h2 { margin-top: 0.6rem; margin-bottom: 1.2rem; }
+.contacto-info p { font-size: 0.92rem; color: var(--text-body); line-height: 1.8; margin-bottom: 2rem; }
+.contacto-datos { display: flex; flex-direction: column; gap: 1rem; }
+.contacto-dato {
+  display: flex; align-items: center; gap: 0.9rem;
+  font-size: 0.88rem; color: var(--text-body);
+}
+.contacto-dato a { color: var(--text-body); transition: color var(--t-base); }
+.contacto-dato a:hover { color: var(--red-500); }
+.contacto-dato-icon {
+  width: 38px; height: 38px; border-radius: 4px;
+  background: var(--red-050); display: flex; align-items: center; justify-content: center;
+  color: var(--red-500); flex-shrink: 0;
+}
+.contacto-dato-icon i { width: 16px; height: 16px; }
+
+/* Form */
+.contact-form { display: flex; flex-direction: column; gap: 1rem; }
+.sbt-field {
+  width: 100%; padding: 0.75rem 0.9rem;
+  font-family: var(--font-body); font-size: 0.88rem;
+  color: var(--text-strong); background: var(--surface-alt);
+  border: 1px solid var(--border-hairline); border-radius: 3px;
+  outline: none; transition: border-color var(--t-base), background var(--t-base);
+}
+.sbt-field::placeholder { color: var(--text-muted); }
+.sbt-field:focus { border-color: var(--red-500); background: #fff; }
+textarea.sbt-field { resize: vertical; min-height: 120px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+.form-label {
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.5px;
+  text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem; display: block;
+}
+.form-group { display: flex; flex-direction: column; }
+.form-success {
+  display: none; background: #f0fdf4; border: 1px solid #86efac;
+  border-radius: 4px; padding: 1rem 1.2rem;
+  font-size: 0.88rem; color: #166534; text-align: center;
+}
+
+/* ── FOOTER ───────────────────────────────────────────────── */
+.site-footer {
+  background: var(--black); color: rgba(255,255,255,0.5);
+  padding: 3rem var(--gutter) 2rem;
+  border-top: 4px solid var(--red-500);
+}
+.footer-inner {
+  display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 3rem;
+  margin-bottom: 2.5rem;
+}
+.footer-brand .brand-wordmark strong { color: #fff; }
+.footer-brand .brand-wordmark small { color: rgba(255,255,255,0.4); }
+.footer-brand p {
+  font-size: 0.82rem; line-height: 1.7; margin-top: 1rem;
+  color: rgba(255,255,255,0.45); max-width: 300px;
+}
+.footer-col h5 {
+  font-family: var(--font-display); font-weight: 700; font-size: 0.72rem;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: rgba(255,255,255,0.35); margin-bottom: 1rem;
+}
+.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+.footer-col a {
+  font-size: 0.82rem; color: rgba(255,255,255,0.5);
+  text-decoration: none; transition: color var(--t-base);
+}
+.footer-col a:hover { color: var(--red-500); }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.07);
+  padding-top: 1.5rem;
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
+  font-size: 0.75rem;
+}
+.swoosh-footer { margin: 0 calc(-1 * var(--gutter)) 2rem; overflow: hidden; }
+
+/* ── RESPONSIVE ───────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; padding: 3rem var(--gutter); }
+  .hero-visual { height: 280px; }
+  .hero h1 { font-size: 2.2rem; }
+  .precios-inner { grid-template-columns: 1fr; gap: 2.5rem; }
+  .contacto-section { grid-template-columns: 1fr; gap: 2.5rem; }
+  .footer-inner { grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .proceso-steps::before { display: none; }
+  .proceso-steps { gap: 1.5rem; }
+  .form-row { grid-template-columns: 1fr; }
+  .nav-links, .nav-cta-wrap { display: none; }
+  .nav-toggle { display: flex; }
+}
+@media (max-width: 600px) {
+  .footer-inner { grid-template-columns: 1fr; }
+  .servicios-grid { grid-template-columns: 1fr; }
+  .diferencial-grid { grid-template-columns: 1fr; }
+  .precios-banner { flex-direction: column; align-items: flex-start; }
+  .h2 { font-size: 1.7rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ─────────────────────────────────────────────────── -->
+<nav class="site-nav">
+  <a href="../../" class="nav-brand">
+    <div class="brand-mosaic">
+      <span style="background:#E10600"></span><span style="background:#E10600"></span><span style="background:#0B0B0B"></span>
+      <span style="background:#E10600"></span><span style="background:#0B0B0B"></span><span style="background:#9AA0A0"></span>
+      <span style="background:#0B0B0B"></span><span style="background:#9AA0A0"></span><span style="background:#9AA0A0"></span>
+    </div>
+    <div class="brand-wordmark">
+      <strong><span class="sibra">SIBRA</span>TECH</strong>
+      <small>GROUP</small>
+    </div>
+  </a>
+
+  <ul class="nav-links">
+    <li><a href="../../#unidades">Unidades</a></li>
+    <li><a href="#servicios">Servicios</a></li>
+    <li><a href="#proceso">Proceso</a></li>
+    <li><a href="#precios">Precios</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ul>
+
+  <div class="nav-cta-wrap">
+    <a href="#precios" class="sbt-cta" style="font-size:0.68rem;padding:0.6rem 1.2rem;">
+      <i data-lucide="trending-up"></i> Precios actualizados
+    </a>
+  </div>
+
+  <button class="nav-toggle" id="nav-toggle" aria-label="Menú">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="nav-mobile" id="nav-mobile">
+  <a href="../../">← Sibratech Group</a>
+  <a href="#servicios">Servicios</a>
+  <a href="#proceso">Proceso</a>
+  <a href="#precios">Precios de obra</a>
+  <a href="#contacto">Contacto</a>
+</div>
+
+<!-- ── HERO ─────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-breadcrumb">
+      <a href="../../">Sibratech Group</a>
+      <span>/</span>
+      <span>Constructora</span>
+    </div>
+    <div class="eyebrow">Sibratech Constructora</div>
+    <h1>Obras que <span class="accent">construyen</span><br>oportunidades</h1>
+    <p class="hero-tagline">Ejecución de obras civiles · Proyectos · Dirección técnica</p>
+    <p>Desarrollamos proyectos de construcción de principio a fin: desde el anteproyecto y legales hasta la dirección de obra y la ingeniería administrativa. Cada etapa con método, control y transparencia.</p>
+    <div class="hero-btns">
+      <a href="#contacto" class="sbt-cta">
+        <i data-lucide="phone"></i> Consultar proyecto
+      </a>
+      <a href="#precios" class="sbt-cta sbt-cta--precios">
+        <i data-lucide="trending-up"></i> <span>Precios de obra actualizados</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="hero-visual-inner">
+      <!-- Skyline SVG constructora -->
+      <svg viewBox="0 0 560 420" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;">
+        <!-- Fondo degradado oscuro -->
+        <rect width="560" height="420" fill="url(#grad-hero)"/>
+        <defs>
+          <linearGradient id="grad-hero" x1="0" y1="0" x2="560" y2="420" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#141414"/>
+            <stop offset="100%" stop-color="#0b0b0b"/>
+          </linearGradient>
+          <linearGradient id="grad-red" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+            <stop offset="0%" stop-color="#E10600"/>
+            <stop offset="100%" stop-color="#8f0400"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Grilla fondo perspectiva -->
+        <g opacity="0.06" stroke="#fff" stroke-width="0.5">
+          <line x1="0" y1="310" x2="560" y2="310"/>
+          <line x1="0" y1="280" x2="560" y2="280"/>
+          <line x1="80" y1="420" x2="280" y2="310"/>
+          <line x1="200" y1="420" x2="280" y2="310"/>
+          <line x1="320" y1="420" x2="280" y2="310"/>
+          <line x1="440" y1="420" x2="280" y2="310"/>
+          <line x1="0" y1="380" x2="280" y2="310"/>
+          <line x1="560" y1="380" x2="280" y2="310"/>
+        </g>
+
+        <!-- Edificios de fondo (silueta) -->
+        <rect x="30" y="220" width="50" height="200" fill="#1f1f1f"/>
+        <rect x="90" y="180" width="40" height="240" fill="#242424"/>
+        <rect x="140" y="240" width="60" height="180" fill="#1c1c1c"/>
+        <rect x="370" y="200" width="55" height="220" fill="#1f1f1f"/>
+        <rect x="435" y="160" width="45" height="260" fill="#242424"/>
+        <rect x="490" y="230" width="50" height="190" fill="#1c1c1c"/>
+
+        <!-- Edificio principal (centro-derecha) -->
+        <rect x="215" y="80" width="130" height="340" fill="#1a1a1a" stroke="rgba(225,6,0,0.2)" stroke-width="1"/>
+        <!-- Ventanas edificio -->
+        <g fill="rgba(255,255,150,0.15)">
+          <rect x="225" y="95" width="15" height="20"/>
+          <rect x="248" y="95" width="15" height="20"/>
+          <rect x="271" y="95" width="15" height="20"/>
+          <rect x="294" y="95" width="15" height="20"/>
+          <rect x="225" y="125" width="15" height="20"/>
+          <rect x="248" y="125" width="15" height="20"/>
+          <rect x="271" y="125" width="15" height="20"/>
+          <rect x="294" y="125" width="15" height="20"/>
+          <rect x="225" y="155" width="15" height="20"/>
+          <rect x="271" y="155" width="15" height="20"/>
+          <rect x="225" y="185" width="15" height="20"/>
+          <rect x="248" y="185" width="15" height="20"/>
+          <rect x="294" y="185" width="15" height="20"/>
+          <rect x="225" y="215" width="15" height="20"/>
+          <rect x="271" y="215" width="15" height="20"/>
+          <rect x="225" y="245" width="15" height="20"/>
+          <rect x="248" y="245" width="15" height="20"/>
+          <rect x="294" y="245" width="15" height="20"/>
+        </g>
+        <!-- Línea roja lateral edificio -->
+        <rect x="215" y="80" width="4" height="340" fill="url(#grad-red)" opacity="0.7"/>
+        <!-- Antena edificio -->
+        <rect x="278" y="55" width="4" height="28" fill="#E10600"/>
+        <circle cx="280" cy="53" r="4" fill="#E10600"/>
+
+        <!-- Grúa torre -->
+        <rect x="350" y="100" width="6" height="220" fill="#2a2a2a" stroke="#3a3a3a" stroke-width="0.5"/>
+        <rect x="295" y="105" width="120" height="5" fill="#E10600" opacity="0.8"/>
+        <line x1="350" y1="108" x2="295" y2="180" stroke="#666" stroke-width="1.5"/>
+        <line x1="350" y1="108" x2="415" y2="150" stroke="#666" stroke-width="1.5"/>
+        <!-- Gancho grúa -->
+        <line x1="380" y1="110" x2="380" y2="160" stroke="#888" stroke-width="1"/>
+        <rect x="375" y="160" width="10" height="6" fill="#555"/>
+
+        <!-- Suelo / base -->
+        <rect x="0" y="385" width="560" height="35" fill="#0f0f0f"/>
+        <rect x="0" y="383" width="560" height="3" fill="rgba(225,6,0,0.3)"/>
+
+        <!-- Línea roja swoosh inferior -->
+        <path d="M0 370 C 120 350, 200 390, 320 360 S 460 330, 560 355" stroke="#E10600" stroke-width="3" fill="none" opacity="0.5"/>
+        <path d="M0 380 C 120 362, 200 400, 320 372 S 460 342, 560 367" stroke="#9AA0A0" stroke-width="1.5" fill="none" opacity="0.3"/>
+      </svg>
+    </div>
+
+    <div class="hero-stat-badge">
+      <strong>+15</strong>
+      <span>años de obras</span>
+    </div>
+    <div class="hero-pill">Corrientes Capital · Argentina</div>
+    <img src="../../assets/logos/sibratech-constructora-trans.png" alt="Sibratech Constructora" class="hero-logo-big">
+  </div>
+</section>
+
+<!-- ── BANNER PRECIOS ──────────────────────────────────────── -->
+<div class="precios-banner" id="precios-banner">
+  <div class="precios-banner-text">
+    <strong>Precios de referencia de obras actualizados</strong>
+    <span>Costos por m² de construcción, materiales e índices de obra civil en Argentina — actualizados mensualmente.</span>
+  </div>
+  <a href="https://presuapp.sibratech.com.ar" target="_blank" rel="noopener" class="sbt-cta sbt-cta--banner">
+    <i data-lucide="external-link"></i> Ver precios en Presuapp
+  </a>
+</div>
+
+<!-- ── SERVICIOS ────────────────────────────────────────────── -->
+<section class="section" id="servicios">
+  <div class="section-header">
+    <div class="eyebrow">Qué hacemos</div>
+    <h2 class="h2">Servicios de construcción<br>con visión integral</h2>
+    <div class="red-bar"></div>
+    <p style="font-size:0.92rem;color:var(--text-body);line-height:1.8;">
+      Desde el diseño del anteproyecto hasta la entrega final, cubrimos todas las etapas de una obra con equipos especializados y tecnología de gestión.
+    </p>
+  </div>
+
+  <div class="servicios-grid">
+    <div class="servicio-card">
+      <div class="servicio-icon"><i data-lucide="building-2"></i></div>
+      <h3>Ejecución de Obras Civiles</h3>
+      <p>Construcción de viviendas, locales comerciales, oficinas, galpones e infraestructura. Trabajamos con materiales de primera calidad y personal propio.</p>
+    </div>
+    <div class="servicio-card">
+      <div class="servicio-icon"><i data-lucide="pen-tool"></i></div>
+      <h3>Proyecto y Anteproyecto</h3>
+      <p>Diseño arquitectónico y de ingeniería, memorias descriptivas, planos ejecutivos, tramitación de visados y legales municipales y provinciales.</p>
+    </div>
+    <div class="servicio-card">
+      <div class="servicio-icon"><i data-lucide="hard-hat"></i></div>
+      <h3>Dirección de Obra</h3>
+      <p>Representación técnica y dirección ejecutiva ante el comitente y organismos. Control de avance, calidad y cumplimiento del plan de trabajos.</p>
+    </div>
+    <div class="servicio-card">
+      <div class="servicio-icon"><i data-lucide="bar-chart-2"></i></div>
+      <h3>Ingeniería Administrativa</h3>
+      <p>Gestión de cómputos y presupuestos, certificaciones de avance, control de costos, variación de precios (Redetermminación), informes técnico-económicos mensuales.</p>
+    </div>
+    <div class="servicio-card">
+      <div class="servicio-icon"><i data-lucide="file-text"></i></div>
+      <h3>Licitaciones y Concursos</h3>
+      <p>Confección de pliegos, análisis de precios, presentación a licitaciones públicas y privadas. Seguimiento y gestión del proceso hasta la adjudicación.</p>
+    </div>
+    <div class="servicio-card">
+      <div class="servicio-icon"><i data-lucide="shield-check"></i></div>
+      <h3>Inspección y Auditoría Técnica</h3>
+      <p>Auditoría de obras en ejecución por terceros, informes de estado, control de calidad de materiales y verificación de mediciones y certificados.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── DIFERENCIAL ───────────────────────────────────────────── -->
+<section class="section section--alt">
+  <div class="section-header">
+    <div class="eyebrow">Por qué elegirnos</div>
+    <h2 class="h2">Método, control<br>y transparencia</h2>
+    <div class="red-bar"></div>
+  </div>
+
+  <div class="diferencial-grid">
+    <div class="diferencial-item">
+      <div class="diferencial-num">01</div>
+      <div>
+        <h4>Precio cerrado o administrado</h4>
+        <p>Acordamos la modalidad contractual según el tipo de obra. Presupuestos detallados con desglose por ítem y análisis de precios unitarios.</p>
+      </div>
+    </div>
+    <div class="diferencial-item">
+      <div class="diferencial-num">02</div>
+      <div>
+        <h4>Gestión integrada con tecnología</h4>
+        <p>Usamos herramientas propias (Presuapp, ERP Sibratech) para el control de obra en tiempo real. El cliente tiene visibilidad del avance y los costos.</p>
+      </div>
+    </div>
+    <div class="diferencial-item">
+      <div class="diferencial-num">03</div>
+      <div>
+        <h4>Equipo multidisciplinario</h4>
+        <p>Ingenieros civiles, arquitectos, maestros mayores de obra y administradores trabajando coordinados bajo una misma dirección técnica.</p>
+      </div>
+    </div>
+    <div class="diferencial-item">
+      <div class="diferencial-num">04</div>
+      <div>
+        <h4>Experiencia en obra pública y privada</h4>
+        <p>Historial en licitaciones municipales y provinciales en Corrientes. Conocimiento del marco regulatorio local y de los organismos de control.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PROCESO ─────────────────────────────────────────────── -->
+<section class="section" id="proceso">
+  <div class="section-header">
+    <div class="eyebrow">Cómo trabajamos</div>
+    <h2 class="h2">El proceso de una obra<br>paso a paso</h2>
+    <div class="red-bar"></div>
+  </div>
+
+  <div class="proceso-steps">
+    <div class="proceso-step">
+      <div class="proceso-dot"><i data-lucide="message-square"></i></div>
+      <h4>1. Consulta inicial</h4>
+      <p>Relevamos necesidades, terreno y presupuesto orientativo. Sin costo ni compromiso.</p>
+    </div>
+    <div class="proceso-step">
+      <div class="proceso-dot"><i data-lucide="file-search"></i></div>
+      <h4>2. Anteproyecto y presupuesto</h4>
+      <p>Elaboramos planos preliminares y un presupuesto detallado por ítems y materiales.</p>
+    </div>
+    <div class="proceso-step">
+      <div class="proceso-dot"><i data-lucide="clipboard-list"></i></div>
+      <h4>3. Proyecto ejecutivo y legales</h4>
+      <p>Planos definitivos, memoria descriptiva, cálculos y tramitación de permisos municipales.</p>
+    </div>
+    <div class="proceso-step">
+      <div class="proceso-dot"><i data-lucide="hard-hat"></i></div>
+      <h4>4. Ejecución y dirección</h4>
+      <p>Inicio de obra con plan de trabajos, cronograma y reuniones periódicas de avance.</p>
+    </div>
+    <div class="proceso-step">
+      <div class="proceso-dot"><i data-lucide="check-circle"></i></div>
+      <h4>5. Entrega y documentación</h4>
+      <p>Planos conforme a obra, certificado final de obra y manual de mantenimiento.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRECIOS ─────────────────────────────────────────────── -->
+<section class="precios-section" id="precios">
+  <div class="precios-inner">
+    <div class="precios-content">
+      <div class="eyebrow">Precios de Obra</div>
+      <h2 class="h2">Costos de referencia<br>actualizados</h2>
+      <p>
+        El costo de construir en Argentina varía mes a mes. En <strong style="color:#fff;">Presuapp</strong> actualizamos permanentemente los precios de materiales, mano de obra y costos por m² según los índices de la Cámara Argentina de la Construcción y proveedores locales.
+      </p>
+      <div class="precios-features">
+        <div class="precios-feature">
+          <i data-lucide="check"></i>
+          Costo por m² por tipo de obra (vivienda, local, galpón, oficina)
+        </div>
+        <div class="precios-feature">
+          <i data-lucide="check"></i>
+          Índices CAC e INDEC integrados para redeterminación de precios
+        </div>
+        <div class="precios-feature">
+          <i data-lucide="check"></i>
+          Precios de materiales en Corrientes Capital
+        </div>
+        <div class="precios-feature">
+          <i data-lucide="check"></i>
+          Costos de mano de obra convenio UOCRA actualizados
+        </div>
+        <div class="precios-feature">
+          <i data-lucide="check"></i>
+          Actualización mensual automática
+        </div>
+      </div>
+      <a href="https://presuapp.sibratech.com.ar" target="_blank" rel="noopener" class="sbt-cta" style="font-size:0.78rem;padding:0.9rem 2rem;">
+        <i data-lucide="external-link"></i> Abrir Presuapp
+      </a>
+    </div>
+
+    <div class="precios-card">
+      <div class="precios-card-icon">
+        <i data-lucide="trending-up"></i>
+      </div>
+      <h3>Precios actualizados este mes</h3>
+      <p>Consultá costos de obra en tiempo real. Sin registro previo, acceso libre para la consulta inicial.</p>
+      <a href="https://presuapp.sibratech.com.ar" target="_blank" rel="noopener" class="sbt-cta sbt-cta--precios-big">
+        <i data-lucide="bar-chart-2"></i> Ver tabla de precios
+      </a>
+      <a href="#contacto" class="sbt-cta sbt-cta--outline-dark" style="width:100%;justify-content:center;font-size:0.75rem;">
+        <i data-lucide="phone"></i> Pedir presupuesto de obra
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── CONTACTO ─────────────────────────────────────────────── -->
+<section id="contacto">
+  <div class="contacto-section">
+    <div class="contacto-info">
+      <div class="eyebrow">Contacto</div>
+      <h2 class="h2">Hablemos de<br>tu proyecto</h2>
+      <div class="red-bar"></div>
+      <p>
+        Contanos qué querés construir — tipo de obra, m² estimados, zona y plazo deseado — y te respondemos con un orientativo de costos sin compromiso.
+      </p>
+      <div class="contacto-datos">
+        <div class="contacto-dato">
+          <div class="contacto-dato-icon"><i data-lucide="phone"></i></div>
+          <a href="https://wa.me/5491166582523" target="_blank" rel="noopener">+54 9 11 6658-2523</a>
+        </div>
+        <div class="contacto-dato">
+          <div class="contacto-dato-icon"><i data-lucide="mail"></i></div>
+          <a href="mailto:info@sibratech.com.ar">info@sibratech.com.ar</a>
+        </div>
+        <div class="contacto-dato">
+          <div class="contacto-dato-icon"><i data-lucide="map-pin"></i></div>
+          <a href="https://maps.app.goo.gl/2AFEDzyry3LbKoja7" target="_blank" rel="noopener">San Martín 524 PB A · Corrientes Capital</a>
+        </div>
+        <div class="contacto-dato">
+          <div class="contacto-dato-icon"><i data-lucide="globe"></i></div>
+          <a href="https://presuapp.sibratech.com.ar" target="_blank" rel="noopener">presuapp.sibratech.com.ar</a>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <form class="contact-form" id="contact-form" action="https://formspree.io/f/mlgzqqke" method="POST" novalidate>
+        <input type="hidden" name="_subject" value="Consulta Constructora — sibratech.com.ar">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="nombre">Nombre</label>
+            <input id="nombre" name="nombre" type="text" class="sbt-field" placeholder="Tu nombre" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="telefono">Teléfono / WhatsApp</label>
+            <input id="telefono" name="telefono" type="tel" class="sbt-field" placeholder="+54 ...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="email">Email</label>
+          <input id="email" name="email" type="email" class="sbt-field" placeholder="tu@email.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="tipo_obra">Tipo de obra</label>
+          <select id="tipo_obra" name="tipo_obra" class="sbt-field">
+            <option value="">Seleccioná una opción</option>
+            <option>Vivienda unifamiliar</option>
+            <option>Local comercial</option>
+            <option>Oficinas / edificio</option>
+            <option>Galpón / nave industrial</option>
+            <option>Ampliación o refacción</option>
+            <option>Obra pública / licitación</option>
+            <option>Otra</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="mensaje">Descripción del proyecto</label>
+          <textarea id="mensaje" name="mensaje" class="sbt-field" placeholder="Contanos m² estimados, zona, plazo y cualquier detalle relevante..." required></textarea>
+        </div>
+        <button type="submit" class="sbt-cta" style="width:100%;justify-content:center;">
+          <i data-lucide="send"></i> Enviar consulta
+        </button>
+        <div class="form-success" id="form-success">
+          ✓ ¡Recibimos tu consulta! Te contactamos en menos de 24 h.
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ────────────────────────────────────────────────── -->
+<footer class="site-footer">
+  <div class="swoosh-footer">
+    <svg viewBox="0 0 1200 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="100%" preserveAspectRatio="none">
+      <path d="M0 40 C 200 15, 400 55, 600 30 S 900 5, 1200 28" stroke="#9AA0A0" stroke-width="4" stroke-linecap="round" opacity="0.25"/>
+      <path d="M0 28 C 200 3, 400 43, 600 18 S 900 -7, 1200 16" stroke="#E10600" stroke-width="7" stroke-linecap="round" opacity="0.7"/>
+    </svg>
+  </div>
+
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="nav-brand" style="margin-bottom:1rem;">
+        <div class="brand-mosaic">
+          <span style="background:#E10600"></span><span style="background:#E10600"></span><span style="background:#fff;opacity:.15"></span>
+          <span style="background:#E10600"></span><span style="background:#fff;opacity:.15"></span><span style="background:#9AA0A0;opacity:.5"></span>
+          <span style="background:#fff;opacity:.15"></span><span style="background:#9AA0A0;opacity:.5"></span><span style="background:#9AA0A0;opacity:.5"></span>
+        </div>
+        <div class="brand-wordmark footer-brand">
+          <strong style="color:#fff"><span class="sibra" style="color:#E10600">SIBRA</span>TECH</strong>
+          <small style="color:rgba(255,255,255,0.35)">CONSTRUCTORA</small>
+        </div>
+      </div>
+      <p>Ingeniería, construcción y gestión de proyectos en Corrientes y la región. Construyendo Oportunidades.</p>
+    </div>
+
+    <div class="footer-col">
+      <h5>Servicios</h5>
+      <ul>
+        <li><a href="#servicios">Ejecución de obras</a></li>
+        <li><a href="#servicios">Proyecto y dirección</a></li>
+        <li><a href="#servicios">Ingeniería administrativa</a></li>
+        <li><a href="#servicios">Licitaciones</a></li>
+        <li><a href="#servicios">Auditoría técnica</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h5>Contacto</h5>
+      <ul>
+        <li><a href="https://wa.me/5491166582523" target="_blank" rel="noopener">WhatsApp</a></li>
+        <li><a href="mailto:info@sibratech.com.ar">info@sibratech.com.ar</a></li>
+        <li><a href="https://maps.app.goo.gl/2AFEDzyry3LbKoja7" target="_blank" rel="noopener">San Martín 524 PB A</a></li>
+        <li><a href="https://presuapp.sibratech.com.ar" target="_blank" rel="noopener">Presuapp</a></li>
+        <li><a href="../../">Sibratech Group</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <span>© 2025 Sibratech Group · CUIT 33-71553663-9</span>
+    <span>San Martín 524 PB A · Corrientes Capital</span>
+  </div>
+</footer>
+
+<script>
+lucide.createIcons();
+
+// Nav mobile
+const toggle = document.getElementById('nav-toggle');
+const mobile = document.getElementById('nav-mobile');
+toggle.addEventListener('click', () => {
+  toggle.classList.toggle('open');
+  mobile.classList.toggle('open');
+});
+mobile.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+  toggle.classList.remove('open');
+  mobile.classList.remove('open');
+}));
+
+// Formspree fetch
+document.getElementById('contact-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn = this.querySelector('[type="submit"]');
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+  try {
+    var res = await fetch('https://formspree.io/f/mlgzqqke', {
+      method: 'POST',
+      headers: { 'Accept': 'application/json' },
+      body: new FormData(this)
+    });
+    if (res.ok) {
+      this.reset();
+      document.getElementById('form-success').style.display = 'block';
+      btn.style.display = 'none';
+    } else {
+      btn.textContent = 'Error al enviar. Intentá de nuevo.';
+      btn.disabled = false;
+    }
+  } catch {
+    btn.textContent = 'Error de red. Intentá de nuevo.';
+    btn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
