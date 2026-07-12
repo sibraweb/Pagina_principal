@@ -206,10 +206,15 @@ a { color: inherit; text-decoration: none; }
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
 }
-.hero-logo-big {
-  position: absolute; bottom: 1.8rem; left: 50%; transform: translateX(-50%);
-  width: 180px; opacity: 0.92; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.12));
+.hero-logo-box {
+  position: absolute; bottom: 1.2rem; left: 50%; transform: translateX(-50%);
+  z-index: 3;
+  background: rgba(255,255,255,0.92); border: 1px solid rgba(0,0,0,0.07);
+  border-radius: 5px; padding: 0.5rem 1.4rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  display: flex; align-items: center; justify-content: center;
 }
+.hero-logo-img { height: 36px; width: auto; display: block; }
 .hero-stat-badge {
   position: absolute; top: 1.5rem; left: 1.5rem;
   background: var(--red-500); color: #fff;
@@ -655,8 +660,13 @@ textarea.sbt-field { resize: vertical; min-height: 120px; }
       <strong>+15</strong>
       <span>años de obras</span>
     </div>
+
+    <!-- Logo Sibratech Constructora -->
+    <div class="hero-logo-box">
+      <img src="../../assets/logos/sibratech-constructora.png" alt="Sibratech Constructora" class="hero-logo-img">
+    </div>
+
     <div class="hero-pill">Corrientes Capital · Argentina</div>
-    <img src="../../assets/logos/sibratech-constructora.png" alt="Sibratech Constructora" class="hero-logo-big">
   </div>
 </section>
 
