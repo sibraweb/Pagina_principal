@@ -455,18 +455,37 @@ td.fail2 { color:var(--fail); font-weight:700; font-family:var(--font-head); }
 
 <script>
 // ================================================================
-// DATOS — Perfiles IPN (DIN 1025-1 / IRAM) — dimensiones nominales
-// [h_mm, b_mm, tw_mm, tf_mm]
-// Ag, Ix, Iy, Zx, peso se CALCULAN a partir de estas dimensiones
-// (idealización de 3 rectángulos, sin radios de acuerdo — simplificación
-// estándar docente). Verificar contra catálogo oficial antes de uso profesional.
+// DATOS — Perfiles I.P.N. — Catálogo Construcción Civil (Acindar/IRAM)
+// Tabla "Perfil normal doble T", pág.24 — IRAM-IAS U500-511/08
+// [h_mm, b_mm, tw(s)_mm, tf(t)_mm, Ag_cm2, peso_kg/m, Ix_cm4, Iy_cm4, Wx_cm3, Wy_cm3]
+// Ag, Ix, Iy, Wx, Wy y peso son los valores TABULADOS oficiales del catálogo.
+// Zx (módulo plástico) y J (torsión) no figuran en el catálogo: se estiman
+// por geometría idealizada (3 rectángulos, sin radios de acuerdo) — ver notas.
 // ================================================================
 var IPN = [
-  [80,42,3.9,5.9],[100,50,4.5,6.8],[120,58,5.1,7.7],[140,66,5.7,8.6],
-  [160,74,6.3,9.5],[180,82,6.9,10.4],[200,90,7.5,11.3],[220,98,8.1,12.2],
-  [240,106,8.7,13.1],[260,113,9.4,14.1],[280,119,10.1,15.2],[300,125,10.8,16.2],
-  [320,131,11.5,17.3],[340,137,12.2,18.3],[360,143,13.0,19.5],[380,149,13.7,20.5],
-  [400,155,14.4,21.6],[450,170,16.2,24.3],[500,185,18.0,27.0],[550,200,19.0,30.0]
+  [80,42,3.9,5.9, 7.6,5.9, 77.8,6.29, 19.5,3.0],
+  [100,50,4.5,6.8, 10.6,8.3, 171,12.2, 34.2,4.88],
+  [120,58,5.1,7.7, 14.2,11.2, 328,21.5, 54.7,7.41],
+  [140,66,5.7,8.6, 18.3,14.3, 573,35.2, 81.9,10.7],
+  [160,74,6.3,9.5, 22.8,17.9, 935,54.7, 117,14.8],
+  [180,82,6.9,10.4, 27.9,21.9, 1450,81.3, 161,19.8],
+  [200,90,7.5,11.3, 33.5,26.2, 2140,117, 214,26.0],
+  [220,98,8.1,12.2, 39.6,31.1, 3060,162, 278,33.1],
+  [240,106,8.7,13.1, 46.1,36.2, 4250,221, 354,41.7],
+  [260,113,9.4,14.1, 53.3,41.9, 5740,288, 442,51.0],
+  [280,119,10.1,15.2, 61.0,47.9, 7590,364, 542,61.2],
+  [300,125,10.8,16.2, 69.1,54.2, 9800,451, 653,72.2],
+  [320,131,11.5,17.3, 77.7,61.0, 12510,555, 782,84.7],
+  [340,137,12.2,18.3, 86.7,68.0, 15700,674, 923,98.4],
+  [360,143,13.0,19.5, 97,76.0, 19610,818, 1090,114.4],
+  [380,149,13.7,20.5, 107,84.0, 24010,975, 1260,130.9],
+  [400,155,14.4,21.6, 118,92.4, 29210,1160, 1460,149.7],
+  [425,163,15.3,23.0, 132,104, 36970,1440, 1740,176.7],
+  [450,170,16.2,24.3, 147,115, 45850,1730, 2040,203.5],
+  [475,178,17.1,25.6, 163,128, 56480,2090, 2380,234.8],
+  [500,185,18.0,27.0, 179,141, 68740,2480, 2750,268.1],
+  [550,200,19.0,30.0, 212,166, 99180,3490, 3610,349.0],
+  [600,215,21.6,32.4, 254,199, 139000,4670, 4630,434.4]
 ];
 var E_ACERO = 200000; // MPa
 
@@ -475,10 +494,39 @@ var ACEROS = {F24:[235,370],F26:[250,400],F36:[345,485],A572:[345,448]};
 // ================================================================
 // ESTADO GLOBAL
 // ================================================================
-var gIPN = {h:300,b:125,tw:10.8,tf:16.2};
+var gIPN = ipnFromRow([300,125,10.8,16.2, 69.1,54.2, 9800,451, 653,72.2]);
 
 // ================================================================
-// MOTOR DE SECCIÓN COMPUESTA (rectángulos)
+// SECCIÓN COMPUESTA EXACTA (perfil = valor tabulado catálogo + platabandas)
+// Usa Ix/Iy tabulados del perfil (dato de catálogo) trasladados por Steiner;
+// las platabandas se calculan geométricamente (rectángulo exacto).
+// ================================================================
+function compositeExact(ipn, bs,ts,hasPS, bi,ti,hasPI){
+  var Ag_p=ipn.Ag*100, Ix_p=ipn.Ix*1e4, Iy_p=ipn.Iy*1e4; // cm²→mm², cm⁴→mm⁴
+  var parts=[{A:Ag_p, Ix0:Ix_p, Iy0:Iy_p, yc:ipn.h/2}];
+  var yBotMin=0, yTopMax=ipn.h;
+  if (hasPI && ti>0){
+    var Api=bi*ti;
+    parts.push({A:Api, Ix0:(bi*Math.pow(ti,3))/12, Iy0:(ti*Math.pow(bi,3))/12, yc:-ti/2});
+    yBotMin=-ti;
+  }
+  if (hasPS && ts>0){
+    var Aps=bs*ts;
+    parts.push({A:Aps, Ix0:(bs*Math.pow(ts,3))/12, Iy0:(ts*Math.pow(bs,3))/12, yc:ipn.h+ts/2});
+    yTopMax=ipn.h+ts;
+  }
+  var At=0,Qx=0;
+  for(var i=0;i<parts.length;i++){ At+=parts[i].A; Qx+=parts[i].A*parts[i].yc; }
+  var ybar=Qx/At;
+  var Ix=0, Iy=0;
+  for(var i=0;i<parts.length;i++){ Ix+=parts[i].Ix0+parts[i].A*Math.pow(parts[i].yc-ybar,2); Iy+=parts[i].Iy0; }
+  var cTop=yTopMax-ybar, cBot=ybar-yBotMin;
+  return {At:At,Ix:Ix,Iy:Iy,ybar:ybar,cTop:cTop,cBot:cBot,SxTop:Ix/cTop,SxBot:Ix/cBot,yBotMin:yBotMin,yTopMax:yTopMax,H:yTopMax-yBotMin};
+}
+
+// ================================================================
+// MOTOR DE SECCIÓN IDEALIZADA (rectángulos) — sólo para Zx y J
+// (el catálogo no tabula módulo plástico ni constante de torsión)
 // ================================================================
 // rects: [{w:ancho_horizontal_mm, yBot:mm, yTop:mm}]
 function sectionProps(rects) {
@@ -600,6 +648,8 @@ function applyAcero(){
 // ================================================================
 // SELECTOR DE PERFIL
 // ================================================================
+function ipnFromRow(p){ return {h:p[0],b:p[1],tw:p[2],tf:p[3],Ag:p[4],peso:p[5],Ix:p[6],Iy:p[7],Wx:p[8],Wy:p[9]}; }
+
 function renderIPN(){
   var box=document.getElementById('ipn-chips'); box.innerHTML='';
   for (var i=0;i<IPN.length;i++){
@@ -607,13 +657,13 @@ function renderIPN(){
     var d=document.createElement('div');
     d.className='bchip'+(isSel?' sel':'');
     d.innerHTML='<div class="bd">IPN'+p[0]+'</div><div class="bs">b='+p[1]+' tw='+p[2]+'<br>tf='+p[3]+'</div>';
-    d.onclick=(function(pp){ return function(){ gIPN={h:pp[0],b:pp[1],tw:pp[2],tf:pp[3]}; renderIPN(); recalc(); }; })(p);
+    d.onclick=(function(pp){ return function(){ gIPN=ipnFromRow(pp); renderIPN(); recalc(); }; })(p);
     box.appendChild(d);
   }
-  var sp=sectionProps(buildRects(gIPN,0,0,false,0,0,false));
   document.getElementById('ipn-info').innerHTML =
-    '<strong>IPN'+gIPN.h+'</strong>  Ag='+f2(sp.At/100)+'cm² · peso≈'+f2(sp.At*0.785/1000)+'kg/m<br>'
-    +'Ix='+f0(sp.Ix/1e4)+'cm⁴ · Iy='+f0(sp.Iy/1e4)+'cm⁴ · Zx='+f0(sp.Zx/1e3)+'cm³';
+    '<strong>IPN'+gIPN.h+'</strong>  Ag='+f2(gIPN.Ag)+'cm² · peso='+f2(gIPN.peso)+'kg/m<br>'
+    +'Ix='+f0(gIPN.Ix)+'cm⁴ · Iy='+f0(gIPN.Iy)+'cm⁴ · Wx='+f0(gIPN.Wx)+'cm³ · Wy='+f0(gIPN.Wy)+'cm³'
+    +'<br><span style="color:#6a8">Catálogo Construcción Civil — Tabla I.P.N.</span>';
 }
 
 // ================================================================
@@ -700,26 +750,29 @@ function recalc(){
   var E=E_ACERO;
 
   // ---- 1. Propiedades sección compuesta ----
-  var rectsPerfil = buildRects(ipn,0,0,false,0,0,false);
-  var spPerfil = sectionProps(rectsPerfil);
+  // Ag/Ix/Iy/Wx del perfil = valores TABULADOS del catálogo (exactos).
+  // Zx y J no están en el catálogo: se estiman por geometría idealizada.
+  var spPerfilCat = {At:ipn.Ag*100, Ix:ipn.Ix*1e4, Iy:ipn.Iy*1e4, SxTop:ipn.Wx*1e3, SxBot:ipn.Wx*1e3, ybar:ipn.h/2};
+  var spPerfilIdeal = sectionProps(buildRects(ipn,0,0,false,0,0,false)); // sólo para Zx del perfil
   var rectsComp = buildRects(ipn,bs,ts,hasPS,bi,ti,hasPI);
-  var sp = sectionProps(rectsComp);
+  var spIdeal = sectionProps(rectsComp); // sólo para Zx de la sección compuesta
+  var sp = compositeExact(ipn,bs,ts,hasPS,bi,ti,hasPI); // Ix/Iy/Sx/ybar EXACTOS (catálogo + Steiner)
   var J = jTorsion(rectsComp);
   var ho = ipn.h - ipn.tf; // aprox distancia entre centroides de alas (perfil base)
   var Cw = sp.Iy*Math.pow(ho,2)/4;
   var rts = Math.sqrt(Math.sqrt(sp.Iy*Cw)/sp.SxTop); // aproximación simplificada Ec F2-7 (mm)
 
   document.getElementById('c1').innerHTML =
-    makeNota('Sección compuesta: perfil IPN'+ipn.h+(hasPS?' + platabanda superior '+bs+'×'+ts+'mm':'')+(hasPI?' + platabanda inferior '+bi+'×'+ti+'mm':'')+'. Propiedades calculadas por descomposición en rectángulos (sin radios de acuerdo).','blue')
-    +'<table><tr><th>Propiedad</th><th>Perfil solo</th><th>Sección compuesta</th></tr>'
-    +'<tr><td>Ag (cm²)</td><td>'+f2(spPerfil.At/100)+'</td><td class="hi">'+f2(sp.At/100)+'</td></tr>'
-    +'<tr><td>Ix (cm⁴)</td><td>'+f0(spPerfil.Ix/1e4)+'</td><td class="hi">'+f0(sp.Ix/1e4)+'</td></tr>'
-    +'<tr><td>Iy (cm⁴)</td><td>'+f0(spPerfil.Iy/1e4)+'</td><td class="hi">'+f0(sp.Iy/1e4)+'</td></tr>'
-    +'<tr><td>ȳ desde fibra inferior (mm)</td><td>'+f1(spPerfil.ybar)+'</td><td class="hi">'+f1(sp.ybar)+'</td></tr>'
-    +'<tr><td>Sx,sup (cm³)</td><td>'+f0(spPerfil.SxTop/1e3)+'</td><td class="hi">'+f0(sp.SxTop/1e3)+'</td></tr>'
-    +'<tr><td>Sx,inf (cm³)</td><td>'+f0(spPerfil.SxBot/1e3)+'</td><td class="hi">'+f0(sp.SxBot/1e3)+'</td></tr>'
-    +'<tr><td>Zx (cm³)</td><td>'+f0(spPerfil.Zx/1e3)+'</td><td class="hi">'+f0(sp.Zx/1e3)+'</td></tr></table>'
-    +makeNota('Se asume viga con momento positivo (carga gravitatoria): ala superior comprimida, ala inferior traccionada. Sx gobernante en compresión = Sx,sup.');
+    makeNota('Sección compuesta: perfil IPN'+ipn.h+(hasPS?' + platabanda superior '+bs+'×'+ts+'mm':'')+(hasPI?' + platabanda inferior '+bi+'×'+ti+'mm':'')+'. Ag/Ix/Iy/Wx del perfil = <strong>valores tabulados</strong> del Catálogo Construcción Civil (Tabla I.P.N.), trasladados por Steiner al agregar las platabandas.','blue')
+    +'<table><tr><th>Propiedad</th><th>Perfil solo (catálogo)</th><th>Sección compuesta</th></tr>'
+    +'<tr><td>Ag (cm²)</td><td>'+f2(spPerfilCat.At/100)+'</td><td class="hi">'+f2(sp.At/100)+'</td></tr>'
+    +'<tr><td>Ix (cm⁴)</td><td>'+f0(spPerfilCat.Ix/1e4)+'</td><td class="hi">'+f0(sp.Ix/1e4)+'</td></tr>'
+    +'<tr><td>Iy (cm⁴)</td><td>'+f0(spPerfilCat.Iy/1e4)+'</td><td class="hi">'+f0(sp.Iy/1e4)+'</td></tr>'
+    +'<tr><td>ȳ desde fibra inferior (mm)</td><td>'+f1(spPerfilCat.ybar)+'</td><td class="hi">'+f1(sp.ybar)+'</td></tr>'
+    +'<tr><td>Sx,sup (cm³)</td><td>'+f0(spPerfilCat.SxTop/1e3)+'</td><td class="hi">'+f0(sp.SxTop/1e3)+'</td></tr>'
+    +'<tr><td>Sx,inf (cm³)</td><td>'+f0(spPerfilCat.SxBot/1e3)+'</td><td class="hi">'+f0(sp.SxBot/1e3)+'</td></tr>'
+    +'<tr><td>Zx (cm³) — estimado</td><td>'+f0(spPerfilIdeal.Zx/1e3)+'</td><td class="hi">'+f0(spIdeal.Zx/1e3)+'</td></tr></table>'
+    +makeNota('Se asume viga con momento positivo (carga gravitatoria): ala superior comprimida, ala inferior traccionada. Sx gobernante en compresión = Sx,sup. Zx (módulo plástico) no figura en el catálogo — se estima por geometría idealizada de 3 rectángulos, sin radios de acuerdo (diferencia típica &lt;2% para IPN).');
 
   // ---- 2. Clasificación de sección ----
   var lamAla = ipn.b/(2*ipn.tf);
@@ -758,8 +811,7 @@ function recalc(){
 
   // ---- 4. Momento resistente ----
   var phi=0.90;
-  var Mp = Fy*sp.Zx*1e-6; // N·mm *1e-... Fy[MPa=N/mm2]*Zx[mm3] = N·mm ; /1e6 -> kN·m... corregido abajo
-  Mp = (Fy*sp.Zx)/1e6; // kN·m
+  var Mp = (Fy*spIdeal.Zx)/1e6; // kN·m (Fy en MPa, Zx en mm³ → /1e6)
   var MyComp = 0.7*Fy*SxComp/1e6; // kN·m (0.7FySx en zona inelástica)
   var Mn, tramo;
   if (zona===1){ Mn=Mp; tramo='(a) Lb≤Lp → Mn=Mp'; }
@@ -777,10 +829,10 @@ function recalc(){
   var ok_flex = phiMn>=Mu;
 
   // Perfil solo (para longitud de platabanda — sección 7)
-  var Mp_perfil = (Fy*spPerfil.Zx)/1e6;
+  var Mp_perfil = (Fy*spPerfilIdeal.Zx)/1e6;
   var lamAlmaPerfil=lamAlma, lamAlaPerfil=lamAla; // idéntico (perfil base)
   var Mn_perfil;
-  var ry_p = Math.sqrt(spPerfil.Iy/spPerfil.At);
+  var ry_p = Math.sqrt(spPerfilCat.Iy/spPerfilCat.At);
   var Lp_p = 1.76*ry_p*Math.sqrt(E/Fy);
   if (LbMM<=Lp_p) Mn_perfil=Mp_perfil;
   else Mn_perfil = Mp_perfil*0.85; // aproximación conservadora si Lb>Lp para el perfil solo (informativo)
@@ -788,7 +840,7 @@ function recalc(){
 
   document.getElementById('c4').innerHTML =
     makeNota(makeNb('§F.2','F2')+' — φ=0,90 · '+tramo)
-    +makeFm('Mp = Fy·Zx·10⁻³ ('+'Fy en MPa, Zx en cm³)',Fy+'×'+f0(sp.Zx/1e3)+'×10⁻³',Mp,'kN·m')
+    +makeFm('Mp = Fy·Zx·10⁻³ ('+'Fy en MPa, Zx en cm³)',Fy+'×'+f0(spIdeal.Zx/1e3)+'×10⁻³',Mp,'kN·m')
     +(zona!==1?makeFm('My,comp = 0,7·Fy·Sx,comp·10⁻³','0,7×'+Fy+'×'+f0(SxComp/1e3)+'×10⁻³',MyComp,'kN·m'):'')
     +makeFm('Mn',tramo,Mn,'kN·m')
     +makeFm('φMn = 0,90·Mn','0,90×'+f2(Mn),phiMn,'kN·m')
@@ -888,7 +940,7 @@ function recalc(){
   var allOk = ok_flex && ok_v;
   makeKpi('kA',[
     {v:'IPN'+ipn.h,l:'Perfil base'},
-    {v:f0(sp.Zx/1e3)+' cm³',l:'Zx compuesto'},
+    {v:f0(spIdeal.Zx/1e3)+' cm³',l:'Zx compuesto'},
     {v:f2(phiMn)+' kN·m',l:'φMn'},
     {v:allOk?'OK':'Revisar',l:'Estado'}
   ]);
