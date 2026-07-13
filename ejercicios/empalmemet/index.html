@@ -1122,32 +1122,71 @@ function dbMin(dnom) {
 // SVG EMPALME
 // ================================================================
 function makeSvg(b,t,dnom,nFil,nCol,s,db,sf,dbp) {
-  var W=420,H=200,esc=0.55;
-  var bPx=Math.min(b*esc,90);
-  var tPx=Math.min((2*db+(nCol-1)*s)*esc+30,310);
-  var cx=W/2,cy=H/2,hB=bPx/2;
+  // Vista de planta — empalme simétrico: pieza central + 2 cubrejuntas (1 cada lado de junta)
+  // Longitud visible de cada mitad: db + (nCol-1)*s + db (desde borde hasta borde opuesto)
+  var halfLen = db + (nCol-1)*s; // mm desde borde hasta último bulón
+  var totalLen = 2 * (halfLen + db); // mm longitud total visible de la pieza
+  var W=500,H=220;
+  // Escala: que la placa quepa en ~340px de ancho y b en max 120px alto
+  var esc=Math.min(340/totalLen, 110/Math.max(b,1));
+  var pxLen=totalLen*esc, pxW=b*esc;
+  var cx=W/2, cy=H/2+8;
+  var x0=cx-pxLen/2, y0=cy-pxW/2;
   var svg='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
-  svg+='<rect x="'+(cx-tPx/2)+'" y="'+(cy-hB)+'" width="'+tPx+'" height="'+bPx+'" fill="#f5f5f5" stroke="#888" stroke-width="1.2"/>';
-  svg+='<rect x="'+(cx-tPx/2)+'" y="'+(cy-hB)+'" width="'+tPx+'" height="'+(bPx/2)+'" fill="none" stroke="#E10600" stroke-width="0.8" stroke-dasharray="4,2" opacity="0.6"/>';
-  svg+='<line x1="'+cx+'" y1="'+(cy-hB-10)+'" x2="'+cx+'" y2="'+(cy+hB+10)+'" stroke="#E10600" stroke-width="1.5" stroke-dasharray="5,3"/>';
-  svg+='<text x="'+(cx+3)+'" y="'+(cy-hB-12)+'" fill="#E10600" font-family="Montserrat" font-size="8" font-weight="700">JUNTA</text>';
-  for(var r=0;r<nFil;r++) {
-    for(var c=0;c<nCol;c++) {
-      var bx=cx-tPx/2+db*esc+c*s*esc;
-      var by=cy-hB+dbp*esc+r*sf*esc;
-      var rr=Math.max(3.5,dnom*esc*0.3);
-      svg+='<circle cx="'+bx+'" cy="'+by+'" r="'+rr+'" fill="#fff" stroke="#1A1A1A" stroke-width="1.3"/>';
-      svg+='<line x1="'+(bx-rr*.65)+'" y1="'+by+'" x2="'+(bx+rr*.65)+'" y2="'+by+'" stroke="#444" stroke-width=".8"/>';
-      svg+='<line x1="'+bx+'" y1="'+(by-rr*.65)+'" x2="'+bx+'" y2="'+(by+rr*.65)+'" stroke="#444" stroke-width=".8"/>';
+  svg+='<defs>'
+    +'<marker id="sA1" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#222"/></marker>'
+    +'<marker id="sA2" markerWidth="7" markerHeight="7" refX="1" refY="3" orient="auto"><path d="M7,0 L7,6 L0,3z" fill="#222"/></marker>'
+    +'</defs>';
+  // Pieza central (placa principal)
+  svg+='<rect x="'+x0+'" y="'+y0+'" width="'+pxLen+'" height="'+pxW+'" fill="#e4e8ec" stroke="#666" stroke-width="1.5"/>';
+  // Cubrejuntas (dos mitades que cubren cada lado de la junta, ligeramente inset para distinción)
+  var cjLen=(halfLen+db)*esc;
+  var inset=1.5;
+  // Cubrejunta izquierda (cubre mitad derecha del lado izquierdo)
+  svg+='<rect x="'+(x0+inset)+'" y="'+(y0+inset)+'" width="'+(cjLen-inset)+'" height="'+(pxW-2*inset)+'" fill="none" stroke="#3a7bd5" stroke-width="0.9" stroke-dasharray="4,2" opacity="0.75"/>';
+  // Cubrejunta derecha
+  svg+='<rect x="'+cx+'" y="'+(y0+inset)+'" width="'+(cjLen-inset)+'" height="'+(pxW-2*inset)+'" fill="none" stroke="#3a7bd5" stroke-width="0.9" stroke-dasharray="4,2" opacity="0.75"/>';
+  // Leyenda cubrejuntas
+  svg+='<text x="'+(x0+4)+'" y="'+(y0-6)+'" fill="#3a7bd5" font-family="Montserrat" font-size="7" font-weight="600">CUBREJUNTAS</text>';
+  // Línea de junta
+  svg+='<line x1="'+cx+'" y1="'+(y0-10)+'" x2="'+cx+'" y2="'+(y0+pxW+10)+'" stroke="#E10600" stroke-width="1.5" stroke-dasharray="5,3"/>';
+  svg+='<text x="'+(cx+3)+'" y="'+(y0-12)+'" fill="#E10600" font-family="Montserrat" font-size="7.5" font-weight="700">JUNTA</text>';
+  // Bulones: nCol columnas a cada lado de la junta, nFil filas
+  var rr=Math.max(3.5, dnom*esc*0.45);
+  for(var r=0;r<nFil;r++){
+    var by=y0+dbp*esc+r*sf*esc;
+    for(var c=0;c<nCol;c++){
+      var dist=(db+(nCol-1-c)*s)*esc; // distancia desde junta hacia cada lado
+      // Lado izquierdo
+      var bxL=cx-dist;
+      svg+='<circle cx="'+bxL+'" cy="'+by+'" r="'+rr+'" fill="#fff" stroke="#1A1A1A" stroke-width="1.3"/>';
+      svg+='<line x1="'+(bxL-rr*.7)+'" y1="'+by+'" x2="'+(bxL+rr*.7)+'" y2="'+by+'" stroke="#555" stroke-width=".8"/>';
+      svg+='<line x1="'+bxL+'" y1="'+(by-rr*.7)+'" x2="'+bxL+'" y2="'+(by+rr*.7)+'" stroke="#555" stroke-width=".8"/>';
+      // Lado derecho (espejo)
+      var bxR=cx+dist;
+      svg+='<circle cx="'+bxR+'" cy="'+by+'" r="'+rr+'" fill="#fff" stroke="#1A1A1A" stroke-width="1.3"/>';
+      svg+='<line x1="'+(bxR-rr*.7)+'" y1="'+by+'" x2="'+(bxR+rr*.7)+'" y2="'+by+'" stroke="#555" stroke-width=".8"/>';
+      svg+='<line x1="'+bxR+'" y1="'+(by-rr*.7)+'" x2="'+bxR+'" y2="'+(by+rr*.7)+'" stroke="#555" stroke-width=".8"/>';
     }
   }
-  svg+='<defs><marker id="a1" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#444"/></marker>';
-  svg+='<marker id="a2" markerWidth="7" markerHeight="7" refX="1" refY="3" orient="auto"><path d="M7,0 L7,6 L0,3z" fill="#444"/></marker></defs>';
-  svg+='<line x1="'+(cx-tPx/2-40)+'" y1="'+cy+'" x2="'+(cx-tPx/2-2)+'" y2="'+cy+'" stroke="#444" stroke-width="2" marker-end="url(#a1)"/>';
-  svg+='<line x1="'+(cx+tPx/2+40)+'" y1="'+cy+'" x2="'+(cx+tPx/2+2)+'" y2="'+cy+'" stroke="#444" stroke-width="2" marker-end="url(#a2)"/>';
-  svg+='<text x="'+(cx-tPx/2-60)+'" y="'+(cy+4)+'" fill="#444" font-family="Montserrat" font-size="10" font-weight="700">Pu</text>';
-  svg+='<text x="'+(cx+tPx/2+44)+'" y="'+(cy+4)+'" fill="#444" font-family="Montserrat" font-size="10" font-weight="700">Pu</text>';
-  svg+='<text x="'+(cx-tPx/2)+'" y="'+(cy+hB+16)+'" fill="#666" font-family="JetBrains Mono" font-size="7.5">'+nCol+'x'+nFil+' bul. s='+s+'mm db='+db+'mm b='+f1(b)+'mm</text>';
+  // Cotas: separación entre bulones (dimensión horizontal entre los 2 centrales)
+  if(nCol>1){
+    var dim1x=cx-(db+(nCol-2)*s)*esc, dim2x=cx-(db+(nCol-1)*s)*esc;
+    var dimY=y0+pxW+22;
+    svg+='<line x1="'+(dim2x)+'" y1="'+(y0+pxW+8)+'" x2="'+(dim2x)+'" y2="'+(dimY+4)+'" stroke="#888" stroke-width="0.8"/>';
+    svg+='<line x1="'+(dim1x)+'" y1="'+(y0+pxW+8)+'" x2="'+(dim1x)+'" y2="'+(dimY+4)+'" stroke="#888" stroke-width="0.8"/>';
+    svg+='<line x1="'+dim2x+'" y1="'+dimY+'" x2="'+dim1x+'" y2="'+dimY+'" stroke="#888" stroke-width="0.8" marker-start="url(#sA2)" marker-end="url(#sA1)"/>';
+    svg+='<text x="'+(( dim1x+dim2x)/2)+'" y="'+(dimY+9)+'" fill="#666" font-family="JetBrains Mono" font-size="7" text-anchor="middle">s='+s+'mm</text>';
+  }
+  // Flechas Pu
+  var ay=cy;
+  svg+='<line x1="'+(x0-42)+'" y1="'+ay+'" x2="'+(x0-3)+'" y2="'+ay+'" stroke="#222" stroke-width="2" marker-end="url(#sA1)"/>';
+  svg+='<text x="'+(x0-58)+'" y="'+(ay+4)+'" fill="#222" font-family="Montserrat" font-size="10" font-weight="700">Pu</text>';
+  svg+='<line x1="'+(x0+pxLen+3)+'" y1="'+ay+'" x2="'+(x0+pxLen+42)+'" y2="'+ay+'" stroke="#222" stroke-width="2" marker-end="url(#sA2)"/>';
+  svg+='<text x="'+(x0+pxLen+46)+'" y="'+(ay+4)+'" fill="#222" font-family="Montserrat" font-size="10" font-weight="700">Pu</text>';
+  // Etiqueta
+  svg+='<text x="'+cx+'" y="'+(y0+pxW+38)+'" fill="#666" font-family="JetBrains Mono" font-size="7.5" text-anchor="middle">';
+  svg+=nCol+'×'+nFil+' bulones c/lado · s='+s+'mm · db='+db+'mm · sf='+sf+'mm · b='+b+'mm</text>';
   svg+='</svg>';
   return svg;
 }
@@ -1243,8 +1282,14 @@ function calcA(p) {
   else{Rn1=1.5*Lc*tC*Fu*1e-1;Rn2=3.0*dnC*tC*Fu*1e-1;}
   var RnA=Math.min(Rn1,Rn2),RdA=0.75*RnA,ok_apl=RdA>=Pu/nb;
   var Ubs=1.0;
-  var Agt=nFil*dbC*tC,Agv=nFil*((nCol-1)*sC+dbC)*tC;
-  var Ant=Math.max(0,Agt-nFil*(dcC/2)*tC);
+  var sfC=sf/10,dbpC=dbp/10;
+  // Agt = área tracción transversal: para 1 fila → dbp·t; para >1 fila → (nFil-1)·sf·t
+  var AgtW=nFil===1?dbpC:(nFil-1)*sfC;
+  var Agt=AgtW*tC;
+  var Agv=nFil*((nCol-1)*sC+dbC)*tC;
+  // Ant: deduce agujeros en plano de tracción
+  var AntHoles=nFil===1?0.5*dcC:(nFil-1)*dcC;
+  var Ant=Math.max(0,(AgtW-AntHoles)*tC);
   var Anv=Math.max(0,Agv-nFil*(nCol-0.5)*dcC*tC);
   var Rbc1=(0.6*Fu*Anv+Ubs*Fu*Ant)*1e-1,Rbc2=(0.6*Fy*Agv+Ubs*Fu*Ant)*1e-1;
   var Rbc=Math.min(Rbc1,Rbc2),Rdbc=0.75*Rbc,ok_bc=Rdbc>=Pu;
@@ -1277,8 +1322,9 @@ function calcA(p) {
     +'<tr><td>Ab = π·d²/4</td><td>'+f2(Ab)+'</td><td>cm²</td></tr></table>'
     +makeFm('Rb1 = φb·Fnv·Ab por plano '+makeNb('Ec.(J.3.1)','J32'),'0,75×'+Fnv+'×'+f2(Ab)+'×10⁻¹',Rb1,'kN/plano')
     +makeFm('Rb = '+nCorte+' planos × Rb1',nCorte+'×'+f2(Rb1),Rb,'kN/bulón')
-    +'<div class="fm"><div class="fm-lbl">N° mínimo de bulones</div><div>nb,min = Pu/Rb = '+Pu+'/'+f2(Rb)+' = '+f2(Pu/Rb)+'</div><div class="fm-res">→ Adoptado: <strong>'+nb+' bulones ('+nFil+'×'+nCol+')</strong></div></div>'
-    +makeVr(nb>=nbMin,'nb ≥ nb,min',nb+' ≥ '+nbMin);
+    +'<div class="fm"><div class="fm-lbl">N° mínimo de bulones</div><div>nb,min = ⌈Pu/Rb⌉ = ⌈'+Pu+'/'+f2(Rb)+'⌉ = <strong>'+nbMin+'</strong></div><div class="fm-res">→ Configurado: <strong>'+nb+' bulones ('+nFil+'×'+nCol+')</strong></div></div>'
+    +makeVr(nb>=nbMin,'nb ≥ nb,min',nb+' ≥ '+nbMin)
+    +(nb>nbMin?makeNota('ℹ El mínimo estructural es <strong>'+nbMin+' '+(nbMin!==1?'bulones':'bulón')+'</strong>. Con el arreglo adoptado ('+nb+') se verifica con holgura — para optimizar podría reducir la cantidad.','blue'):'');
 
   document.getElementById('cA4').innerHTML =
     makeNota(makeNb('§J.3.3','J33')+' s,min='+f2(smin)+' cm · s,max='+f2(smax)+' cm &nbsp;|&nbsp; '+makeNb('§J.3.4','J34')+' db,min='+dbMinVal+'mm (borde soplete '+makeNb('Tab.J.3.4','J34')+')')
@@ -1305,7 +1351,11 @@ function calcA(p) {
     +makeFm('Rd,apl = 0,75·min(Rn1;Rn2)','0,75×'+f2(RnA),RdA,'kN')+makeVr(ok_apl,'Rd,apl ≥ Pu/nb',f2(RdA)+' kN ≥ '+f2(Pu/nb)+' kN')
     +makeH4('5.4 Bloque de Corte '+makeNb('§J.4.3','J43')+' · Ec.(J.4.5) · Ubs=1,0')
     +makeNota(makeNb('§J.4.3','J43')+' — Rn=min(0,60·Fu·Anv+Ubs·Fu·Ant ; 0,60·Fy·Agv+Ubs·Fu·Ant)·10⁻¹ · φ=0,75 · Ubs=1,0')
-    +'<table><tr><th>Área</th><th>cm²</th></tr><tr><td>Agt</td><td>'+f2(Agt)+'</td></tr><tr><td>Agv</td><td>'+f2(Agv)+'</td></tr><tr><td>Ant</td><td>'+f2(Ant)+'</td></tr><tr><td>Anv</td><td>'+f2(Anv)+'</td></tr></table>'
+    +'<table><tr><th>Área</th><th>Fórmula</th><th>cm²</th></tr>'
+    +'<tr><td>Agt</td><td>'+(nFil===1?'dbp·t':'(nFil−1)·sf·t')+'</td><td class="hi">'+f2(Agt)+'</td></tr>'
+    +'<tr><td>Agv</td><td>nFil·[(nCol−1)·s+db]·t</td><td>'+f2(Agv)+'</td></tr>'
+    +'<tr><td>Ant</td><td>Agt − '+(nFil===1?'0,5':'nFil−1')+'·d,calc·t</td><td class="hi">'+f2(Ant)+'</td></tr>'
+    +'<tr><td>Anv</td><td>Agv − nFil·(nCol−0,5)·d,calc·t</td><td>'+f2(Anv)+'</td></tr></table>'
     +makeFm('Rn1 = 0,60·Fu·Anv+1,0·Fu·Ant','(0,60×'+Fu+'×'+f2(Anv)+'+1,0×'+Fu+'×'+f2(Ant)+')×10⁻¹',Rbc1,'kN')
     +makeFm('Rn2 = 0,60·Fy·Agv+1,0·Fu·Ant','(0,60×'+Fy+'×'+f2(Agv)+'+1,0×'+Fu+'×'+f2(Ant)+')×10⁻¹',Rbc2,'kN')
     +makeFm('Rd,bc = 0,75·min(Rn1;Rn2)','0,75×'+f2(Rbc),Rdbc,'kN')+makeVr(ok_bc,'Rd,bc ≥ Pu',f2(Rdbc)+' kN ≥ '+Pu+' kN');
@@ -1349,8 +1399,13 @@ function calcB(p) {
   else{Rn1=1.5*Lc*tC*Fu*1e-1;Rn2=3.0*dnC*tC*Fu*1e-1;}
   var RnA=Math.min(Rn1,Rn2),RdA=0.75*RnA,ok_apl=RdA>=Pu/nb;
   var Ubs=1.0;
-  var Agt=nFil*dbC*tC,Agv=nFil*((nCol-1)*sC+dbC)*tC;
-  var Ant=Math.max(0,Agt-nFil*(dcC/2)*tC),Anv=Math.max(0,Agv-nFil*(nCol-0.5)*dcC*tC);
+  var sfC=sf/10,dbpC=dbp/10;
+  var AgtW=nFil===1?dbpC:(nFil-1)*sfC;
+  var Agt=AgtW*tC;
+  var Agv=nFil*((nCol-1)*sC+dbC)*tC;
+  var AntHoles=nFil===1?0.5*dcC:(nFil-1)*dcC;
+  var Ant=Math.max(0,(AgtW-AntHoles)*tC);
+  var Anv=Math.max(0,Agv-nFil*(nCol-0.5)*dcC*tC);
   var Rbc1=(0.6*Fu*Anv+Ubs*Fu*Ant)*1e-1,Rbc2=(0.6*Fy*Agv+Ubs*Fu*Ant)*1e-1;
   var Rbc=Math.min(Rbc1,Rbc2),Rdbc=0.75*Rbc,ok_bc=Rdbc>=Pu;
   var smin=3*dnC,ok_s=sC>=smin,ok_db=db>=dbMinVal;
@@ -1393,7 +1448,11 @@ function calcB(p) {
     +makeH4('Aplastamiento '+makeNb('§J.3.10','J310'))
     +makeFm('Rd,apl = 0,75·min(Rn1;Rn2)','0,75×'+f2(RnA),RdA,'kN')+makeVr(ok_apl,'Rd,apl ≥ Pu/nb',f2(RdA)+' kN ≥ '+f2(Pu/nb)+' kN')
     +makeH4('Bloque de Corte '+makeNb('§J.4.3','J43')+' · Ec.(J.4.5)')
-    +'<table><tr><th>Área</th><th>cm²</th></tr><tr><td>Agt</td><td>'+f2(Agt)+'</td></tr><tr><td>Agv</td><td>'+f2(Agv)+'</td></tr><tr><td>Ant</td><td>'+f2(Ant)+'</td></tr><tr><td>Anv</td><td>'+f2(Anv)+'</td></tr></table>'
+    +'<table><tr><th>Área</th><th>Fórmula</th><th>cm²</th></tr>'
+    +'<tr><td>Agt</td><td>'+(nFil===1?'dbp·t':'(nFil−1)·sf·t')+'</td><td class="hi">'+f2(Agt)+'</td></tr>'
+    +'<tr><td>Agv</td><td>nFil·[(nCol−1)·s+db]·t</td><td>'+f2(Agv)+'</td></tr>'
+    +'<tr><td>Ant</td><td>Agt − '+(nFil===1?'0,5':'nFil−1')+'·d,calc·t</td><td class="hi">'+f2(Ant)+'</td></tr>'
+    +'<tr><td>Anv</td><td>Agv − nFil·(nCol−0,5)·d,calc·t</td><td>'+f2(Anv)+'</td></tr></table>'
     +makeFm('Rd,bc = 0,75·min(Rn1;Rn2)','0,75×'+f2(Rbc),Rdbc,'kN')+makeVr(ok_bc,'Rd,bc ≥ Pu',f2(Rdbc)+' kN ≥ '+Pu+' kN');
 
   document.getElementById('cB6').innerHTML='<div class="drawing">'+makeSvg(b,t,dnom,nFil,nCol,s,db,sf,dbp)+'</div>';
