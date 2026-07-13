@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viga con Platabanda — CIRSOC 301·2018 | Sibratech</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Raleway:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ── Variables ──────────────────────────────────────────── */
+:root {
+  --red:#E10600; --red-bg:#fff0f0; --red-dk:#b80400;
+  --ok:#1a7f40; --ok-bg:#eafaf1;
+  --fail:#c0392b; --fail-bg:#fdecea;
+  --blue:#1a5fa8; --blue-bg:#eaf1fb;
+  --grey:#f4f4f6; --border:#dde1e7;
+  --text:#1a1a1a; --text2:#555;
+  --sidebar-w:300px;
+  --font-head:'Montserrat',sans-serif;
+  --font-body:'Raleway',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+
+/* ── Reset & Base ───────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+body { font-family:var(--font-body); background:#f0f2f5; color:var(--text); font-size:13px; }
+h1,h2,h3,h4,h5 { font-family:var(--font-head); }
+input,select,button { font-family:inherit; font-size:12px; }
+
+/* ── Layout ─────────────────────────────────────────────── */
+.app { display:flex; min-height:100vh; }
+
+/* ── Sidebar ────────────────────────────────────────────── */
+.sidebar {
+  width:var(--sidebar-w); min-width:var(--sidebar-w);
+  background:#1a1a1a; color:#f0f0f0;
+  display:flex; flex-direction:column;
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+  scrollbar-width:thin; scrollbar-color:#444 #1a1a1a;
+}
+.sidebar::-webkit-scrollbar { width:5px; }
+.sidebar::-webkit-scrollbar-thumb { background:#444; border-radius:3px; }
+
+.sb-logo {
+  padding:18px 16px 14px;
+  border-bottom:1px solid #2a2a2a;
+  display:flex; align-items:center; gap:10px;
+}
+.sb-logo .logo-mark {
+  width:32px; height:32px; background:var(--red);
+  border-radius:4px; display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-head); font-weight:900; font-size:16px; color:#fff;
+  flex-shrink:0;
+}
+.sb-logo .logo-text { line-height:1.2; }
+.sb-logo .logo-text b { font-family:var(--font-head); font-size:13px; font-weight:700; color:#fff; display:block; }
+.sb-logo .logo-text span { font-size:9px; color:#aaa; letter-spacing:.5px; }
+
+.sb-section {
+  padding:12px 14px 10px;
+  border-bottom:1px solid #252525;
+}
+.sb-section-title {
+  font-family:var(--font-head); font-size:9px; font-weight:700;
+  letter-spacing:1.2px; text-transform:uppercase; color:#888;
+  margin-bottom:8px;
+}
+
+/* inputs */
+.sb-row { display:flex; gap:6px; align-items:center; margin-bottom:6px; }
+.sb-row label { font-size:11px; color:#aaa; min-width:70px; flex-shrink:0; }
+.sb-row input, .sb-row select {
+  flex:1; background:#2a2a2a; border:1px solid #3a3a3a;
+  color:#f0f0f0; border-radius:4px; padding:5px 8px;
+  outline:none; min-width:0;
+}
+.sb-row input:focus, .sb-row select:focus { border-color:var(--red); }
+.sb-row input[type=number] { text-align:right; }
+.sb-row select option { background:#2a2a2a; }
+
+.sb-two { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:6px; }
+.sb-two label { font-size:10px; color:#aaa; display:block; margin-bottom:2px; }
+.sb-two input, .sb-two select {
+  width:100%; background:#2a2a2a; border:1px solid #3a3a3a;
+  color:#f0f0f0; border-radius:4px; padding:5px 7px; outline:none;
+}
+.sb-two input:focus, .sb-two select:focus { border-color:var(--red); }
+
+/* ── Perfil / chip selectors (reuso patrón bulones) ───────── */
+.bul-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:3px; margin-bottom:6px; }
+.bchip {
+  background:#2a2a2a; border:1.5px solid #3a3a3a; border-radius:5px;
+  padding:5px 4px; cursor:pointer; text-align:center;
+  transition:all .12s; overflow:hidden;
+}
+.bchip:hover { border-color:#888; }
+.bchip.sel { background:#1a1030; border-color:#6c3fe0; }
+.bchip .bd { font-family:var(--font-head); font-size:11px; font-weight:700; color:#e0e0e0; margin-bottom:1px; }
+.bchip.sel .bd { color:#c8a0ff; }
+.bchip .bs { font-family:var(--font-mono); font-size:8px; color:#888; line-height:1.3; }
+.bchip.sel .bs { color:#a080cc; }
+
+.bul-info-box {
+  background:#111; border:1px solid #2a2a2a; border-radius:5px;
+  padding:7px 9px; font-family:var(--font-mono); font-size:9.5px;
+  color:#aaa; line-height:1.5; margin-bottom:6px;
+}
+.bul-info-box strong { color:#e8c060; }
+
+.pb-toggle {
+  display:flex; align-items:center; gap:6px; margin-bottom:8px;
+  font-size:10.5px; color:#ccc;
+}
+.pb-toggle input { accent-color:var(--red); }
+
+/* ── Calc button ────────────────────────────────────────── */
+.btn-calc {
+  width:100%; background:var(--red); color:#fff; border:none;
+  border-radius:6px; padding:10px; font-family:var(--font-head);
+  font-size:12px; font-weight:700; letter-spacing:.5px; cursor:pointer;
+  transition:background .15s;
+}
+.btn-calc:hover { background:var(--red-dk); }
+
+/* ── Main content ───────────────────────────────────────── */
+.main { flex:1; display:flex; flex-direction:column; min-width:0; }
+
+.topbar {
+  background:#fff; border-bottom:3px solid var(--red);
+  padding:14px 24px 12px; display:flex; align-items:center; gap:16px;
+}
+.topbar h1 { font-size:17px; font-weight:900; color:var(--text); }
+.topbar h1 span { color:var(--red); }
+.topbar .sub { font-size:11px; color:#888; font-family:var(--font-head);
+  letter-spacing:.3px; margin-top:1px; }
+.topbar .badge {
+  margin-left:auto; background:var(--grey); border:1px solid var(--border);
+  border-radius:5px; padding:5px 12px; font-family:var(--font-head);
+  font-size:10px; font-weight:700; color:#555; letter-spacing:.5px;
+}
+
+.tab-pane { padding:20px 24px 40px; }
+
+/* ── KPI row ────────────────────────────────────────────── */
+.kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:20px; }
+.kpi { border-radius:8px; padding:12px 14px; border:1px solid var(--border); }
+.kpi.cr { background:#fff5f5; border-color:#f5c0c0; }
+.kpi.cok { background:#f0fbf4; border-color:#a0d8b4; }
+.kpi.cb { background:#f0f6ff; border-color:#a8c4f0; }
+.kpi.cw { background:#fff; }
+.kpi-val { font-family:var(--font-head); font-size:18px; font-weight:700; color:var(--text); }
+.kpi-lbl { font-size:10px; color:var(--text2); margin-top:2px; font-family:var(--font-head); }
+
+/* ── Card ───────────────────────────────────────────────── */
+.card {
+  background:#fff; border-radius:8px; border:1px solid var(--border);
+  margin-bottom:16px; overflow:hidden;
+}
+.card-head {
+  padding:11px 16px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:8px;
+  background:var(--grey);
+}
+.card-head h3 {
+  font-size:12px; font-weight:700; color:var(--text);
+  letter-spacing:.2px; font-family:var(--font-head);
+}
+.card-body { padding:14px 16px; }
+
+/* ── Tables ─────────────────────────────────────────────── */
+table { width:100%; border-collapse:collapse; font-size:12px; margin:8px 0; }
+th { background:var(--grey); font-family:var(--font-head); font-size:10px;
+  font-weight:700; letter-spacing:.3px; padding:6px 8px; text-align:left;
+  border-bottom:2px solid var(--border); color:var(--text2); }
+td { padding:5px 8px; border-bottom:1px solid var(--border); color:var(--text); }
+tr:last-child td { border-bottom:none; }
+td.hi { font-family:var(--font-mono); font-weight:600; color:var(--text); }
+td.ok2 { color:var(--ok); font-weight:700; font-family:var(--font-head); }
+td.fail2 { color:var(--fail); font-weight:700; font-family:var(--font-head); }
+
+/* ── Formula blocks ─────────────────────────────────────── */
+.fm {
+  background:var(--grey); border-left:3px solid var(--red);
+  border-radius:0 5px 5px 0; padding:8px 12px; margin:7px 0;
+  font-family:var(--font-mono); font-size:11.5px;
+}
+.fm-lbl { font-family:var(--font-head); font-size:10px; font-weight:700;
+  color:var(--text2); margin-bottom:3px; text-transform:uppercase; letter-spacing:.3px; }
+.fm-res { color:var(--red); font-weight:700; margin-top:4px; font-size:12px; }
+
+/* ── Verification badges ─────────────────────────────────── */
+.vr {
+  display:flex; align-items:center; gap:8px;
+  padding:7px 12px; border-radius:6px; margin:5px 0; font-size:11.5px;
+}
+.vr.ok { background:var(--ok-bg); }
+.vr.fail { background:var(--fail-bg); }
+.vb { font-family:var(--font-head); font-size:10px; font-weight:700;
+  letter-spacing:.5px; padding:3px 8px; border-radius:4px; flex-shrink:0; }
+.vb.ok { background:var(--ok); color:#fff; }
+.vb.fail { background:var(--fail); color:#fff; }
+.vr-txt { font-family:var(--font-mono); font-size:11px; flex:1; }
+.vr-val { font-family:var(--font-mono); font-weight:600; font-size:11.5px; margin-left:auto; }
+
+/* ── Notes ──────────────────────────────────────────────── */
+.nota {
+  background:#f8f9fb; border:1px solid var(--border);
+  border-radius:5px; padding:7px 10px; margin:6px 0;
+  font-size:11px; color:var(--text2); line-height:1.5;
+}
+.nota.blue { background:var(--blue-bg); border-color:#b8d0f0; color:#1a3a6a; }
+.nota.warn { background:#fffbea; border-color:#e8d060; color:#6a4a00; }
+
+/* ── Summary ────────────────────────────────────────────── */
+.summ {
+  background:#fff; border-radius:8px; border:2px solid var(--red);
+  margin-top:20px; overflow:hidden;
+}
+.summ h3 {
+  background:var(--red); color:#fff; font-family:var(--font-head);
+  font-size:12px; font-weight:700; letter-spacing:.5px; padding:10px 16px;
+}
+.summ-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:1px;
+  background:var(--border);
+}
+.summ-grid > div { background:#fff; padding:10px 14px; }
+.si-lbl { font-family:var(--font-head); font-size:9px; font-weight:700;
+  color:#888; text-transform:uppercase; letter-spacing:.5px; margin-bottom:3px; }
+.si-val { font-family:var(--font-mono); font-size:12px; font-weight:600; color:var(--text); }
+
+/* ── Drawing ────────────────────────────────────────────── */
+.drawing { text-align:center; padding:8px 0; overflow-x:auto; }
+
+/* ── Modal ──────────────────────────────────────────────── */
+.modal-overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.55);
+  z-index:1000; align-items:center; justify-content:center;
+}
+.modal-overlay.show { display:flex; }
+.modal-box {
+  background:#fff; border-radius:10px; width:min(680px,94vw);
+  max-height:88vh; overflow-y:auto; box-shadow:0 24px 60px rgba(0,0,0,.25);
+}
+.modal-hdr {
+  display:flex; align-items:center; gap:10px; padding:14px 18px;
+  border-bottom:1px solid var(--border); position:sticky; top:0; background:#fff;
+}
+.modal-hdr .mbadge {
+  background:var(--red); color:#fff; font-family:var(--font-head);
+  font-size:11px; font-weight:700; padding:4px 10px; border-radius:4px;
+}
+.modal-hdr .mtitle { font-size:14px; font-weight:700; font-family:var(--font-head); }
+.modal-hdr button { margin-left:auto; background:none; border:none; cursor:pointer;
+  font-size:20px; color:#888; line-height:1; }
+.modal-content { padding:16px 18px; font-size:12px; line-height:1.6; }
+.modal-form {
+  background:#f4f6f9; border-radius:5px; padding:12px 14px;
+  font-family:var(--font-mono); font-size:11px; white-space:pre; margin:10px 0;
+  border-left:3px solid var(--blue); overflow-x:auto;
+}
+.modal-note {
+  background:#fffce8; border:1px solid #e8d870; border-radius:5px;
+  padding:8px 12px; margin:10px 0; font-size:11px; color:#5a4800;
+}
+.modal-note.blue { background:var(--blue-bg); border-color:#b0ccf0; color:#1a3a6a; }
+.modal-table { border-collapse:collapse; width:100%; font-size:11.5px; margin:10px 0; }
+.modal-table th, .modal-table td { border:1px solid var(--border); padding:5px 8px; }
+.modal-table th { background:var(--grey); font-family:var(--font-head); font-size:10px;
+  font-weight:700; letter-spacing:.3px; }
+
+/* norm badge buttons */
+.nb {
+  display:inline-flex; align-items:center; background:var(--blue-bg);
+  border:1px solid #b8d0f0; border-radius:4px; padding:1px 7px;
+  font-family:var(--font-head); font-size:9.5px; font-weight:700; color:var(--blue);
+  cursor:pointer; text-decoration:none; white-space:nowrap; transition:all .12s;
+}
+.nb:hover { background:var(--blue); color:#fff; border-color:var(--blue); }
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media(max-width:900px){
+  .app { flex-direction:column; }
+  .sidebar { width:100%; height:auto; position:static; }
+  .kpi-row { grid-template-columns:repeat(2,1fr); }
+  .summ-grid { grid-template-columns:repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  MODAL overlay                                         -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <span class="mbadge" id="m-badge"></span>
+      <span class="mtitle" id="m-title"></span>
+      <button onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-content" id="m-body"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  APP                                                   -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="app">
+
+<!-- ─────────────────── SIDEBAR ──────────────────────── -->
+<aside class="sidebar">
+
+  <!-- Logo -->
+  <div class="sb-logo">
+    <div class="logo-mark">S</div>
+    <div class="logo-text">
+      <b>SIBRATECH</b>
+      <span>CIRSOC 301 · 2018</span>
+    </div>
+  </div>
+
+  <!-- Acero & Solicitaciones -->
+  <div class="sb-section">
+    <div class="sb-section-title">Acero & Solicitaciones</div>
+    <div class="sb-row">
+      <label>Preset</label>
+      <select id="acero_std" onchange="applyAcero()">
+        <option value="F24">F.24 — Fy=235 / Fu=370</option>
+        <option value="F26">F.26 — Fy=250 / Fu=400</option>
+        <option value="F36" selected>F.36 — Fy=345 / Fu=485</option>
+        <option value="A572">A572 — Fy=345 / Fu=448</option>
+        <option value="custom">Personalizado</option>
+      </select>
+    </div>
+    <div class="sb-two">
+      <div><label>Fy (MPa)</label><input type="number" id="Fy" value="345" oninput="recalc()"></div>
+      <div><label>Fu (MPa)</label><input type="number" id="Fu" value="485" oninput="recalc()"></div>
+    </div>
+    <div class="sb-two">
+      <div><label>Mu (kN·m)</label><input type="number" id="Mu" value="320" oninput="recalc()"></div>
+      <div><label>Vu (kN)</label><input type="number" id="Vu" value="150" oninput="recalc()"></div>
+    </div>
+    <div class="sb-two">
+      <div><label>Luz L (m)</label><input type="number" id="Lm" value="8" step="0.1" oninput="recalc()"></div>
+      <div><label>Lb (m)</label><input type="number" id="Lb_m" value="2" step="0.1" oninput="recalc()"></div>
+    </div>
+    <div class="sb-row">
+      <label>Cb</label>
+      <input type="number" id="Cb" value="1.0" step="0.05" oninput="recalc()">
+    </div>
+    <div class="nota" style="background:#111;border-color:#2a2a2a;color:#999;font-size:10px;margin:0">
+      Mu según diagrama de momento de viga simplemente apoyada con carga uniforme: se estima w = 8·Mu/L² sólo para ubicar el corte teórico de platabanda.
+    </div>
+  </div>
+
+  <!-- Perfil base -->
+  <div class="sb-section">
+    <div class="sb-section-title">Perfil Base (IPN)</div>
+    <div class="bul-grid" id="ipn-chips"></div>
+    <div class="bul-info-box" id="ipn-info">Seleccione un perfil</div>
+  </div>
+
+  <!-- Platabanda superior -->
+  <div class="sb-section">
+    <div class="sb-section-title">Platabanda Superior</div>
+    <label class="pb-toggle"><input type="checkbox" id="hasPS" checked onchange="recalc()"> Tiene platabanda superior</label>
+    <div class="sb-two">
+      <div><label>Ancho bs (mm)</label><input type="number" id="bs_mm" value="150" oninput="recalc()"></div>
+      <div><label>Espesor ts (mm)</label><input type="number" id="ts_mm" value="12" oninput="recalc()"></div>
+    </div>
+  </div>
+
+  <!-- Platabanda inferior -->
+  <div class="sb-section">
+    <div class="sb-section-title">Platabanda Inferior</div>
+    <label class="pb-toggle"><input type="checkbox" id="hasPI" checked onchange="recalc()"> Tiene platabanda inferior</label>
+    <div class="sb-two">
+      <div><label>Ancho bi (mm)</label><input type="number" id="bi_mm" value="150" oninput="recalc()"></div>
+      <div><label>Espesor ti (mm)</label><input type="number" id="ti_mm" value="12" oninput="recalc()"></div>
+    </div>
+  </div>
+
+  <!-- Soldadura -->
+  <div class="sb-section">
+    <div class="sb-section-title">Soldadura Platabanda-Ala</div>
+    <div class="sb-two">
+      <div><label>FEXX (MPa)</label><input type="number" id="Feex" value="480" oninput="recalc()"></div>
+      <div><label>w garganta (mm)</label><input type="number" id="w_mm" value="6" oninput="recalc()"></div>
+    </div>
+    <div class="nota" style="background:#111;border-color:#2a2a2a;color:#999;font-size:10px;margin:0">
+      2 cordones continuos, uno a cada lado del ala, a lo largo de toda la platabanda.
+    </div>
+  </div>
+
+  <div class="sb-section">
+    <button class="btn-calc" onclick="recalc()">⟳ Recalcular Todo</button>
+  </div>
+
+</aside>
+<!-- ──────────────────────────────────────────────────────── -->
+
+<!-- ─────────────────── MAIN ─────────────────────────── -->
+<main class="main">
+
+  <div class="topbar">
+    <div>
+      <h1>Viga con <span>Platabanda</span> — <span>§Cap. F · G</span></h1>
+      <div class="sub">Memoria de Cálculo · CIRSOC 301-2018</div>
+    </div>
+    <div class="badge">CIRSOC 301 · 2018</div>
+  </div>
+
+  <div class="tab-pane" id="tabA">
+    <div class="kpi-row" id="kA"></div>
+
+    <div class="card">
+      <div class="card-head"><h3>1. Propiedades de la sección compuesta</h3></div>
+      <div class="card-body" id="c1"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>2. Clasificación de la sección (ala / alma)</h3></div>
+      <div class="card-body" id="c2"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>3. Longitudes límite y zona de pandeo lateral-torsional</h3></div>
+      <div class="card-body" id="c3"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>4. Momento resistente de diseño φMn</h3></div>
+      <div class="card-body" id="c4"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>5. Verificación a corte</h3></div>
+      <div class="card-body" id="c5"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>6. Soldadura platabanda-ala</h3></div>
+      <div class="card-body" id="c6"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>7. Longitud de platabanda (corte teórico + desarrollo)</h3></div>
+      <div class="card-body" id="c7"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>8. Esquema</h3></div>
+      <div class="card-body" id="c8"></div>
+    </div>
+    <div class="summ" id="sA"></div>
+  </div>
+
+</main>
+<!-- ──────────────────────────────────────────────────────── -->
+</div><!-- .app -->
+
+<script>
+// ================================================================
+// DATOS — Perfiles IPN (DIN 1025-1 / IRAM) — dimensiones nominales
+// [h_mm, b_mm, tw_mm, tf_mm]
+// Ag, Ix, Iy, Zx, peso se CALCULAN a partir de estas dimensiones
+// (idealización de 3 rectángulos, sin radios de acuerdo — simplificación
+// estándar docente). Verificar contra catálogo oficial antes de uso profesional.
+// ================================================================
+var IPN = [
+  [80,42,3.9,5.9],[100,50,4.5,6.8],[120,58,5.1,7.7],[140,66,5.7,8.6],
+  [160,74,6.3,9.5],[180,82,6.9,10.4],[200,90,7.5,11.3],[220,98,8.1,12.2],
+  [240,106,8.7,13.1],[260,113,9.4,14.1],[280,119,10.1,15.2],[300,125,10.8,16.2],
+  [320,131,11.5,17.3],[340,137,12.2,18.3],[360,143,13.0,19.5],[380,149,13.7,20.5],
+  [400,155,14.4,21.6],[450,170,16.2,24.3],[500,185,18.0,27.0],[550,200,19.0,30.0]
+];
+var E_ACERO = 200000; // MPa
+
+var ACEROS = {F24:[235,370],F26:[250,400],F36:[345,485],A572:[345,448]};
+
+// ================================================================
+// ESTADO GLOBAL
+// ================================================================
+var gIPN = {h:300,b:125,tw:10.8,tf:16.2};
+
+// ================================================================
+// MOTOR DE SECCIÓN COMPUESTA (rectángulos)
+// ================================================================
+// rects: [{w:ancho_horizontal_mm, yBot:mm, yTop:mm}]
+function sectionProps(rects) {
+  var At=0, Qx=0;
+  for (var i=0;i<rects.length;i++){
+    var r=rects[i], a=r.w*(r.yTop-r.yBot), yc=(r.yTop+r.yBot)/2;
+    At+=a; Qx+=a*yc;
+  }
+  var ybar = Qx/At;
+  var Ix=0, Iy=0;
+  for (var i=0;i<rects.length;i++){
+    var r=rects[i], h=r.yTop-r.yBot, a=r.w*h, yc=(r.yTop+r.yBot)/2;
+    Ix += (r.w*h*h*h)/12 + a*Math.pow(yc-ybar,2);
+    Iy += (h*Math.pow(r.w,3))/12;
+  }
+  var yTopMax=-1e9, yBotMin=1e9;
+  for (var i=0;i<rects.length;i++){ if(rects[i].yTop>yTopMax) yTopMax=rects[i].yTop; if(rects[i].yBot<yBotMin) yBotMin=rects[i].yBot; }
+  var cTop=yTopMax-ybar, cBot=ybar-yBotMin;
+  var SxTop=Ix/cTop, SxBot=Ix/cBot;
+  // Zx — eje neutro plástico por igualdad de áreas
+  var target=At/2, acc=0, yPNA=null;
+  var sorted=rects.slice().sort(function(a,b){return a.yBot-b.yBot;});
+  for (var i=0;i<sorted.length;i++){
+    var r=sorted[i], a=r.w*(r.yTop-r.yBot);
+    if (acc+a>=target){ var need=target-acc; yPNA=r.yBot+need/r.w; break; }
+    acc+=a;
+  }
+  if (yPNA===null) yPNA=ybar;
+  var Zx=0;
+  for (var i=0;i<rects.length;i++){
+    var r=rects[i];
+    if (r.yTop<=yPNA){ var a=r.w*(r.yTop-r.yBot), yc=(r.yTop+r.yBot)/2; Zx+=a*(yPNA-yc); }
+    else if (r.yBot>=yPNA){ var a=r.w*(r.yTop-r.yBot), yc=(r.yTop+r.yBot)/2; Zx+=a*(yc-yPNA); }
+    else {
+      var a1=r.w*(yPNA-r.yBot), yc1=(yPNA+r.yBot)/2;
+      var a2=r.w*(r.yTop-yPNA), yc2=(r.yTop+yPNA)/2;
+      Zx+=a1*(yPNA-yc1)+a2*(yc2-yPNA);
+    }
+  }
+  return {At:At,ybar:ybar,Ix:Ix,Iy:Iy,SxTop:SxTop,SxBot:SxBot,Zx:Zx,cTop:cTop,cBot:cBot,H:yTopMax-yBotMin,yBotMin:yBotMin,yTopMax:yTopMax,yPNA:yPNA};
+}
+
+function jTorsion(rects){
+  // J = (1/3)·Σ(longitud·espesor³) por franja rectangular.
+  // El espesor es siempre la dimensión MENOR de la franja (w vs alto);
+  // para el alma w=tw es el espesor, para alas/platabandas el espesor es (yTop-yBot).
+  var J=0;
+  for (var i=0;i<rects.length;i++){
+    var r=rects[i], d1=r.w, d2=r.yTop-r.yBot;
+    var length=Math.max(d1,d2), thick=Math.min(d1,d2);
+    J += (length*Math.pow(thick,3))/3;
+  }
+  return J;
+}
+
+// Construye rects de la sección compuesta (perfil + platabandas) en mm, base=IPN
+function buildRects(ipn, bs,ts,hasPS, bi,ti,hasPI){
+  var rects = [
+    {w:ipn.b, yBot:0, yTop:ipn.tf},                     // ala inferior perfil
+    {w:ipn.tw, yBot:ipn.tf, yTop:ipn.h-ipn.tf},          // alma
+    {w:ipn.b, yBot:ipn.h-ipn.tf, yTop:ipn.h}             // ala superior perfil
+  ];
+  if (hasPI && ti>0) rects.unshift({w:bi, yBot:-ti, yTop:0});
+  if (hasPS && ts>0) rects.push({w:bs, yBot:ipn.h, yTop:ipn.h+ts});
+  return rects;
+}
+
+// ================================================================
+// NORMAS / MODAL
+// ================================================================
+var NORMAS = {
+  F1: {badge:'§F.1', title:'Disposiciones Generales — Flexión',
+    body:'<h3>F.1 — Resistencia de Diseño a Flexión</h3><div class="modal-form">φb = 0,90\n\nφMn = φb · Mn</div><p>Mn se determina según la clasificación de la sección (compacta/no compacta/esbelta) y la relación entre la longitud no arriostrada Lb y las longitudes límite Lp, Lr.</p>'},
+  BTAB: {badge:'Tabla B4.1', title:'Clasificación de Elementos — Ala y Alma en Flexión',
+    body:'<h3>Tabla B4.1 — Relaciones ancho/espesor límite</h3><div class="modal-form">ALA (elemento no rigidizado, caso 10):\n  λ = b/(2·tf)\n  λp = 0,38·√(E/Fy)\n  λr = 1,00·√(E/Fy)\n\nALMA (elemento rigidizado en flexión, caso 15):\n  λ = h/tw\n  λp = 3,76·√(E/Fy)\n  λr = 5,70·√(E/Fy)</div><div class="modal-note">Compacta: ala y alma ≤ λp · No compacta: λp &lt; λ ≤ λr · Esbelta: λ &gt; λr</div>'},
+  F25: {badge:'Ec.(F2-5,6)', title:'Longitudes Límite Lp y Lr',
+    body:'<h3>F.2 — Longitudes límite de arriostramiento lateral</h3><div class="modal-form">Lp = 1,76 · ry · √(E/Fy)                         Ec.(F2-5)\n\nLr = 1,95·rts·(E/(0,7Fy))·\n     √[ (J·c)/(Sx·ho) + √((J·c/(Sx·ho))²+6,76·(0,7Fy/E)²) ]   Ec.(F2-6)\n\nrts² = √(Iy·Cw) / Sx                             Ec.(F2-7)\nc = 1,0  (sección doblemente simétrica)          Ec.(F2-8a)\nho = distancia entre centroides de alas</div>'},
+  F2: {badge:'§F.2', title:'Momento Resistente — Fluencia y Pandeo Lateral-Torsional',
+    body:'<h3>F.2.1 — Fluencia (Mp)</h3><div class="modal-form">Mp = Fy · Zx                                     Ec.(F2-1)</div><h3 style="margin-top:10px">F.2.2 — Pandeo Lateral-Torsional (LTB)</h3><div class="modal-form">(a) Lb ≤ Lp:  Mn = Mp\n\n(b) Lp &lt; Lb ≤ Lr:\n    Mn = Cb·[Mp−(Mp−0,7·Fy·Sx)·(Lb−Lp)/(Lr−Lp)] ≤ Mp   Ec.(F2-2)\n\n(c) Lb &gt; Lr:\n    Fcr = (Cb·π²·E)/(Lb/rts)² · √[1+0,078·(J·c/(Sx·ho))·(Lb/rts)²]   Ec.(F2-4)\n    Mn = Fcr·Sx ≤ Mp                                Ec.(F2-3)</div>'},
+  G2: {badge:'§G.2', title:'Resistencia de Diseño a Corte',
+    body:'<h3>G.2.1 — Resistencia al Corte del Alma</h3><div class="modal-form">Vn = 0,6 · Fy · Aw · Cv\n\nAw = h · tw   (área del alma)\n\nSi h/tw ≤ 2,24·√(E/Fy):  Cv=1,0  y  φv=1,00\nSi no:  Cv según §G2.1(b) y φv=0,90</div><div class="modal-note">Para la mayoría de los perfiles laminados IPN con Fy usual, gobierna el primer caso (φv=1,00).</div>'},
+  J24: {badge:'Tab.J.2.5', title:'Resistencia de Cordón de Filete',
+    body:'<h3>Tabla J.2.5 — Soldadura de Filete</h3><div class="modal-form">Fw = 0,60 · FEXX     φ = 0,75\nRd (por cm de cordón) = φ · Fw · eg · (10⁻¹)   [kN/cm]\neg = w/√2   (garganta efectiva)</div><p>Flujo de corte en la interfase platabanda-ala: q = Vu·Q/Ix. Se reparte entre los 2 cordones longitudinales.</p>'},
+  TEO: {badge:'Corte teórico', title:'Longitud de Platabanda — Corte Teórico y Desarrollo',
+    body:'<h3>Punto de corte teórico</h3><p>Es la sección donde el perfil <strong>sin</strong> platabanda ya alcanza a resistir el momento actuante M(x). A partir de ahí, en teoría, la platabanda ya no es necesaria.</p><div class="modal-form">M(x) = w·x·(L−x)/2   (viga s.apoyada, carga uniforme)\nw = 8·Mu/L²\n\nBuscar x1 / M(x1) = φMn,perfil solo</div><h3 style="margin-top:10px">Extensión de desarrollo</h3><p>La platabanda debe prolongarse más allá del punto teórico una longitud adicional Lext tal que la soldadura en ese tramo pueda desarrollar la fuerza axial que la platabanda toma en el punto teórico.</p><div class="modal-form">Fp,teo = M(x1)·Ap·dp / Ix\nLext = Fp,teo / (2·Rd,cordón)</div>'}
+};
+function openModal(key){ var n=NORMAS[key]; if(!n) return;
+  document.getElementById('m-badge').textContent=n.badge;
+  document.getElementById('m-title').textContent=n.title;
+  document.getElementById('m-body').innerHTML=n.body;
+  document.getElementById('modal-overlay').classList.add('show'); }
+function closeModalDirect(){ document.getElementById('modal-overlay').classList.remove('show'); }
+function closeModal(e){ if(e.target===document.getElementById('modal-overlay')) closeModalDirect(); }
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeModalDirect(); });
+
+// ================================================================
+// HELPERS (mismo esquema que Tracción & Empalme)
+// ================================================================
+function f2(v){ return (Math.round(+v*100)/100).toFixed(2); }
+function f1(v){ return (Math.round(+v*10)/10).toFixed(1); }
+function f0(v){ return (Math.round(+v)).toString(); }
+function makeNb(ref,key){ return '<button class="nb" onclick="openModal(\''+key+'\')">'+ref+'</button>'; }
+function makeFm(lbl,eq,res,unit){ unit=unit||'kN'; return '<div class="fm"><div class="fm-lbl">'+lbl+'</div><div>'+eq+'</div><div class="fm-res">= '+f2(res)+' '+unit+'</div></div>'; }
+function makeFmStr(lbl,content){ return '<div class="fm"><div class="fm-lbl">'+lbl+'</div><div>'+content+'</div></div>'; }
+function makeVr(ok,expr,vals){ var cls=ok?'ok':'fail', lbl=ok?'VERIFICA':'NO VERIFICA';
+  return '<div class="vr '+cls+'"><span class="vb '+cls+'">'+lbl+'</span><span class="vr-txt">'+expr+'</span><span class="vr-val">'+vals+'</span></div>'; }
+function makeKpi(elId,items){ var c=['cr','cok','cb','cw'], h='';
+  for(var i=0;i<items.length;i++) h+='<div class="kpi '+c[i%4]+'"><div class="kpi-val">'+items[i].v+'</div><div class="kpi-lbl">'+items[i].l+'</div></div>';
+  document.getElementById(elId).innerHTML=h; }
+function makeH4(t){ return '<h4 style="font-family:Montserrat,sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#444;margin:12px 0 8px">'+t+'</h4>'; }
+function makeNota(h,cls){ return '<div class="nota'+(cls?' '+cls:'')+'">'+h+'</div>'; }
+
+function applyAcero(){
+  var v=document.getElementById('acero_std').value;
+  if(v!=='custom'){ var a=ACEROS[v]; document.getElementById('Fy').value=a[0]; document.getElementById('Fu').value=a[1]; }
+  recalc();
+}
+
+// ================================================================
+// SELECTOR DE PERFIL
+// ================================================================
+function renderIPN(){
+  var box=document.getElementById('ipn-chips'); box.innerHTML='';
+  for (var i=0;i<IPN.length;i++){
+    var p=IPN[i]; var isSel=Math.abs(p[0]-gIPN.h)<0.1;
+    var d=document.createElement('div');
+    d.className='bchip'+(isSel?' sel':'');
+    d.innerHTML='<div class="bd">IPN'+p[0]+'</div><div class="bs">b='+p[1]+' tw='+p[2]+'<br>tf='+p[3]+'</div>';
+    d.onclick=(function(pp){ return function(){ gIPN={h:pp[0],b:pp[1],tw:pp[2],tf:pp[3]}; renderIPN(); recalc(); }; })(p);
+    box.appendChild(d);
+  }
+  var sp=sectionProps(buildRects(gIPN,0,0,false,0,0,false));
+  document.getElementById('ipn-info').innerHTML =
+    '<strong>IPN'+gIPN.h+'</strong>  Ag='+f2(sp.At/100)+'cm² · peso≈'+f2(sp.At*0.785/1000)+'kg/m<br>'
+    +'Ix='+f0(sp.Ix/1e4)+'cm⁴ · Iy='+f0(sp.Iy/1e4)+'cm⁴ · Zx='+f0(sp.Zx/1e3)+'cm³';
+}
+
+// ================================================================
+// SVG — sección transversal + diagrama de momento
+// ================================================================
+function makeSeccionSvg(ipn,bs,ts,hasPS,bi,ti,hasPI,ybar,H){
+  var W=260,Hh=260, esc=Math.min(180/H, 150/Math.max(ipn.b,bs||0,bi||0));
+  var cx=W/2;
+  var baseY=Hh-30; // y=0 (base perfil, o base platabanda inferior) en pixeles, midiendo hacia arriba
+  function toPx(ymm){ return baseY-(ymm-( (hasPI&&ti>0)?-ti:0 ))*esc; }
+  var svg='<svg width="'+W+'" height="'+Hh+'" viewBox="0 0 '+W+' '+Hh+'" xmlns="http://www.w3.org/2000/svg">';
+  var yA = (hasPI&&ti>0)?-ti:0;
+  var yTopTotal = ipn.h + ((hasPS&&ts>0)?ts:0);
+  // ala inferior + alma + ala superior
+  function rect(xw,y0,y1,fill,stroke){
+    var x0=cx-xw/2, yTopPx=baseY-(y1-yA)*esc, hpx=(y1-y0)*esc;
+    svg+='<rect x="'+x0+'" y="'+yTopPx+'" width="'+xw+'" height="'+hpx+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="1"/>';
+  }
+  rect(ipn.b*esc,0,ipn.tf,'#e4e8ec','#666');
+  rect(ipn.tw*esc,ipn.tf,ipn.h-ipn.tf,'#e4e8ec','#666');
+  rect(ipn.b*esc,ipn.h-ipn.tf,ipn.h,'#e4e8ec','#666');
+  if(hasPI&&ti>0) rect(bi*esc,-ti,0,'#fdecea','#E10600');
+  if(hasPS&&ts>0) rect(bs*esc,ipn.h,ipn.h+ts,'#fdecea','#E10600');
+  // eje neutro
+  var yNA = baseY-(ybar-yA)*esc;
+  svg+='<line x1="'+(cx-100)+'" y1="'+yNA+'" x2="'+(cx+100)+'" y2="'+yNA+'" stroke="#1a5fa8" stroke-width="1.2" stroke-dasharray="5,3"/>';
+  svg+='<text x="'+(cx+62)+'" y="'+(yNA-4)+'" fill="#1a5fa8" font-family="Montserrat" font-size="8" font-weight="700">E.N.</text>';
+  svg+='<text x="'+cx+'" y="'+(Hh-8)+'" fill="#666" font-family="JetBrains Mono" font-size="7.5" text-anchor="middle">IPN'+ipn.h+(hasPS?' + PS '+bs+'×'+ts:'')+(hasPI?' + PI '+bi+'×'+ti:'')+'</text>';
+  svg+='</svg>';
+  return svg;
+}
+
+function makeMomentoSvg(L,w,Mact,x1i,x1d,MnPerfil){
+  var W=460,Hh=180,padX=40,padTop=20,padBot=30;
+  var plotW=W-2*padX, plotH=Hh-padTop-padBot;
+  var scX=plotW/L, Mmax=w*L*L/8;
+  var scY=plotH/Mmax;
+  function px(x){ return padX+x*scX; }
+  function py(M){ return padTop+plotH-M*scY; }
+  var svg='<svg width="'+W+'" height="'+Hh+'" viewBox="0 0 '+W+' '+Hh+'" xmlns="http://www.w3.org/2000/svg">';
+  // eje
+  svg+='<line x1="'+padX+'" y1="'+(padTop+plotH)+'" x2="'+(padX+plotW)+'" y2="'+(padTop+plotH)+'" stroke="#888" stroke-width="1"/>';
+  // parábola de momento M(x)=w*x*(L-x)/2
+  var pts='';
+  var N=40;
+  for(var i=0;i<=N;i++){ var x=L*i/N, M=w*x*(L-x)/2; pts+=px(x)+','+py(M)+' '; }
+  svg+='<polyline points="'+pts+'" fill="none" stroke="#1a5fa8" stroke-width="1.6"/>';
+  // línea Mn perfil solo
+  svg+='<line x1="'+padX+'" y1="'+py(MnPerfil)+'" x2="'+(padX+plotW)+'" y2="'+py(MnPerfil)+'" stroke="#1a7f40" stroke-width="1.2" stroke-dasharray="4,3"/>';
+  svg+='<text x="'+(padX+plotW-2)+'" y="'+(py(MnPerfil)-4)+'" fill="#1a7f40" font-family="JetBrains Mono" font-size="7.5" text-anchor="end">φMn,perfil='+f1(MnPerfil)+'kN·m</text>';
+  // corte teórico
+  if(x1i!=null && x1d!=null){
+    svg+='<line x1="'+px(x1i)+'" y1="'+padTop+'" x2="'+px(x1i)+'" y2="'+(padTop+plotH)+'" stroke="#E10600" stroke-width="1.2" stroke-dasharray="3,3"/>';
+    svg+='<line x1="'+px(x1d)+'" y1="'+padTop+'" x2="'+px(x1d)+'" y2="'+(padTop+plotH)+'" stroke="#E10600" stroke-width="1.2" stroke-dasharray="3,3"/>';
+    svg+='<line x1="'+px(x1i)+'" y1="'+(padTop+plotH+14)+'" x2="'+px(x1d)+'" y2="'+(padTop+plotH+14)+'" stroke="#E10600" stroke-width="1.5"/>';
+    svg+='<text x="'+((px(x1i)+px(x1d))/2)+'" y="'+(padTop+plotH+13)+'" fill="#E10600" font-family="Montserrat" font-size="7.5" font-weight="700" text-anchor="middle">L,platabanda</text>';
+  }
+  svg+='<text x="'+padX+'" y="'+(padTop-6)+'" fill="#666" font-family="JetBrains Mono" font-size="7.5">Mu,max='+f1(Mmax)+'kN·m</text>';
+  svg+='<text x="'+(padX+plotW)+'" y="'+(padTop+plotH+28)+'" fill="#666" font-family="JetBrains Mono" font-size="7.5" text-anchor="end">L='+f1(L)+'m</text>';
+  svg+='</svg>';
+  return svg;
+}
+
+// ================================================================
+// RECALC PRINCIPAL
+// ================================================================
+function recalc(){
+  var Fy=+document.getElementById('Fy').value;
+  var Fu=+document.getElementById('Fu').value;
+  var Mu=+document.getElementById('Mu').value;
+  var Vu=+document.getElementById('Vu').value;
+  var L=+document.getElementById('Lm').value;
+  var Lb=+document.getElementById('Lb_m').value;
+  var Cb=+document.getElementById('Cb').value;
+  var hasPS=document.getElementById('hasPS').checked;
+  var bs=+document.getElementById('bs_mm').value, ts=+document.getElementById('ts_mm').value;
+  var hasPI=document.getElementById('hasPI').checked;
+  var bi=+document.getElementById('bi_mm').value, ti=+document.getElementById('ti_mm').value;
+  var Feex=+document.getElementById('Feex').value;
+  var w_mm=+document.getElementById('w_mm').value;
+
+  renderIPN();
+  var ipn=gIPN;
+  var E=E_ACERO;
+
+  // ---- 1. Propiedades sección compuesta ----
+  var rectsPerfil = buildRects(ipn,0,0,false,0,0,false);
+  var spPerfil = sectionProps(rectsPerfil);
+  var rectsComp = buildRects(ipn,bs,ts,hasPS,bi,ti,hasPI);
+  var sp = sectionProps(rectsComp);
+  var J = jTorsion(rectsComp);
+  var ho = ipn.h - ipn.tf; // aprox distancia entre centroides de alas (perfil base)
+  var Cw = sp.Iy*Math.pow(ho,2)/4;
+  var rts = Math.sqrt(Math.sqrt(sp.Iy*Cw)/sp.SxTop); // aproximación simplificada Ec F2-7 (mm)
+
+  document.getElementById('c1').innerHTML =
+    makeNota('Sección compuesta: perfil IPN'+ipn.h+(hasPS?' + platabanda superior '+bs+'×'+ts+'mm':'')+(hasPI?' + platabanda inferior '+bi+'×'+ti+'mm':'')+'. Propiedades calculadas por descomposición en rectángulos (sin radios de acuerdo).','blue')
+    +'<table><tr><th>Propiedad</th><th>Perfil solo</th><th>Sección compuesta</th></tr>'
+    +'<tr><td>Ag (cm²)</td><td>'+f2(spPerfil.At/100)+'</td><td class="hi">'+f2(sp.At/100)+'</td></tr>'
+    +'<tr><td>Ix (cm⁴)</td><td>'+f0(spPerfil.Ix/1e4)+'</td><td class="hi">'+f0(sp.Ix/1e4)+'</td></tr>'
+    +'<tr><td>Iy (cm⁴)</td><td>'+f0(spPerfil.Iy/1e4)+'</td><td class="hi">'+f0(sp.Iy/1e4)+'</td></tr>'
+    +'<tr><td>ȳ desde fibra inferior (mm)</td><td>'+f1(spPerfil.ybar)+'</td><td class="hi">'+f1(sp.ybar)+'</td></tr>'
+    +'<tr><td>Sx,sup (cm³)</td><td>'+f0(spPerfil.SxTop/1e3)+'</td><td class="hi">'+f0(sp.SxTop/1e3)+'</td></tr>'
+    +'<tr><td>Sx,inf (cm³)</td><td>'+f0(spPerfil.SxBot/1e3)+'</td><td class="hi">'+f0(sp.SxBot/1e3)+'</td></tr>'
+    +'<tr><td>Zx (cm³)</td><td>'+f0(spPerfil.Zx/1e3)+'</td><td class="hi">'+f0(sp.Zx/1e3)+'</td></tr></table>'
+    +makeNota('Se asume viga con momento positivo (carga gravitatoria): ala superior comprimida, ala inferior traccionada. Sx gobernante en compresión = Sx,sup.');
+
+  // ---- 2. Clasificación de sección ----
+  var lamAla = ipn.b/(2*ipn.tf);
+  var lamAlaP = 0.38*Math.sqrt(E/Fy), lamAlaR = 1.00*Math.sqrt(E/Fy);
+  var lamAlma = (ipn.h-2*ipn.tf)/ipn.tw;
+  var lamAlmaP = 3.76*Math.sqrt(E/Fy), lamAlmaR = 5.70*Math.sqrt(E/Fy);
+  var alaClase = lamAla<=lamAlaP?'Compacta':(lamAla<=lamAlaR?'No compacta':'Esbelta');
+  var almaClase = lamAlma<=lamAlmaP?'Compacta':(lamAlma<=lamAlmaR?'No compacta':'Esbelta');
+  var seccionCompacta = alaClase==='Compacta' && almaClase==='Compacta';
+
+  document.getElementById('c2').innerHTML =
+    makeNota(makeNb('Tabla B4.1','BTAB')+' — Clasificación según relación ancho/espesor (perfil base; la platabanda no se clasifica por separado si bp≤b).')
+    +'<table><tr><th>Elemento</th><th>λ</th><th>λp</th><th>λr</th><th>Clasificación</th></tr>'
+    +'<tr><td>Ala: b/(2·tf)</td><td class="hi">'+f2(lamAla)+'</td><td>'+f2(lamAlaP)+'</td><td>'+f2(lamAlaR)+'</td><td class="'+(alaClase==='Compacta'?'ok2':'fail2')+'">'+alaClase+'</td></tr>'
+    +'<tr><td>Alma: h/tw</td><td class="hi">'+f2(lamAlma)+'</td><td>'+f2(lamAlmaP)+'</td><td>'+f2(lamAlmaR)+'</td><td class="'+(almaClase==='Compacta'?'ok2':'fail2')+'">'+almaClase+'</td></tr></table>'
+    +makeNota((bs>ipn.b||bi>ipn.b)?'⚠ El ancho de platabanda supera el ancho del ala del perfil — revisar clasificación local de la platabanda como elemento propio.':'Platabanda(s) dentro del ancho del ala: no gobiernan el pandeo local del ala.', (bs>ipn.b||bi>ipn.b)?'warn':undefined);
+
+  // ---- 3. Lp, Lr, zona LTB ----
+  var ry = Math.sqrt(sp.Iy/sp.At); // mm
+  var Lp = 1.76*ry*Math.sqrt(E/Fy); // mm
+  var c=1.0;
+  var SxComp = sp.SxTop; // ala superior comprimida
+  var term1 = (J*c)/(SxComp*ho);
+  var Lr = 1.95*rts*(E/(0.7*Fy))*Math.sqrt(term1 + Math.sqrt(term1*term1 + 6.76*Math.pow(0.7*Fy/E,2))); // mm
+  var LbMM = Lb*1000;
+  var zona = LbMM<=Lp ? 1 : (LbMM<=Lr ? 2 : 3);
+  var zonaLbl = zona===1?'Plástica (Lb≤Lp)':(zona===2?'Inelástica (Lp<Lb≤Lr)':'Elástica (Lb>Lr)');
+
+  document.getElementById('c3').innerHTML =
+    makeNota(makeNb('Ec.(F2-5,6)','F25')+' — J='+f0(J/1e4)+'cm⁴(ap.) · Cw='+f0(Cw/1e8)+'×10⁴cm⁶(ap.) · rts='+f1(rts)+'mm · ho='+f1(ho)+'mm')
+    +makeFm('Lp = 1,76·ry·√(E/Fy)','1,76×'+f1(ry)+'×√('+E+'/'+Fy+')',Lp/1000,'m')
+    +makeFm('Lr (Ec.F2-6)','ver detalle en '+makeNb('Ec.(F2-5,6)','F25'),Lr/1000,'m')
+    +'<div class="fm"><div class="fm-lbl">Zona de pandeo lateral-torsional</div><div>Lb='+f2(Lb)+'m &nbsp;|&nbsp; Lp='+f2(Lp/1000)+'m &nbsp;|&nbsp; Lr='+f2(Lr/1000)+'m</div>'
+    +'<div class="fm-res">→ Zona '+zona+': '+zonaLbl+'</div></div>'
+    +makeNota('J y Cw calculados con fórmulas aproximadas para sección I (sin radios de acuerdo, ho referido al perfil base). Válido como estimación de proyecto preliminar.','blue');
+
+  // ---- 4. Momento resistente ----
+  var phi=0.90;
+  var Mp = Fy*sp.Zx*1e-6; // N·mm *1e-... Fy[MPa=N/mm2]*Zx[mm3] = N·mm ; /1e6 -> kN·m... corregido abajo
+  Mp = (Fy*sp.Zx)/1e6; // kN·m
+  var MyComp = 0.7*Fy*SxComp/1e6; // kN·m (0.7FySx en zona inelástica)
+  var Mn, tramo;
+  if (zona===1){ Mn=Mp; tramo='(a) Lb≤Lp → Mn=Mp'; }
+  else if (zona===2){
+    Mn = Cb*(Mp-(Mp-MyComp)*(LbMM-Lp)/(Lr-Lp));
+    if(Mn>Mp) Mn=Mp;
+    tramo='(b) Lp<Lb≤Lr → interpolación inelástica';
+  } else {
+    var Fcr = (Cb*Math.PI*Math.PI*E)/Math.pow(LbMM/rts,2) * Math.sqrt(1+0.078*term1*Math.pow(LbMM/rts,2)); // MPa
+    Mn = Fcr*SxComp/1e6;
+    if(Mn>Mp) Mn=Mp;
+    tramo='(c) Lb>Lr → pandeo elástico, Fcr='+f1(Fcr)+' MPa';
+  }
+  var phiMn = phi*Mn;
+  var ok_flex = phiMn>=Mu;
+
+  // Perfil solo (para longitud de platabanda — sección 7)
+  var Mp_perfil = (Fy*spPerfil.Zx)/1e6;
+  var lamAlmaPerfil=lamAlma, lamAlaPerfil=lamAla; // idéntico (perfil base)
+  var Mn_perfil;
+  var ry_p = Math.sqrt(spPerfil.Iy/spPerfil.At);
+  var Lp_p = 1.76*ry_p*Math.sqrt(E/Fy);
+  if (LbMM<=Lp_p) Mn_perfil=Mp_perfil;
+  else Mn_perfil = Mp_perfil*0.85; // aproximación conservadora si Lb>Lp para el perfil solo (informativo)
+  var phiMn_perfil = phi*Mn_perfil;
+
+  document.getElementById('c4').innerHTML =
+    makeNota(makeNb('§F.2','F2')+' — φ=0,90 · '+tramo)
+    +makeFm('Mp = Fy·Zx·10⁻³ ('+'Fy en MPa, Zx en cm³)',Fy+'×'+f0(sp.Zx/1e3)+'×10⁻³',Mp,'kN·m')
+    +(zona!==1?makeFm('My,comp = 0,7·Fy·Sx,comp·10⁻³','0,7×'+Fy+'×'+f0(SxComp/1e3)+'×10⁻³',MyComp,'kN·m'):'')
+    +makeFm('Mn',tramo,Mn,'kN·m')
+    +makeFm('φMn = 0,90·Mn','0,90×'+f2(Mn),phiMn,'kN·m')
+    +makeVr(ok_flex,'φMn ≥ Mu',f2(phiMn)+' kN·m ≥ '+f2(Mu)+' kN·m');
+
+  // ---- 5. Corte ----
+  var Aw = ipn.h*ipn.tw; // mm²
+  var hTw = ipn.h/ipn.tw;
+  var lim = 2.24*Math.sqrt(E/Fy);
+  var Cv = hTw<=lim?1.0:0.9; var phiV = hTw<=lim?1.00:0.90;
+  var Vn = 0.6*Fy*Aw*Cv/1000; // kN
+  var phiVn = phiV*Vn;
+  var ok_v = phiVn>=Vu;
+  document.getElementById('c5').innerHTML =
+    makeNota(makeNb('§G.2','G2')+' — Aw=h·tw='+f1(ipn.h)+'×'+f1(ipn.tw)+'='+f0(Aw/100)+'cm² · h/tw='+f2(hTw)+' vs 2,24√(E/Fy)='+f2(lim))
+    +makeFm('Vn = 0,6·Fy·Aw·Cv','0,6×'+Fy+'×'+f0(Aw)+'×'+Cv+'×10⁻³',Vn,'kN')
+    +makeFm('φv·Vn',phiV+'×'+f2(Vn),phiVn,'kN')
+    +makeVr(ok_v,'φVn ≥ Vu',f2(phiVn)+' kN ≥ '+f2(Vu)+' kN');
+
+  // ---- 6. Soldadura platabanda-ala ----
+  var eg = w_mm/Math.SQRT2;
+  var Fw = 0.6*Feex;
+  var Rd_cm = 0.75*Fw*eg*1e-1; // kN/cm (por cordón)
+  var c6 = makeNota(makeNb('Tab.J.2.5','J24')+' — eg=w/√2='+f2(eg)+'mm · Fw=0,6×FEXX='+f2(Fw)+'MPa')
+    + makeFm('Rd,cordón = φ·Fw·eg·10⁻¹','0,75×'+f2(Fw)+'×'+f2(eg)+'×10⁻¹',Rd_cm,'kN/cm');
+  function soldaduraPlaca(label,bpl,tpl,dCentroid){
+    if(bpl<=0||tpl<=0) return '';
+    var Apl=bpl*tpl; // mm²
+    var Q = Apl*Math.abs(dCentroid-sp.ybar)/1000; // cm³ (Apl mm2 * dist mm /1000 = mm3/1000=cm3... ver abajo)
+    Q = (Apl*Math.abs(dCentroid-sp.ybar))/1000; // mm³ → /1000 = cm³
+    var q = Vu*Q/(sp.Ix/1e4); // kN·cm3/cm4 = kN/cm
+    var qPorCordon = q/2;
+    var ok = Rd_cm>=qPorCordon;
+    return makeH4(label)
+      + makeFmStr('Q = Ap·|dp−ȳ|','Ap='+f0(Apl/100)+'cm² · dist='+f1(Math.abs(dCentroid-sp.ybar))+'mm → Q='+f2(Q)+' cm³')
+      + makeFm('q = Vu·Q/Ix','('+Vu+'×'+f2(Q)+')/'+f0(sp.Ix/1e4),q,'kN/cm')
+      + makeFm('q por cordón (2 cordones)','q/2',qPorCordon,'kN/cm')
+      + makeVr(ok,'Rd,cordón ≥ q/cordón',f2(Rd_cm)+' kN/cm ≥ '+f2(qPorCordon)+' kN/cm');
+  }
+  var dPS = ipn.h + ts/2, dPI = -ti/2;
+  if(hasPS && ts>0) c6 += soldaduraPlaca('Platabanda superior', bs, ts, dPS);
+  if(hasPI && ti>0) c6 += soldaduraPlaca('Platabanda inferior', bi, ti, dPI);
+  document.getElementById('c6').innerHTML = c6;
+
+  // ---- 7. Longitud de platabanda ----
+  var wCarga = 8*Mu/(L*L); // kN/m (uniforme equivalente para tener Mu en el centro)
+  var Mmax = wCarga*L*L/8;
+  function cutoff(phiMnPerfilSolo){
+    // M(x)=w*x*(L-x)/2 = target -> resolver
+    var a=-wCarga/2, b=wCarga*L/2, cc=-phiMnPerfilSolo;
+    var disc=b*b-4*a*cc;
+    if(disc<0) return null;
+    var sq=Math.sqrt(disc);
+    var x1=(-b+sq)/(2*a), x2=(-b-sq)/(2*a);
+    var xi=Math.min(x1,x2), xd=Math.max(x1,x2);
+    if(xi<0) xi=0; if(xd>L) xd=L;
+    return {xi:xi,xd:xd};
+  }
+  var corte = cutoff(phiMn_perfil);
+  var c7='';
+  if(!corte || phiMn_perfil>=Mmax){
+    c7 = makeNota('⚠ El perfil solo ya resiste el momento máximo de la viga (φMn,perfil='+f2(phiMn_perfil)+' kN·m ≥ Mu,max='+f2(Mmax)+' kN·m) — no se requiere platabanda por flexión con esta luz/carga estimada. Revisar Mu o L ingresados.','warn');
+  } else {
+    var Lteo = corte.xd-corte.xi;
+    // extensión de desarrollo en el punto teórico (usa la platabanda de mayor demanda: la que gobierna en c6)
+    var Mteo = wCarga*corte.xi*(L-corte.xi)/2;
+    function extension(bpl,tpl,dCentroid){
+      if(bpl<=0||tpl<=0) return 0;
+      var Apl=bpl*tpl;
+      var Fp = Mteo*Apl*Math.abs(dCentroid-sp.ybar)/(sp.Ix/1e6); // kN·m·mm2·mm/mm4 → ajustar unidades abajo
+      // Fp[kN] = Mteo[kN·m]*1000[mm/m] * Apl[mm2]*d[mm] / Ix[mm4]
+      Fp = (Mteo*1000*Apl*Math.abs(dCentroid-sp.ybar))/sp.Ix;
+      var Lext = Fp/(2*Rd_cm)*10; // Rd_cm en kN/cm -> *10 para mm
+      return Lext;
+    }
+    var LextPS = hasPS?extension(bs,ts,dPS):0;
+    var LextPI = hasPI?extension(bi,ti,dPI):0;
+    var Lext = Math.max(LextPS,LextPI)/1000; // m
+    var Lreal = Lteo + 2*Lext;
+    c7 = makeNota(makeNb('Corte teórico','TEO')+' — w equivalente = 8·Mu/L² = '+f2(wCarga)+' kN/m (para ubicar el punto donde el perfil solo alcanza)')
+      + makeFmStr('φMn,perfil solo', f2(phiMn_perfil)+' kN·m  (misma sección, sin platabandas)')
+      + makeFmStr('Puntos de corte teórico (desde apoyo izq.)', 'x₁='+f2(corte.xi)+' m &nbsp;|&nbsp; x₂='+f2(corte.xd)+' m')
+      + makeFm('L,teórica = x₂−x₁','', Lteo,'m')
+      + makeFm('Extensión de desarrollo (c/extremo)','max(PS,PI)', Lext,'m')
+      + '<div class="fm"><div class="fm-lbl">Longitud real de platabanda</div><div>L,real = L,teórica + 2·Lext</div><div class="fm-res">= '+f2(Lreal)+' m</div></div>';
+  }
+  document.getElementById('c7').innerHTML = c7;
+
+  // ---- 8. Esquema ----
+  document.getElementById('c8').innerHTML =
+    '<div class="drawing" style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;align-items:flex-start">'
+    + makeSeccionSvg(ipn,bs,ts,hasPS,bi,ti,hasPI,sp.ybar,sp.H)
+    + (corte ? makeMomentoSvg(L,wCarga,Mu,corte.xi,corte.xd,phiMn_perfil) : makeMomentoSvg(L,wCarga,Mu,null,null,phiMn_perfil))
+    + '</div>';
+
+  // ---- KPI + Resumen ----
+  var allOk = ok_flex && ok_v;
+  makeKpi('kA',[
+    {v:'IPN'+ipn.h,l:'Perfil base'},
+    {v:f0(sp.Zx/1e3)+' cm³',l:'Zx compuesto'},
+    {v:f2(phiMn)+' kN·m',l:'φMn'},
+    {v:allOk?'OK':'Revisar',l:'Estado'}
+  ]);
+  document.getElementById('sA').innerHTML = '<h3>✦ Resumen — '+(allOk?'VERIFICADO':'REVISAR')+'</h3><div class="summ-grid">'
+    +'<div><div class="si-lbl">Perfil</div><div class="si-val">IPN'+ipn.h+'</div></div>'
+    +'<div><div class="si-lbl">Platabandas</div><div class="si-val">'+(hasPS?('PS '+bs+'×'+ts+'mm '):'')+(hasPI?('PI '+bi+'×'+ti+'mm'):'')+((!hasPS&&!hasPI)?'Ninguna':'')+'</div></div>'
+    +'<div><div class="si-lbl">Clasificación</div><div class="si-val">'+alaClase+' (ala) / '+almaClase+' (alma)</div></div>'
+    +'<div><div class="si-lbl">φMn</div><div class="si-val">'+f2(phiMn)+' kN·m '+(ok_flex?'≥':'<')+' '+f2(Mu)+'</div></div>'
+    +'<div><div class="si-lbl">φVn</div><div class="si-val">'+f2(phiVn)+' kN '+(ok_v?'≥':'<')+' '+f2(Vu)+'</div></div>'
+    +'<div><div class="si-lbl">Zona LTB</div><div class="si-val">'+zonaLbl+'</div></div></div>';
+}
+
+// ================================================================
+// INIT
+// ================================================================
+renderIPN();
+recalc();
+</script>
+</body>
+</html>
