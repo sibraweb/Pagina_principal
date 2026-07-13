@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Construcciones Metálicas y de Madera — Sibratech</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+:root {
+  --red:#E10600; --red-dk:#b80500; --red-lt:#fdecea;
+  --ink:#1a1a1a; --body:#5A6060; --muted:#9AA0A0;
+  --g200:#eaeaea; --g100:#F5F5F5; --g050:#f9f9f9;
+  --wood:#b5651d; --wood-lt:#fdf3eb;
+  --steel:#3a5a78; --steel-lt:#eaf1f8;
+  --calc:#1a6640; --calc-lt:#eaf5ee;
+  --shadow:0 2px 10px rgba(0,0,0,0.08);
+  --hover:0 8px 25px rgba(225,6,0,0.12);
+  --t:0.25s ease;
+  --ff:'Jost','Century Gothic',system-ui,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--ff);color:var(--ink);background:#fff;line-height:1.6}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-thumb{background:var(--red);border-radius:3px}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:100;height:64px;padding:0 5%;
+  display:flex;align-items:center;justify-content:space-between;
+  background:#fff;border-bottom:1px solid var(--g200);
+  box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.brand{display:flex;align-items:center;gap:9px}
+.mosaic{display:grid;grid-template-columns:repeat(3,10px);grid-template-rows:repeat(3,10px);gap:2px}
+.mosaic span{display:block}
+.wm strong{font-weight:700;font-size:1rem;letter-spacing:.02em;color:var(--ink)}
+.wm strong em{color:var(--red);font-style:normal}
+.wm small{display:block;font-size:.35rem;letter-spacing:.44em;color:var(--body);margin-top:2px}
+.nav-bc{display:flex;align-items:center;gap:.5rem;font-size:.72rem;font-weight:600;color:var(--muted)}
+.nav-bc a{color:var(--red)}
+.nav-bc span{color:var(--g200)}
+
+/* ── HERO ── */
+.hero{padding:3.5rem 5% 3rem;border-bottom:1px solid var(--g200)}
+.hero-eyebrow{font-size:.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--red);margin-bottom:.6rem}
+.hero h1{font-weight:700;font-size:2.4rem;line-height:1.1;letter-spacing:-.4px;margin-bottom:1rem}
+.hero h1 em{color:var(--red);font-style:normal}
+.hero-desc{font-size:.95rem;line-height:1.8;color:var(--body);max-width:640px;margin-bottom:2rem}
+.hero-tags{display:flex;gap:.6rem;flex-wrap:wrap}
+.tag{display:inline-flex;align-items:center;gap:.35rem;
+  font-size:.7rem;font-weight:600;color:var(--body);
+  background:var(--g100);border:1px solid var(--g200);
+  padding:.3rem .75rem;border-radius:2rem}
+.tag i{width:13px;height:13px}
+
+/* ── SECCIÓN TABS ── */
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--g200);padding:0 5%;background:#fff;position:sticky;top:64px;z-index:90}
+.tab-btn{padding:.9rem 1.6rem;font-family:var(--ff);font-size:.76rem;font-weight:700;
+  letter-spacing:.3px;border:none;background:none;cursor:pointer;
+  color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-2px;
+  transition:color var(--t),border-color var(--t);display:flex;align-items:center;gap:.4rem}
+.tab-btn i{width:15px;height:15px}
+.tab-btn.active{color:var(--ink);border-bottom-color:var(--red)}
+.tab-btn:hover:not(.active){color:var(--ink)}
+
+/* ── CONTENIDO SECCIONES ── */
+.section{display:none;padding:3.5rem 5%}
+.section.active{display:block}
+
+.section-hd{margin-bottom:2.5rem}
+.eyebrow{font-size:.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.5rem}
+.eyebrow--steel{color:var(--steel)}
+.eyebrow--wood{color:var(--wood)}
+.eyebrow--calc{color:var(--calc)}
+.red-bar{width:44px;height:3px;background:var(--red);margin:.5rem 0 1.2rem}
+.h2{font-weight:700;font-size:1.8rem;line-height:1.15;letter-spacing:-.25px}
+.section-desc{font-size:.9rem;color:var(--body);line-height:1.8;max-width:560px;margin-top:.8rem}
+
+/* ── EXERCISE GRID ── */
+.ex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.4rem}
+.ex-card{background:#fff;border:1px solid var(--g200);border-radius:8px;
+  box-shadow:var(--shadow);overflow:hidden;
+  transition:transform var(--t),box-shadow var(--t),border-color var(--t);
+  display:flex;flex-direction:column}
+.ex-card:hover{transform:translateY(-4px);box-shadow:var(--hover);border-color:var(--red)}
+.ex-card-header{padding:1.4rem 1.4rem 1rem;border-bottom:1px solid var(--g200);display:flex;align-items:flex-start;gap:.9rem}
+.ex-icon{width:44px;height:44px;border-radius:6px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center}
+.ex-icon--steel{background:var(--steel-lt);color:var(--steel)}
+.ex-icon--wood{background:var(--wood-lt);color:var(--wood)}
+.ex-icon--calc{background:var(--calc-lt);color:var(--calc)}
+.ex-icon i{width:22px;height:22px}
+.ex-card-title{font-weight:700;font-size:.95rem;margin-bottom:.25rem}
+.ex-card-subtitle{font-size:.75rem;color:var(--muted);font-weight:600;letter-spacing:.3px}
+.ex-card-body{padding:1rem 1.4rem;flex:1}
+.ex-card-body p{font-size:.83rem;color:var(--body);line-height:1.7;margin-bottom:.8rem}
+.ex-tags{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem}
+.ex-tag{font-size:.65rem;font-weight:700;letter-spacing:.3px;text-transform:uppercase;
+  padding:.2rem .6rem;border-radius:3px}
+.ex-tag--ok{background:#eaf5ee;color:#1a6640}
+.ex-tag--wip{background:#fdf3eb;color:#b5651d}
+.ex-tag--new{background:var(--red-lt);color:var(--red)}
+.ex-tag--norma{background:var(--steel-lt);color:var(--steel)}
+.ex-card-footer{padding:.9rem 1.4rem;border-top:1px solid var(--g200);display:flex;align-items:center;justify-content:space-between}
+.ex-card-footer small{font-size:.72rem;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;gap:.4rem;
+  font-family:var(--ff);font-weight:700;font-size:.68rem;
+  letter-spacing:.8px;text-transform:uppercase;
+  padding:.6rem 1.2rem;border-radius:3px;border:none;cursor:pointer;transition:background var(--t),transform var(--t)}
+.btn--red{background:var(--red);color:#fff}
+.btn--red:hover{background:var(--red-dk);transform:translateY(-1px)}
+.btn--steel{background:var(--steel);color:#fff}
+.btn--steel:hover{background:#2e4860;transform:translateY(-1px)}
+.btn--wood{background:var(--wood);color:#fff}
+.btn--wood:hover{background:#8b4a13;transform:translateY(-1px)}
+.btn--calc{background:var(--calc);color:#fff}
+.btn--calc:hover{background:#124d2f;transform:translateY(-1px)}
+.btn--ghost{background:transparent;color:var(--ink);border:1.5px solid var(--g200)}
+.btn--ghost:hover{border-color:var(--ink)}
+.btn i{width:13px;height:13px}
+
+/* ── COMING SOON CARD ── */
+.cs-card{background:var(--g050);border:1.5px dashed var(--g200);border-radius:8px;
+  padding:2rem;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center;gap:.6rem;min-height:180px}
+.cs-card i{color:var(--muted);width:32px;height:32px}
+.cs-card h4{font-weight:700;font-size:.9rem;color:var(--body)}
+.cs-card p{font-size:.78rem;color:var(--muted);line-height:1.6}
+
+/* ── CALCULADORA NAVE ── */
+.nave-wrap{display:grid;grid-template-columns:320px 1fr;gap:2rem;align-items:start}
+.nave-panel{background:#fff;border:1px solid var(--g200);border-radius:8px;padding:1.5rem;box-shadow:var(--shadow)}
+.nave-panel h3{font-weight:700;font-size:.88rem;margin-bottom:1.2rem;padding-bottom:.75rem;border-bottom:1px solid var(--g200);display:flex;align-items:center;gap:.5rem}
+.nave-panel h3 i{color:var(--calc);width:16px;height:16px}
+.field-group{margin-bottom:1rem}
+.field-label{font-size:.68rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem;display:block}
+.field-input{width:100%;padding:.55rem .8rem;font-family:var(--ff);font-size:.85rem;color:var(--ink);background:var(--g050);border:1px solid var(--g200);border-radius:4px;outline:none;transition:border-color var(--t)}
+.field-input:focus{border-color:var(--red);background:#fff}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.field-select{width:100%;padding:.55rem .8rem;font-family:var(--ff);font-size:.85rem;color:var(--ink);background:var(--g050);border:1px solid var(--g200);border-radius:4px;outline:none;transition:border-color var(--t);cursor:pointer}
+.field-select:focus{border-color:var(--red)}
+
+.results{background:var(--g050);border:1px solid var(--g200);border-radius:8px;padding:1.4rem;margin-top:1.2rem}
+.results h4{font-size:.72rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:1rem}
+.result-row{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--g200);font-size:.82rem}
+.result-row:last-child{border-bottom:none;font-weight:700;color:var(--red)}
+.result-row span{color:var(--body)}
+.result-row strong{color:var(--ink)}
+
+/* SVG nave */
+.nave-svg-wrap{background:var(--g050);border:1px solid var(--g200);border-radius:8px;padding:1.5rem;box-shadow:var(--shadow);position:relative}
+.nave-svg-wrap h3{font-weight:700;font-size:.88rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+.nave-svg-wrap h3 i{color:var(--calc);width:16px;height:16px}
+.nave-svg{width:100%;border-radius:6px}
+.dim-label{font-family:var(--ff);font-size:11px;fill:#666}
+.dim-line{stroke:#aaa;stroke-width:1;stroke-dasharray:3 2}
+.dim-arrow{stroke:#888;stroke-width:1.5;fill:none}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .nave-wrap{grid-template-columns:1fr}
+  .tabs{overflow-x:auto;top:56px}
+  .tab-btn{padding:.75rem 1.1rem;white-space:nowrap}
+}
+@media(max-width:600px){
+  .hero h1{font-size:1.8rem}
+  .ex-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="../../" class="brand">
+    <div class="mosaic">
+      <span style="background:#E10600"></span><span style="background:#E10600"></span><span style="background:#1a1a1a"></span>
+      <span style="background:#E10600"></span><span style="background:#1a1a1a"></span><span style="background:#9AA0A0"></span>
+      <span style="background:#1a1a1a"></span><span style="background:#9AA0A0"></span><span style="background:#9AA0A0"></span>
+    </div>
+    <div class="wm"><strong><em>SIBRA</em>TECH</strong><small>GROUP</small></div>
+  </a>
+  <div class="nav-bc">
+    <a href="../../">Inicio</a>
+    <span>/</span>
+    <a href="../../cursos-charlas/">Cursos</a>
+    <span>/</span>
+    <span style="color:var(--ink)">Metálica &amp; Madera</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">Construcciones Metálicas y de Madera</div>
+  <h1>Ejercicios interactivos<br>de <em>estructuras</em></h1>
+  <p class="hero-desc">Contenido universitario completo para practicar verificaciones según normas argentinas (CIRSOC 301 y 601). Calculá, verificá y aprendé a tu ritmo — sin registro, sin costo.</p>
+  <div class="hero-tags">
+    <span class="tag"><i data-lucide="book-open"></i> Norma CIRSOC 301 · Acero</span>
+    <span class="tag"><i data-lucide="tree-pine"></i> Norma CIRSOC 601 · Madera</span>
+    <span class="tag"><i data-lucide="calculator"></i> Calculadora rápida de nave</span>
+    <span class="tag"><i data-lucide="gift"></i> Gratuito</span>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" data-tab="metalica">
+    <i data-lucide="layers"></i> Estructuras Metálicas
+  </button>
+  <button class="tab-btn" data-tab="madera">
+    <i data-lucide="tree-pine"></i> Estructuras de Madera
+  </button>
+  <button class="tab-btn" data-tab="nave">
+    <i data-lucide="warehouse"></i> Calculadora de Nave
+  </button>
+</div>
+
+<!-- ══ SECCIÓN METÁLICA ══ -->
+<section class="section active" id="tab-metalica">
+  <div class="section-hd">
+    <div class="eyebrow eyebrow--steel">CIRSOC 301 — Estructuras de Acero</div>
+    <div class="red-bar"></div>
+    <h2 class="h2">Ejercicios de estructuras metálicas</h2>
+    <p class="section-desc">Verificaciones de resistencia según el Reglamento Argentino de Estructuras de Acero. Cada ejercicio incluye datos editables, procedimiento paso a paso y resultado con estado de verificación.</p>
+  </div>
+
+  <div class="ex-grid">
+
+    <!-- Empalme en tracción -->
+    <div class="ex-card">
+      <div class="ex-card-header">
+        <div class="ex-icon ex-icon--steel"><i data-lucide="move-horizontal"></i></div>
+        <div>
+          <div class="ex-card-title">Tracción y empalme con bulones</div>
+          <div class="ex-card-subtitle">CIRSOC 301 · Cap. D &amp; J</div>
+        </div>
+      </div>
+      <div class="ex-card-body">
+        <p>Verificación de una barra de perfil doble en T sometida a tracción, con empalme por planchuelas y bulones de alta resistencia. Incluye verificación de sección neta, resistencia de bulones a corte y aplastamiento.</p>
+        <div class="ex-tags">
+          <span class="ex-tag ex-tag--ok">Disponible</span>
+          <span class="ex-tag ex-tag--norma">CIRSOC 301</span>
+        </div>
+      </div>
+      <div class="ex-card-footer">
+        <small>Perfil doble T · Bulones A325/A490</small>
+        <a href="../../ejercicios/empalmemet/" class="btn btn--steel">
+          <i data-lucide="arrow-right"></i> Resolver
+        </a>
+      </div>
+    </div>
+
+    <!-- Viga con platabanda -->
+    <div class="ex-card">
+      <div class="ex-card-header">
+        <div class="ex-icon ex-icon--steel"><i data-lucide="align-center-horizontal"></i></div>
+        <div>
+          <div class="ex-card-title">Viga con platabanda</div>
+          <div class="ex-card-subtitle">CIRSOC 301 · Cap. F</div>
+        </div>
+      </div>
+      <div class="ex-card-body">
+        <p>Verificación de viga de perfil I reforzada con platabanda en el ala inferior. Cálculo de momento resistente, clasificación de sección compacta/no compacta y verificación de pandeo lateral.</p>
+        <div class="ex-tags">
+          <span class="ex-tag ex-tag--wip">En desarrollo</span>
+          <span class="ex-tag ex-tag--norma">CIRSOC 301</span>
+        </div>
+      </div>
+      <div class="ex-card-footer">
+        <small>Perfil IPN · Flexión simple</small>
+        <button class="btn btn--ghost" disabled style="opacity:.45;cursor:not-allowed">
+          <i data-lucide="clock"></i> Próximamente
+        </button>
+      </div>
+    </div>
+
+    <!-- Columna -->
+    <div class="cs-card">
+      <i data-lucide="arrow-up"></i>
+      <h4>Compresión · Columna metálica</h4>
+      <p>Verificación de estabilidad por pandeo global<br>CIRSOC 301 Cap. E — En desarrollo</p>
+    </div>
+
+    <!-- Unión soldada -->
+    <div class="cs-card">
+      <i data-lucide="zap"></i>
+      <h4>Unión soldada</h4>
+      <p>Verificación de soldaduras de filete<br>CIRSOC 301 Cap. J — En desarrollo</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ SECCIÓN MADERA ══ -->
+<section class="section" id="tab-madera">
+  <div class="section-hd">
+    <div class="eyebrow eyebrow--wood">CIRSOC 601 — Estructuras de Madera</div>
+    <div class="red-bar"></div>
+    <h2 class="h2">Ejercicios de estructuras de madera</h2>
+    <p class="section-desc">Verificaciones de resistencia según el Reglamento Argentino de Estructuras de Madera. Flexión, corte, compresión y uniones con clavos y bulones.</p>
+  </div>
+
+  <div class="ex-grid">
+    <div class="cs-card">
+      <i data-lucide="tree-pine"></i>
+      <h4>Viga de madera a flexión</h4>
+      <p>Verificación de tensión normal de flexión y deformación<br>CIRSOC 601 — En desarrollo</p>
+    </div>
+    <div class="cs-card">
+      <i data-lucide="grip-vertical"></i>
+      <h4>Pilar de madera a compresión</h4>
+      <p>Pandeo y verificación de estabilidad<br>CIRSOC 601 — En desarrollo</p>
+    </div>
+    <div class="cs-card">
+      <i data-lucide="link"></i>
+      <h4>Unión con clavos</h4>
+      <p>Resistencia de clavos a doble corte<br>CIRSOC 601 — En desarrollo</p>
+    </div>
+    <div class="cs-card">
+      <i data-lucide="columns"></i>
+      <h4>Tirante de techo</h4>
+      <p>Tracción y uniones en cabeza de cercha<br>CIRSOC 601 — En desarrollo</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SECCIÓN NAVE ══ -->
+<section class="section" id="tab-nave">
+  <div class="section-hd">
+    <div class="eyebrow eyebrow--calc">Calculadora rápida</div>
+    <div class="red-bar"></div>
+    <h2 class="h2">Nave industrial editable</h2>
+    <p class="section-desc">Ingresá las dimensiones y cargas de tu nave y obtené en tiempo real las cargas de diseño, separación de pórticos sugerida y perfiles orientativos. Es una herramienta de predimensionado — no reemplaza el cálculo estructural completo.</p>
+  </div>
+
+  <div class="nave-wrap">
+    <!-- Panel izq -->
+    <div>
+      <div class="nave-panel">
+        <h3><i data-lucide="sliders"></i> Datos de la nave</h3>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">Luz (m)</label>
+            <input type="number" id="luz" class="field-input" value="20" min="6" max="60" step="1">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Longitud (m)</label>
+            <input type="number" id="largo" class="field-input" value="40" min="10" max="200" step="5">
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">Altura de canaleta (m)</label>
+            <input type="number" id="hcanal" class="field-input" value="6" min="3" max="16" step="0.5">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Pendiente techo (%)</label>
+            <input type="number" id="pend" class="field-input" value="10" min="5" max="30" step="1">
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Separación entre pórticos (m)</label>
+          <input type="number" id="sep" class="field-input" value="6" min="4" max="12" step="0.5">
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Zona de viento (CIRSOC 102)</label>
+          <select id="zona" class="field-select">
+            <option value="0.50">Zona I — 0.50 kN/m²</option>
+            <option value="0.70" selected>Zona II — 0.70 kN/m²</option>
+            <option value="0.90">Zona III — 0.90 kN/m²</option>
+            <option value="1.10">Zona IV — 1.10 kN/m²</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Sobrecarga de uso en techo</label>
+          <select id="scuso" class="field-select">
+            <option value="0.50">Techo sin acceso — 0.50 kN/m²</option>
+            <option value="1.00" selected>Techo con acceso — 1.00 kN/m²</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Carga muerta cubierta (kN/m²)</label>
+          <input type="number" id="cm" class="field-input" value="0.30" min="0.10" max="2.00" step="0.05">
+        </div>
+
+        <div class="results" id="results">
+          <h4>Resultados — pórtico central</h4>
+          <div class="result-row"><span>Área tributaria por pórtico</span><strong id="r-atrib">—</strong></div>
+          <div class="result-row"><span>Carga total cubierta (CM+SC)</span><strong id="r-cv">—</strong></div>
+          <div class="result-row"><span>Presión de viento barlovento</span><strong id="r-vb">—</strong></div>
+          <div class="result-row"><span>Reacción vertical estimada</span><strong id="r-rv">—</strong></div>
+          <div class="result-row"><span>Momento en cumbrera (aprox.)</span><strong id="r-mc">—</strong></div>
+        </div>
+      </div>
+
+      <div style="margin-top:1rem;font-size:.75rem;color:var(--muted);line-height:1.6;padding:0 .2rem">
+        ⚠ Herramienta de predimensionado. Los valores son orientativos. El cálculo final debe ser realizado por un profesional habilitado.
+      </div>
+    </div>
+
+    <!-- Vista SVG nave -->
+    <div class="nave-svg-wrap">
+      <h3><i data-lucide="maximize-2"></i> Vista de la nave</h3>
+      <svg id="nave-svg" class="nave-svg" viewBox="0 0 600 360" xmlns="http://www.w3.org/2000/svg">
+        <!-- dibujado por JS -->
+      </svg>
+    </div>
+  </div>
+</section>
+
+<script>
+lucide.createIcons();
+
+// ── TABS ─────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'nave') { calcNave(); }
+  });
+});
+
+// ── CALCULADORA NAVE ─────────────────────────────────────────
+function v(id) { return parseFloat(document.getElementById(id).value) || 0; }
+
+function calcNave() {
+  const luz   = v('luz');
+  const largo = v('largo');
+  const sep   = v('sep');
+  const hc    = v('hcanal');
+  const pend  = v('pend') / 100;
+  const qvBase= parseFloat(document.getElementById('zona').value);
+  const scuso = parseFloat(document.getElementById('scuso').value);
+  const cm    = v('cm');
+
+  const hcumb = hc + (luz / 2) * pend;
+  const atrib = sep * luz;
+  const qCub  = (cm + scuso) * atrib;
+  const qvPres= qvBase * 0.8 * sep * hcumb;
+  const rv    = qCub / 2;
+  const mc    = (cm + scuso) * sep * (luz * luz) / 8;
+
+  document.getElementById('r-atrib').textContent = atrib.toFixed(1) + ' m²';
+  document.getElementById('r-cv').textContent    = qCub.toFixed(1) + ' kN';
+  document.getElementById('r-vb').textContent    = qvPres.toFixed(1) + ' kN';
+  document.getElementById('r-rv').textContent    = rv.toFixed(1) + ' kN';
+  document.getElementById('r-mc').textContent    = mc.toFixed(1) + ' kN·m';
+
+  drawNave(luz, largo, hc, hcumb, sep);
+}
+
+function drawNave(luz, largo, hc, hcumb, sep) {
+  const svg = document.getElementById('nave-svg');
+  const W = 600, H = 360;
+  const M = 60; // margen
+
+  // escala isométrica simple
+  const escX = (W - M * 2) / (luz + largo * 0.4);
+  const escY = (H - M * 2) / (hcumb + largo * 0.2);
+  const esc  = Math.min(escX, escY) * 0.8;
+
+  // punto de vista isométrico
+  const ox = 80, oy = H - M - 20;
+  const iso = (x, y, z) => ({
+    px: ox + (x + z * 0.45) * esc,
+    py: oy - (y + z * 0.25) * esc
+  });
+
+  const portCnt = Math.round(largo / sep) + 1;
+  const sepReal = largo / (portCnt - 1);
+
+  let paths = '';
+
+  const col = (obj) => `${obj.px},${obj.py}`;
+  const line = (a, b, stroke, sw, dash) =>
+    `<line x1="${a.px}" y1="${a.py}" x2="${b.px}" y2="${b.py}" stroke="${stroke}" stroke-width="${sw}" ${dash ? `stroke-dasharray="${dash}"` : ''}/>`;
+  const poly = (pts, fill, stroke, sw, op) =>
+    `<polygon points="${pts.map(col).join(' ')}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" opacity="${op || 1}"/>`;
+
+  // fondo
+  paths += `<rect width="${W}" height="${H}" fill="#f4f5f5" rx="6"/>`;
+
+  // cargar pórticos
+  for (let i = 0; i < portCnt; i++) {
+    const z = i * sepReal;
+    const A  = iso(0,   0,    z);
+    const B  = iso(luz, 0,    z);
+    const C  = iso(luz, hc,   z);
+    const D  = iso(luz/2, hcumb, z);
+    const E  = iso(0,   hc,   z);
+    const isLast = i === portCnt - 1;
+    const isFirst = i === 0;
+    const stroke = (isFirst || isLast) ? '#3a5a78' : '#7a9ab8';
+    const sw = (isFirst || isLast) ? 2 : 1;
+
+    // columnas
+    paths += line(A, E, stroke, sw);
+    paths += line(B, C, stroke, sw);
+    // rafters
+    paths += line(E, D, stroke, sw);
+    paths += line(C, D, stroke, sw);
+  }
+
+  // planos laterales (cara frontal y lateral)
+  const zEnd = largo;
+  const face = [
+    iso(0,0,0), iso(luz,0,0), iso(luz,hc,0), iso(luz/2,hcumb,0), iso(0,hc,0)
+  ];
+  const roofL = [
+    iso(0,hc,0), iso(luz/2,hcumb,0), iso(luz/2,hcumb,zEnd), iso(0,hc,zEnd)
+  ];
+  const roofR = [
+    iso(luz/2,hcumb,0), iso(luz,hc,0), iso(luz,hc,zEnd), iso(luz/2,hcumb,zEnd)
+  ];
+  const sideR = [
+    iso(luz,0,0), iso(luz,0,zEnd), iso(luz,hc,zEnd), iso(luz,hc,0)
+  ];
+
+  paths += poly(sideR, '#d8dfe6', '#3a5a78', 1, 0.5);
+  paths += poly(roofR, '#dce3e8', '#3a5a78', 1, 0.6);
+  paths += poly(roofL, '#e4e9ec', '#3a5a78', 1, 0.7);
+  paths += poly(face,  '#eef1f3', '#3a5a78', 1.5, 0.85);
+
+  // vigas de atado (correas) — 3 líneas por faldón
+  for (let ci = 1; ci <= 3; ci++) {
+    const t = ci / 4;
+    const yL1 = hc + (hcumb - hc) * t;
+    const xL1 = (luz / 2) * t;
+    const a1 = iso(xL1, yL1, 0);
+    const b1 = iso(xL1, yL1, zEnd);
+    const yR1 = hc + (hcumb - hc) * (1 - t);
+    const xR1 = luz/2 + (luz/2) * t;
+    const a2 = iso(xR1, yR1, 0);
+    const b2 = iso(xR1, yR1, zEnd);
+    paths += line(a1, b1, '#5a8aaa', 1, '4 3');
+    paths += line(a2, b2, '#5a8aaa', 1, '4 3');
+  }
+  // vigas de atado columnas
+  const atCol = iso(0, hc * 0.6, 0);
+  const btCol = iso(0, hc * 0.6, zEnd);
+  const atColR = iso(luz, hc * 0.6, 0);
+  const btColR = iso(luz, hc * 0.6, zEnd);
+  paths += line(atCol, btCol, '#5a8aaa', 1, '4 3');
+  paths += line(atColR, btColR, '#5a8aaa', 1, '4 3');
+
+  // acento rojo — arista de cumbrera
+  const cumA = iso(luz/2, hcumb, 0);
+  const cumB = iso(luz/2, hcumb, zEnd);
+  paths += line(cumA, cumB, '#E10600', 2.5);
+
+  // cotas dimensionales
+  const dimY = oy + 28;
+  const p0 = iso(0, 0, 0);
+  const pL = iso(luz, 0, 0);
+  paths += `<line x1="${p0.px}" y1="${dimY}" x2="${pL.px}" y2="${dimY}" stroke="#aaa" stroke-width="1"/>`;
+  paths += `<line x1="${p0.px}" y1="${p0.py}" x2="${p0.px}" y2="${dimY+6}" stroke="#aaa" stroke-width="1"/>`;
+  paths += `<line x1="${pL.px}" y1="${pL.py}" x2="${pL.px}" y2="${dimY+6}" stroke="#aaa" stroke-width="1"/>`;
+  paths += `<text x="${(p0.px+pL.px)/2}" y="${dimY+14}" text-anchor="middle" class="dim-label">L = ${luz} m</text>`;
+
+  // cota altura
+  const pH  = iso(0, hc, 0);
+  const pHx = p0.px - 18;
+  paths += `<line x1="${pHx}" y1="${p0.py}" x2="${pHx}" y2="${pH.py}" stroke="#aaa" stroke-width="1"/>`;
+  paths += `<text x="${pHx - 4}" y="${(p0.py+pH.py)/2 + 4}" text-anchor="end" class="dim-label">h = ${hc} m</text>`;
+
+  // label cumbrera
+  const pCumb = iso(luz/2, hcumb, zEnd);
+  paths += `<text x="${pCumb.px + 6}" y="${pCumb.py}" text-anchor="start" class="dim-label" fill="#E10600" font-weight="700">↑ ${hcumb.toFixed(1)} m</text>`;
+
+  svg.innerHTML = paths;
+}
+
+// Inicializar al cargar y al cambiar inputs
+document.addEventListener('DOMContentLoaded', () => {
+  calcNave();
+  document.querySelectorAll('#tab-nave input, #tab-nave select').forEach(el => {
+    el.addEventListener('input', calcNave);
+  });
+});
+</script>
+</body>
+</html>
