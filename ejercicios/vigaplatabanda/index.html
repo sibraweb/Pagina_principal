@@ -337,9 +337,9 @@ td.fail2 { color:var(--fail); font-weight:700; font-family:var(--font-head); }
       <div><label>Fy (MPa)</label><input type="number" id="Fy" value="345" oninput="recalc()"></div>
       <div><label>Fu (MPa)</label><input type="number" id="Fu" value="485" oninput="recalc()"></div>
     </div>
-    <div class="sb-two">
-      <div><label>Mu (kN·m)</label><input type="number" id="Mu" value="320" oninput="recalc()"></div>
-      <div><label>Vu (kN)</label><input type="number" id="Vu" value="150" oninput="recalc()"></div>
+    <div class="sb-row">
+      <label>qu (kN/m)</label>
+      <input type="number" id="qu" value="40" step="0.5" oninput="recalc()">
     </div>
     <div class="sb-two">
       <div><label>Luz L (m)</label><input type="number" id="Lm" value="8" step="0.1" oninput="recalc()"></div>
@@ -349,8 +349,9 @@ td.fail2 { color:var(--fail); font-weight:700; font-family:var(--font-head); }
       <label>Cb</label>
       <input type="number" id="Cb" value="1.0" step="0.05" oninput="recalc()">
     </div>
+    <div id="cargaDerivada" class="bul-info-box" style="margin-top:2px">Mu = — kN·m · Vu = — kN</div>
     <div class="nota" style="background:#111;border-color:#2a2a2a;color:#999;font-size:10px;margin:0">
-      Mu según diagrama de momento de viga simplemente apoyada con carga uniforme: se estima w = 8·Mu/L² sólo para ubicar el corte teórico de platabanda.
+      Viga simplemente apoyada, carga uniformemente mayorada qu. Mu = qu·L²/8 (centro del tramo) · Vu = qu·L/2 (apoyo). Ambos se recalculan solos.
     </div>
   </div>
 
@@ -611,7 +612,7 @@ var NORMAS = {
   J24: {badge:'Tab.J.2.5', title:'Resistencia de Cordón de Filete',
     body:'<h3>Tabla J.2.5 — Soldadura de Filete</h3><div class="modal-form">Fw = 0,60 · FEXX     φ = 0,75\nRd (por cm de cordón) = φ · Fw · eg · (10⁻¹)   [kN/cm]\neg = w/√2   (garganta efectiva)</div><p>Flujo de corte en la interfase platabanda-ala: q = Vu·Q/Ix. Se reparte entre los 2 cordones longitudinales.</p>'},
   TEO: {badge:'Corte teórico', title:'Longitud de Platabanda — Corte Teórico y Desarrollo',
-    body:'<h3>Punto de corte teórico</h3><p>Es la sección donde el perfil <strong>sin</strong> platabanda ya alcanza a resistir el momento actuante M(x). A partir de ahí, en teoría, la platabanda ya no es necesaria.</p><div class="modal-form">M(x) = w·x·(L−x)/2   (viga s.apoyada, carga uniforme)\nw = 8·Mu/L²\n\nBuscar x1 / M(x1) = φMn,perfil solo</div><h3 style="margin-top:10px">Extensión de desarrollo</h3><p>La platabanda debe prolongarse más allá del punto teórico una longitud adicional Lext tal que la soldadura en ese tramo pueda desarrollar la fuerza axial que la platabanda toma en el punto teórico.</p><div class="modal-form">Fp,teo = M(x1)·Ap·dp / Ix\nLext = Fp,teo / (2·Rd,cordón)</div>'}
+    body:'<h3>Punto de corte teórico</h3><p>Es la sección donde el perfil <strong>sin</strong> platabanda ya alcanza a resistir el momento actuante M(x). A partir de ahí, en teoría, la platabanda ya no es necesaria.</p><div class="modal-form">M(x) = qu·x·(L−x)/2   (viga s.apoyada, carga uniforme qu)\n\nResolver la cuadrática M(x1) = φMn,perfil solo:\n−(qu/2)·x² + (qu·L/2)·x − φMn,perfil = 0\n\nx1 = raíz menor · x2 = raíz mayor (x2 = L−x1 por simetría)</div><h3 style="margin-top:10px">Extensión de desarrollo</h3><p>La platabanda debe prolongarse más allá del punto teórico una longitud adicional Lext tal que la soldadura en ese tramo pueda desarrollar la fuerza axial que la platabanda toma en el punto teórico.</p><div class="modal-form">Fp,teo = M(x1)·Ap·dp / Ix\nLext = Fp,teo / (2·Rd,cordón)</div>'}
 };
 function openModal(key){ var n=NORMAS[key]; if(!n) return;
   document.getElementById('m-badge').textContent=n.badge;
@@ -733,8 +734,7 @@ function makeMomentoSvg(L,w,Mact,x1i,x1d,MnPerfil){
 function recalc(){
   var Fy=+document.getElementById('Fy').value;
   var Fu=+document.getElementById('Fu').value;
-  var Mu=+document.getElementById('Mu').value;
-  var Vu=+document.getElementById('Vu').value;
+  var qu=+document.getElementById('qu').value;
   var L=+document.getElementById('Lm').value;
   var Lb=+document.getElementById('Lb_m').value;
   var Cb=+document.getElementById('Cb').value;
@@ -744,6 +744,12 @@ function recalc(){
   var bi=+document.getElementById('bi_mm').value, ti=+document.getElementById('ti_mm').value;
   var Feex=+document.getElementById('Feex').value;
   var w_mm=+document.getElementById('w_mm').value;
+
+  // Viga simplemente apoyada, carga uniforme mayorada qu → Mu y Vu derivados
+  var Mu = qu*L*L/8;
+  var Vu = qu*L/2;
+  document.getElementById('cargaDerivada').innerHTML =
+    'qu='+f2(qu)+' kN/m · L='+f2(L)+'m<br><strong>Mu = qu·L²/8 = '+f2(Mu)+' kN·m</strong><br><strong>Vu = qu·L/2 = '+f2(Vu)+' kN</strong>';
 
   renderIPN();
   var ipn=gIPN;
@@ -886,7 +892,7 @@ function recalc(){
   document.getElementById('c6').innerHTML = c6;
 
   // ---- 7. Longitud de platabanda ----
-  var wCarga = 8*Mu/(L*L); // kN/m (uniforme equivalente para tener Mu en el centro)
+  var wCarga = qu; // kN/m — carga real ingresada (Mu ya fue derivado de ella)
   var Mmax = wCarga*L*L/8;
   function cutoff(phiMnPerfilSolo){
     // M(x)=w*x*(L-x)/2 = target -> resolver
@@ -902,7 +908,7 @@ function recalc(){
   var corte = cutoff(phiMn_perfil);
   var c7='';
   if(!corte || phiMn_perfil>=Mmax){
-    c7 = makeNota('⚠ El perfil solo ya resiste el momento máximo de la viga (φMn,perfil='+f2(phiMn_perfil)+' kN·m ≥ Mu,max='+f2(Mmax)+' kN·m) — no se requiere platabanda por flexión con esta luz/carga estimada. Revisar Mu o L ingresados.','warn');
+    c7 = makeNota('⚠ El perfil solo ya resiste el momento máximo de la viga (φMn,perfil='+f2(phiMn_perfil)+' kN·m ≥ Mu,max='+f2(Mmax)+' kN·m) — no se requiere platabanda por flexión con esta luz/carga. Aumentá qu o L para forzar el caso, o elegí un perfil menor.','warn');
   } else {
     var Lteo = corte.xd-corte.xi;
     // extensión de desarrollo en el punto teórico (usa la platabanda de mayor demanda: la que gobierna en c6)
@@ -920,7 +926,7 @@ function recalc(){
     var LextPI = hasPI?extension(bi,ti,dPI):0;
     var Lext = Math.max(LextPS,LextPI)/1000; // m
     var Lreal = Lteo + 2*Lext;
-    c7 = makeNota(makeNb('Corte teórico','TEO')+' — w equivalente = 8·Mu/L² = '+f2(wCarga)+' kN/m (para ubicar el punto donde el perfil solo alcanza)')
+    c7 = makeNota(makeNb('Corte teórico','TEO')+' — qu = '+f2(wCarga)+' kN/m (carga real ingresada, viga simplemente apoyada)')
       + makeFmStr('φMn,perfil solo', f2(phiMn_perfil)+' kN·m  (misma sección, sin platabandas)')
       + makeFmStr('Puntos de corte teórico (desde apoyo izq.)', 'x₁='+f2(corte.xi)+' m &nbsp;|&nbsp; x₂='+f2(corte.xd)+' m')
       + makeFm('L,teórica = x₂−x₁','', Lteo,'m')
