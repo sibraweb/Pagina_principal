@@ -500,6 +500,7 @@ td.fail2 { color:var(--fail); font-weight:700; font-family:var(--font-head); }
       <div><label>N° filas</label><input type="number" id="nFil" value="2" min="1" max="6" oninput="recalc()"></div>
       <div><label>N° columnas</label><input type="number" id="nCol" value="3" min="1" max="10" oninput="recalc()"></div>
     </div>
+    <div id="nbTotalLive" style="background:var(--red-bg,#fdecea);border-radius:5px;padding:6px 9px;margin:2px 0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--red,#E10600)">Total: 6 bulones (2×3)</div>
     <div class="sb-two">
       <div><label>Planos corte</label>
         <select id="nCorte" onchange="recalc()">
@@ -1274,6 +1275,7 @@ function recalc() {
   var dag  = aguj==='normal' ? gBul.dag : gBul.dag; // dag ya actualizado
   var nFil = Math.max(1,+document.getElementById('nFil').value);
   var nCol = Math.max(1,+document.getElementById('nCol').value);
+  document.getElementById('nbTotalLive').innerHTML = 'Total: '+(nFil*nCol)+' bulones ('+nFil+'×'+nCol+') — elegido por vos';
   var nCorte=+document.getElementById('nCorte').value;
   var s    = +document.getElementById('s_mm').value;
   var db   = +document.getElementById('db_mm').value;
