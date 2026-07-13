@@ -1133,9 +1133,10 @@ function makeBlockShearSvg(nFil,nCol,s,db,sf,dbp,dnom,dcalc) {
   svg+='<defs><marker id="bsAr" markerWidth="7" markerHeight="7" refX="1" refY="3" orient="auto"><path d="M7,0 L7,6 L0,3z" fill="#222"/></marker></defs>';
   // Placa
   svg+='<rect x="'+x0+'" y="'+y0+'" width="'+pxLen+'" height="'+pxW+'" fill="#edf0f3" stroke="#888" stroke-width="1.5" rx="1"/>';
-  // Coordenadas del bloque
+  // Coordenadas del bloque — el bloque llega hasta el borde real de la chapa (esquina),
+  // no hasta el centro del último bulón: ahí es donde efectivamente se desgarra el material.
   var bx0=x0+db*esc;
-  var bx1=x0+(db+(nCol-1)*s)*esc;
+  var edgeX=x0+pxLen;
   var by0b, by1b;
   if(nFil>=2){
     by0b=y0+dbp*esc;
@@ -1145,7 +1146,7 @@ function makeBlockShearSvg(nFil,nCol,s,db,sf,dbp,dnom,dcalc) {
     by1b=y0+dbp*esc;
   }
   // Relleno del bloque
-  svg+='<rect x="'+bx0+'" y="'+by0b+'" width="'+(bx1-bx0)+'" height="'+(by1b-by0b)+'" fill="rgba(225,6,0,0.10)" stroke="rgba(225,6,0,0.3)" stroke-width="0.5"/>';
+  svg+='<rect x="'+bx0+'" y="'+by0b+'" width="'+(edgeX-bx0)+'" height="'+(by1b-by0b)+'" fill="rgba(225,6,0,0.10)" stroke="rgba(225,6,0,0.3)" stroke-width="0.5"/>';
   // Planos de corte (Agv) — paralelos a Pu
   if(nFil>=2){
     svg+='<line x1="'+bx0+'" y1="'+by0b+'" x2="'+(x0+pxLen)+'" y2="'+by0b+'" stroke="#E10600" stroke-width="2"/>';
@@ -1156,10 +1157,10 @@ function makeBlockShearSvg(nFil,nCol,s,db,sf,dbp,dnom,dcalc) {
     svg+='<line x1="'+bx0+'" y1="'+by1b+'" x2="'+(x0+pxLen)+'" y2="'+by1b+'" stroke="#E10600" stroke-width="2"/>';
     svg+='<text x="'+(x0+pxLen+4)+'" y="'+(by1b+4)+'" fill="#E10600" font-family="Montserrat" font-size="8" font-weight="700">Agv</text>';
   }
-  // Plano de tracción (Agt) — perpendicular a Pu
-  svg+='<line x1="'+bx1+'" y1="'+by0b+'" x2="'+bx1+'" y2="'+by1b+'" stroke="#1a6fd4" stroke-width="2.5"/>';
+  // Plano de tracción (Agt) — perpendicular a Pu, en el borde/esquina de la chapa
+  svg+='<line x1="'+edgeX+'" y1="'+by0b+'" x2="'+edgeX+'" y2="'+by1b+'" stroke="#1a6fd4" stroke-width="2.5"/>';
   var midY=(by0b+by1b)/2;
-  svg+='<text x="'+(bx1+4)+'" y="'+(midY+4)+'" fill="#1a6fd4" font-family="Montserrat" font-size="8" font-weight="700">Agt</text>';
+  svg+='<text x="'+(edgeX-16)+'" y="'+(by0b-4)+'" fill="#1a6fd4" font-family="Montserrat" font-size="8" font-weight="700">Agt</text>';
   // Agujeros de bulones
   var rr=Math.max(3,dnom*esc*0.42);
   var rh=Math.max(3.8,dcalc*esc*0.45);
@@ -1172,8 +1173,8 @@ function makeBlockShearSvg(nFil,nCol,s,db,sf,dbp,dnom,dcalc) {
     }
   }
   // Etiqueta "BLOQUE" dentro
-  if((bx1-bx0)>50&&(by1b-by0b)>20){
-    svg+='<text x="'+((bx0+bx1)/2)+'" y="'+((by0b+by1b)/2+4)+'" fill="rgba(180,0,0,0.55)" font-family="Montserrat" font-size="8" font-weight="700" text-anchor="middle">BLOQUE</text>';
+  if((edgeX-bx0)>50&&(by1b-by0b)>20){
+    svg+='<text x="'+((bx0+edgeX)/2)+'" y="'+((by0b+by1b)/2+4)+'" fill="rgba(180,0,0,0.55)" font-family="Montserrat" font-size="8" font-weight="700" text-anchor="middle">BLOQUE</text>';
   }
   // Flecha Pu
   var ay=y0+pxW/2;
