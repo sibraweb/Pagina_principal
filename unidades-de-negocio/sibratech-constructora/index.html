@@ -256,6 +256,13 @@ a { color: inherit; text-decoration: none; }
 }
 .sbt-cta--banner:hover { background: var(--gray-100); transform: translateY(-1px); }
 
+.datos-banner-btns { display: flex; gap: 0.8rem; flex-wrap: wrap; flex-shrink: 0; }
+.sbt-cta--datos-secondary {
+  background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,0.5);
+  font-size: 0.78rem; padding: 0.9rem 1.7rem;
+}
+.sbt-cta--datos-secondary:hover { border-color: #fff; background: rgba(255,255,255,0.12); transform: none; box-shadow: none; }
+
 /* ── SERVICIOS ────────────────────────────────────────────── */
 .section { padding: 5rem var(--gutter); }
 .section--alt { background: var(--gray-050); }
@@ -550,12 +557,6 @@ textarea.sbt-field { resize: vertical; min-height: 120px; }
       <a href="#precios" class="sbt-cta sbt-cta--precios">
         <i data-lucide="trending-up"></i> <span>Precios de obra actualizados</span>
       </a>
-      <a href="datos/" class="sbt-cta sbt-cta--ghost">
-        <i data-lucide="bar-chart-2"></i> Datos de Interés
-      </a>
-      <a href="datos/#obras" class="sbt-cta sbt-cta--ghost">
-        <i data-lucide="building-2"></i> Precios de Obras Típicas
-      </a>
     </div>
   </div>
 
@@ -678,15 +679,20 @@ textarea.sbt-field { resize: vertical; min-height: 120px; }
   </div>
 </section>
 
-<!-- ── BANNER PRECIOS ──────────────────────────────────────── -->
-<div class="precios-banner" id="precios-banner">
+<!-- ── BANNER DATOS DE INTERÉS ──────────────────────────────── -->
+<div class="precios-banner" id="datos-banner">
   <div class="precios-banner-text">
-    <strong>Precios de referencia de obras actualizados</strong>
-    <span>Costos por m² de construcción, materiales e índices de obra civil en Argentina — actualizados mensualmente.</span>
+    <strong>Datos de Interés</strong>
+    <span>Índices UOCRA, dólar, CER, UVA, CAMARCO y más, actualizados — y costos de referencia por tipo de obra.</span>
   </div>
-  <a href="https://presuapp.sibratech.com.ar" target="_blank" rel="noopener" class="sbt-cta sbt-cta--banner">
-    <i data-lucide="external-link"></i> Ver precios en Presuapp
-  </a>
+  <div class="datos-banner-btns">
+    <a href="datos/" class="sbt-cta sbt-cta--banner">
+      <i data-lucide="trending-up"></i> Ver índices
+    </a>
+    <a href="datos/#obras" class="sbt-cta sbt-cta--datos-secondary">
+      <i data-lucide="building-2"></i> Precios de obras típicas
+    </a>
+  </div>
 </div>
 
 <!-- ── SERVICIOS ────────────────────────────────────────────── -->
