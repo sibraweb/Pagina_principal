@@ -368,14 +368,22 @@ mobile.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
 }));
 
 // Tabs
+function activarTab(tab) {
+  var btn = document.querySelector('.tab-btn[data-tab="' + tab + '"]');
+  if (!btn) return;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    activarTab(btn.dataset.tab);
+    history.replaceState(null, '', '#' + btn.dataset.tab);
   });
 });
+// Entrar directo a un tab por hash (ej. datos/#obras)
+if (location.hash) activarTab(location.hash.replace('#', ''));
 
 // ================================================================
 // DATOS — hoy hardcodeados (última foto de /api/resumen del módulo
