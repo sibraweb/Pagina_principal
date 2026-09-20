@@ -200,3 +200,74 @@
   .modal-overlay { align-items: flex-end; padding: 0; }
   .modal { max-height: 88vh; }
 }
+
+/* ═══════════════ PLAN DE TRABAJO ═══════════════ */
+.plan-config { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.chk { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--gray-700);
+       font-family: var(--sans); text-transform: none; letter-spacing: 0; cursor: pointer; }
+.chk input { width: auto; margin: 0; }
+
+.plan-grilla input.mini { width: 78px; margin: 0; padding: .35rem .4rem; text-align: right; font-size: .78rem; }
+.plan-grilla input.pred { width: 120px; margin: 0; padding: .35rem .4rem; font-size: .78rem; }
+.plan-grilla input.mal { border-color: var(--red-500); background: var(--red-050); }
+.plan-grilla td.fecha { font-family: var(--title); font-size: .78rem; white-space: nowrap; color: var(--gray-700); }
+/* la ruta critica no se marca solo con color: tambien con un borde,
+   para el que no distingue el rojo del gris */
+.plan-grilla tr.critica td:first-child,
+.gantt tr.critica td.g-tarea { border-left: 3px solid var(--red-500); }
+.tag.critica { background: var(--red-050); color: var(--red-500); border: 1px solid var(--red-500);
+               font-size: .62rem; padding: .1em .45em; font-family: var(--title); font-weight: 600; }
+.tag.ok { background: #eaf3ec; color: var(--success); font-size: .62rem; padding: .1em .45em; }
+.tag.aviso { background: #fbf1e3; color: var(--aviso); font-size: .62rem; padding: .1em .45em; }
+
+/* ── el gantt ───────────────────────────────────────────── */
+.gantt { width: 100%; border-collapse: collapse; font-size: 12px; }
+.gantt th { font-family: var(--title); font-weight: 600; font-size: .6rem; letter-spacing: .1em;
+            text-transform: uppercase; color: var(--gray-600); padding: 6px 4px;
+            border-bottom: 1px solid var(--gray-300); text-align: center; }
+.gantt th.g-tarea { text-align: left; width: 280px; min-width: 220px; }
+.gantt td { border-bottom: 1px solid var(--border); padding: 3px 4px; }
+.gantt td.g-tarea { font-size: 11.5px; line-height: 1.35; padding-left: 6px; }
+.gantt td.g-tarea .cod { font-size: .68rem; }
+.gantt .g-fechas { display: block; font-family: var(--title); font-size: .62rem; color: var(--gray-500); }
+.gantt td.g-mes { min-width: 58px; padding: 6px 3px; vertical-align: middle; }
+.g-barra { height: 16px; background: var(--ink-800); color: #fff; border-radius: 0;
+           font-family: var(--title); font-weight: 600; font-size: .58rem; line-height: 16px;
+           text-align: center; overflow: hidden; white-space: nowrap; }
+.g-barra.critica { background: var(--red-500); }
+.gantt tfoot td { border-top: 2px solid var(--ink-900); border-bottom: none; vertical-align: bottom;
+                  height: 54px; text-align: center; }
+.g-avance { background: var(--red-dim2); margin: 0 auto; width: 70%; min-height: 2px; }
+.g-pct { display: block; font-family: var(--title); font-size: .6rem; color: var(--gray-600); margin-top: 2px; }
+.gantt .g-rango { display: block; font-weight: 400; letter-spacing: 0; text-transform: none;
+                  font-size: .58rem; color: var(--gray-500); }
+
+/* ── las curvas ─────────────────────────────────────────── */
+.curvas { width: 100%; height: auto; max-width: 100%; display: block; }
+.c-grilla { stroke: var(--border); stroke-width: 1; }
+.c-eje { font-family: var(--title); font-size: 10px; fill: var(--gray-600); }
+.c-eje.der { text-anchor: end; } .c-eje.medio { text-anchor: middle; }
+.c-eje.tenue { fill: var(--gray-500); font-size: 9px; }
+.c-plan { fill: none; stroke: var(--gray-500); stroke-width: 2; }
+.c-plan-pt { fill: var(--gray-500); }
+.c-real { fill: none; stroke: var(--red-500); stroke-width: 2.5; }
+.c-real-pt { fill: var(--red-500); }
+/* punteada = proyeccion. Lo que ya se certifico va lleno. */
+.c-proy { fill: none; stroke: var(--red-500); stroke-width: 2.5; stroke-dasharray: 6 5; opacity: .75; }
+.c-leyenda { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px; font-size: 11.5px;
+             color: var(--gray-700); align-items: center; }
+.c-leyenda i { display: inline-block; width: 18px; height: 3px; vertical-align: middle; margin-right: 5px; }
+.c-m-plan { background: var(--gray-500); }
+.c-m-real { background: var(--red-500); }
+.c-m-proy { background: repeating-linear-gradient(90deg, var(--red-500) 0 5px, transparent 5px 9px); }
+.c-ok { color: var(--success); font-weight: 600; }
+.c-mal { color: var(--red-500); font-weight: 600; }
+
+@media (max-width: 720px) {
+  .gantt th.g-tarea { width: 150px; min-width: 130px; }
+  .plan-grilla input.mini { width: 62px; }
+}
+
+/* `display:flex` le gana a [hidden]: sin esto, el campo que se esconde
+   por JS sigue en pantalla. */
+[hidden] { display: none !important; }

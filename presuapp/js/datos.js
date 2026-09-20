@@ -230,6 +230,32 @@
     });
   }
 
+  /* ── los analisis de varias tareas de una ─────────────────────
+     Los materiales por mes necesitan la RECETA de cada tarea del
+     computo: cuanto cemento lleva el m2, no cuanto sale. Eso ya viaja
+     por diseño, asi que se puede armar el reparto en el navegador sin
+     pedirle nada nuevo al servidor.
+
+     Se cachea por codigo: mover una fecha en el gantt no tiene por que
+     volver a preguntar recetas que no cambiaron.                    */
+  var cacheAnalisis = Object.create(null);
+  function analisisDeVarias(codigos) {
+    var unicos = [], visto = Object.create(null);
+    (codigos || []).forEach(function (c) {
+      var k = String(c || '').trim();
+      if (k && !visto[k]) { visto[k] = true; unicos.push(k); }
+    });
+    var faltan = unicos.filter(function (c) { return !cacheAnalisis[c]; });
+    return Promise.all(faltan.map(function (c) {
+      return analisis(c).then(function (det) { cacheAnalisis[c] = det; })
+                        .catch(function () { cacheAnalisis[c] = []; });
+    })).then(function () {
+      var mapa = Object.create(null);
+      unicos.forEach(function (c) { mapa[c] = cacheAnalisis[c] || []; });
+      return mapa;
+    });
+  }
+
   /* ── el email, al bajar el Excel ──────────────────────────────── */
   function registrarDescarga(email, nombre, obra, origen) {
     if (modo !== 'remoto') return Promise.resolve(true);
@@ -248,6 +274,7 @@
     buscarTareas: buscarTareas,
     buscarInsumos: buscarInsumos,
     analisis: analisis,
+    analisisDeVarias: analisisDeVarias,
     cotizar: cotizar,
     registrarDescarga: registrarDescarga,
     catalogoLocal: catalogoLocal,

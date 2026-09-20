@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700;800&family=Libre+Franklin:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=202609201942">
-<link rel="stylesheet" href="css/extra.css?v=202609201942">
+<link rel="stylesheet" href="css/app.css?v=202609201954">
+<link rel="stylesheet" href="css/extra.css?v=202609201954">
 </head>
 <body>
 
@@ -43,6 +43,7 @@
   <button class="tab" data-tab="presupuesto">Presupuesto</button>
   <button class="tab" data-tab="precios">Precios</button>
   <button class="tab" data-tab="materiales">Materiales</button>
+  <button class="tab" data-tab="plan">Plan de trabajo</button>
   <button class="tab" data-tab="control">Control</button>
 </div>
 
@@ -223,6 +224,116 @@
   <div class="card"><div id="materiales-tabla"><div class="empty-state">Cargá el cómputo primero</div></div></div>
 </div>
 
+
+<!-- ══════════════════ PLAN DE TRABAJO ══════════════════ -->
+<div class="section" id="tab-plan">
+
+  <div class="card">
+    <div class="flex-row mb8">
+      <div class="card-title" style="margin:0">CÓMO SE ARMA EL PLAN</div>
+      <div class="spacer"></div>
+      <span class="badge" id="plan-resumen">—</span>
+    </div>
+    <p class="text-muted mb8">Dos caminos para el mismo plan. Con <strong>predecesoras</strong> las fechas
+      salen solas del rendimiento diario y de qué va después de qué. Con el <strong>gantt rápido</strong> no
+      declarás dependencias: ponés a mano el avance de cada tarea mes a mes.</p>
+
+    <div class="plan-config">
+      <div class="obra-field">
+        <label>Modo</label>
+        <select id="plan-modo">
+          <option value="calculado">Calculado (predecesoras)</option>
+          <option value="rapido">Gantt rápido (avances a mano)</option>
+        </select>
+      </div>
+      <div class="obra-field">
+        <label>Inicio de obra</label>
+        <input type="date" id="plan-inicio">
+      </div>
+      <div class="obra-field">
+        <label>Ritmo</label>
+        <select id="plan-baseline">
+          <option value="cliente">Cliente (el plazo que se firma)</option>
+          <option value="empresa">Empresa (con el que se trabaja)</option>
+        </select>
+      </div>
+      <div class="obra-field" id="plan-campo-meses" hidden>
+        <label>Meses de obra</label>
+        <input type="number" id="plan-meses" min="1" max="60" value="6">
+      </div>
+      <div class="obra-field">
+        <label>Días laborables</label>
+        <div class="flex-row" style="gap:14px;padding-top:6px">
+          <label class="chk"><input type="checkbox" id="plan-sabado"> sábado</label>
+          <label class="chk"><input type="checkbox" id="plan-domingo"> domingo</label>
+        </div>
+      </div>
+    </div>
+    <div id="plan-avisos"></div>
+  </div>
+
+  <div class="card">
+    <div class="flex-row mb8">
+      <div class="card-title" style="margin:0">TAREAS, RITMO Y DEPENDENCIAS</div>
+      <div class="spacer"></div>
+      <span class="text-muted" id="plan-ayuda-modo"></span>
+    </div>
+    <div id="plan-tabla"><div class="empty-state">Cargá el cómputo primero: el plan se arma sobre esas tareas</div></div>
+  </div>
+
+  <div class="card">
+    <div class="flex-row mb8">
+      <div class="card-title" style="margin:0">GANTT POR MES</div>
+      <div class="spacer"></div>
+      <label class="chk"><input type="checkbox" id="plan-solo-criticas"> sólo la ruta crítica</label>
+    </div>
+    <div id="plan-gantt"></div>
+  </div>
+
+  <div class="card">
+    <div class="flex-row mb8">
+      <div class="card-title" style="margin:0">LOOK AHEAD · PRÓXIMAS SEMANAS</div>
+      <div class="spacer"></div>
+      <div class="obra-field" style="flex-direction:row;align-items:center;gap:8px">
+        <label style="margin:0">desde</label>
+        <input type="date" id="plan-la-desde" style="width:auto">
+        <label style="margin:0">semanas</label>
+        <input type="number" id="plan-la-semanas" min="2" max="12" value="4" style="width:70px">
+      </div>
+    </div>
+    <div id="plan-lookahead"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">CURVAS DE INVERSIÓN</div>
+    <p class="text-muted mb8">Un solo plan físico, tres lecturas. <strong>Cliente</strong> es lo que se
+      certifica (costo × K); <strong>empresa</strong> es lo que sale hacer la obra. La tercera es la real:
+      cargá el avance certificado de cada mes y la curva se dibuja <strong>continua hasta donde llega lo
+      certificado</strong> y <strong>punteada</strong> de ahí en adelante, que es proyección.</p>
+    <div id="plan-curvas"></div>
+    <div id="plan-curvas-tabla"></div>
+  </div>
+
+  <div class="card">
+    <div class="flex-row mb8">
+      <div class="card-title" style="margin:0">MATERIALES POR MES</div>
+      <div class="spacer"></div>
+      <select id="plan-mat-categoria" style="width:auto;margin:0">
+        <option value="">Todo</option>
+        <option value="Materiales">Materiales</option>
+        <option value="Mano de obra">Mano de obra</option>
+        <option value="Equipos">Equipos</option>
+      </select>
+      <button class="btn btn-secondary" id="plan-export">Exportar el plan</button>
+    </div>
+    <p class="text-muted mb8">La lista de compras abierta mes a mes. El pedido se redondea
+      <strong>en cada mes</strong>: si en marzo hacen falta 26 kg de cemento y en abril 30, son dos bolsas
+      y dos bolsas, no las tres que saldrían de sumar primero.</p>
+    <div id="plan-materiales"></div>
+  </div>
+
+</div>
+
 <!-- ══════════════════ CONTROL ══════════════════ -->
 <div class="section" id="tab-control">
   <div class="card">
@@ -312,11 +423,13 @@
 
 <div id="toast-zona"></div>
 
-<script src="vendor/xlsx.full.min.js?v=202609201942"></script>
+<script src="vendor/xlsx.full.min.js?v=202609201954"></script>
 <script>window.PRESUAPP_REMOTO = true;</script>
-<script src="js/motor.js?v=202609201942"></script>
-<script src="js/datos.js?v=202609201942"></script>
-<script src="js/importar.js?v=202609201942"></script>
-<script src="js/app.js?v=202609201942"></script>
+<script src="js/motor.js?v=202609201954"></script>
+<script src="js/datos.js?v=202609201954"></script>
+<script src="js/importar.js?v=202609201954"></script>
+<script src="js/app.js?v=202609201954"></script>
+<script src="js/plan.js?v=202609201954"></script>
+<script src="js/planui.js?v=202609201954"></script>
 </body>
 </html>

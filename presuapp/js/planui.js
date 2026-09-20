@@ -1,0 +1,634 @@
+/* ───────────────────────────────────────────────────────────────
+   PANTALLA DEL PLAN DE TRABAJO
+
+   Los numeros los hace `plan.js`; aca solo se dibuja y se escucha.
+   La division es la misma que en el resto de la app: si esta pantalla
+   calculara por su cuenta, el gantt y el Excel podrian decir cosas
+   distintas y no habria forma de saber cual miente.
+
+   DOS CAMINOS AL MISMO PLAN:
+
+     calculado  se declaran predecesoras y un rendimiento diario, y
+                las fechas salen del CPM. Es el que da ruta critica
+                y holguras.
+
+     rapido     no se declara nada: se escribe a mano cuanto avanza
+                cada tarea en cada mes. No hay fechas ni holgura,
+                pero hay curva y materiales por mes, que es lo que
+                se necesita para pedir la plata y comprar.
+
+   El plan se guarda con el presupuesto: si se pierde, hay que volver
+   a cargar rendimientos y predecesoras a mano, que es el trabajo caro.
+   ─────────────────────────────────────────────────────────────── */
+(function () {
+  'use strict';
+
+  var M = window.Motor, P = window.Plan, D = window.Datos, A = window.App;
+  if (!P || !A) return;
+
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = A.esc, num = A.num, fmt = A.fmt, fmtCorto = A.fmtCorto, toast = A.toast;
+
+  /* Lo que el usuario carga. Vive dentro del estado de la app para que
+     se guarde, se exporte y se recupere junto con todo lo demas. */
+  function plan() {
+    var e = A.estado();
+    if (!e.plan) {
+      e.plan = {
+        modo: 'calculado',
+        fechaInicio: new Date().toISOString().slice(0, 10),
+        baseline: 'cliente',
+        meses: 6,
+        sabado: false, domingo: false,   // el sabado NO es laborable
+        tareas: {},                      // id -> {predecesoras, cliente:{...}, empresa:{...}}
+        avances: {},                     // id -> {1: 40, 2: 60}  (gantt rapido)
+        certificado: {}                  // numero de mes -> % acumulado certificado
+      };
+    }
+    return e.plan;
+  }
+
+  var ultimo = null;        // {programacion, reparto, curvas}
+  var recetas = {};         // codigo de tarea -> rendimientos
+  var soloCriticas = false;
+
+  /* ── helpers ──────────────────────────────────────────────── */
+  function cal() {
+    var p = plan();
+    return P.calendario({ sabado: !!p.sabado, domingo: !!p.domingo });
+  }
+  function nodo(id) {
+    var p = plan();
+    if (!p.tareas[id]) p.tareas[id] = { predecesoras: [], cliente: {}, empresa: {} };
+    var n = p.tareas[id];
+    if (!n.cliente) n.cliente = {};
+    if (!n.empresa) n.empresa = {};
+    if (!n.predecesoras) n.predecesoras = [];
+    return n;
+  }
+  function ritmo(id) { return nodo(id)[plan().baseline] || {}; }
+
+  /* Las predecesoras se escriben por CODIGO, que es lo que la persona
+     tiene en la cabeza, y se guardan por id, que es lo que no se repite
+     cuando la misma tarea esta en dos sectores. */
+  function codigosAIds(texto, propioId) {
+    var items = A.estado().items;
+    var out = [], noEncontrados = [];
+    String(texto || '').split(/[,;]+/).forEach(function (t) {
+      var c = t.trim();
+      if (!c) return;
+      var halladas = items.filter(function (it) {
+        return String(it.code).toLowerCase() === c.toLowerCase() && it.id !== propioId;
+      });
+      if (!halladas.length) { noEncontrados.push(c); return; }
+      halladas.forEach(function (it) { if (out.indexOf(it.id) < 0) out.push(it.id); });
+    });
+    return { ids: out, noEncontrados: noEncontrados };
+  }
+  function idsACodigos(ids) {
+    var items = A.estado().items, vistos = [];
+    (ids || []).forEach(function (id) {
+      var it = items.filter(function (x) { return x.id === id; })[0];
+      if (it && vistos.indexOf(it.code) < 0) vistos.push(it.code);
+    });
+    return vistos.join(', ');
+  }
+
+  /* ══════════════════ EL CALCULO ══════════════════ */
+  function recalcular() {
+    var p = plan();
+    var c = A.calcular();
+    var items = c.items || [];
+    if (!items.length) { ultimo = null; return Promise.resolve(null); }
+
+    var reparto, programacion = null;
+    if (p.modo === 'rapido') {
+      reparto = P.repartirAMano(items, {
+        meses: p.meses, fechaInicio: p.fechaInicio, valores: p.avances
+      });
+    } else {
+      programacion = P.programar(items, p.tareas, {
+        calendario: cal(), fechaInicio: p.fechaInicio, baseline: p.baseline
+      });
+      reparto = P.repartirPorFechas(programacion, { calendario: cal() });
+    }
+
+    var curvas = P.curvas(c, reparto, c.k || 1);
+    ultimo = { calculo: c, programacion: programacion, reparto: reparto, curvas: curvas };
+
+    // las recetas, para los materiales por mes
+    return D.analisisDeVarias(items.map(function (it) { return it.code; }))
+      .then(function (mapa) { recetas = mapa; return ultimo; })
+      .catch(function () { return ultimo; });
+  }
+
+  /* ══════════════════ RENDER ══════════════════ */
+  function render() {
+    return recalcular().then(function () {
+      pintarConfig();
+      pintarTabla();
+      pintarGantt();
+      pintarLookAhead();
+      pintarCurvas();
+      pintarMateriales();
+      A.guardar();
+    });
+  }
+
+  function pintarConfig() {
+    var p = plan();
+    $('plan-modo').value = p.modo;
+    $('plan-inicio').value = p.fechaInicio;
+    $('plan-baseline').value = p.baseline;
+    $('plan-meses').value = p.meses;
+    $('plan-sabado').checked = !!p.sabado;
+    $('plan-domingo').checked = !!p.domingo;
+    $('plan-campo-meses').hidden = p.modo !== 'rapido';
+    $('plan-ayuda-modo').textContent = p.modo === 'rapido'
+      ? 'escribí el % de avance de cada tarea en cada mes'
+      : 'rendimiento diario y qué va después de qué';
+
+    var avisos = [];
+    if (ultimo && ultimo.programacion) avisos = ultimo.programacion.avisos || [];
+    if (ultimo && ultimo.reparto.incompletas && ultimo.reparto.incompletas.length) {
+      avisos = avisos.concat(ultimo.reparto.incompletas.slice(0, 6).map(function (x) {
+        return x.code + ': cargado ' + num(x.cargado) + '% (' +
+          (x.cargado > 100 ? 'sobra ' + num(x.cargado - 100) : 'falta ' + num(100 - x.cargado)) + '%)';
+      }));
+      if (ultimo.reparto.incompletas.length > 6) {
+        avisos.push('…y ' + (ultimo.reparto.incompletas.length - 6) + ' tareas más sin completar el 100%');
+      }
+    }
+    $('plan-avisos').innerHTML = avisos.length
+      ? '<div class="aviso-fila"><div class="aviso-marca"></div><div>' +
+        avisos.map(esc).join('<br>') + '</div></div>'
+      : '';
+
+    if (!ultimo) { $('plan-resumen').textContent = '—'; return; }
+    if (ultimo.programacion) {
+      var pr = ultimo.programacion;
+      var criticas = pr.tareas.filter(function (t) { return t.critica; }).length;
+      $('plan-resumen').textContent = pr.duracionObra + ' días hábiles · ' +
+        ultimo.reparto.meses.length + ' meses · ' + criticas + ' en ruta crítica';
+    } else {
+      $('plan-resumen').textContent = ultimo.reparto.meses.length + ' meses';
+    }
+  }
+
+  /* ── la grilla de tareas ───────────────────────────────────── */
+  function pintarTabla() {
+    var cont = $('plan-tabla');
+    if (!ultimo) {
+      cont.innerHTML = '<div class="empty-state">Cargá el cómputo primero: el plan se arma sobre esas tareas</div>';
+      return;
+    }
+    var p = plan();
+    cont.innerHTML = p.modo === 'rapido' ? tablaRapida() : tablaCalculada();
+  }
+
+  function tablaCalculada() {
+    var pr = ultimo.programacion;
+    var filas = pr.tareas.map(function (t) {
+      var r = ritmo(t.id);
+      return '<tr data-plan="' + t.id + '"' + (t.critica ? ' class="critica"' : '') + '>' +
+        '<td class="cod">' + esc(t.code) + '</td>' +
+        '<td>' + esc(t.desc || '—') + '</td>' +
+        '<td class="der">' + num(t.qty) + ' <span class="text-muted">' + esc(t.unit) + '</span></td>' +
+        '<td class="der"><input class="mini" type="number" step="any" data-campo="rendimiento" ' +
+          'value="' + (r.rendimiento || '') + '" placeholder="—" title="' + esc(t.unit) + ' por día y por cuadrilla"></td>' +
+        '<td class="der"><input class="mini" type="number" step="1" min="1" data-campo="cuadrillas" ' +
+          'value="' + (r.cuadrillas || '') + '" placeholder="1"></td>' +
+        '<td class="der"><strong>' + t.duracion + '</strong> <span class="text-muted">d</span></td>' +
+        '<td><input class="pred" type="text" data-campo="predecesoras" value="' +
+          esc(idsACodigos(t.predecesoras)) + '" placeholder="—" title="códigos separados por coma"></td>' +
+        '<td class="fecha">' + esc(t.inicio) + '</td>' +
+        '<td class="fecha">' + esc(t.fin) + '</td>' +
+        '<td class="der">' + (t.critica
+          ? '<span class="tag critica">crítica</span>'
+          : '<span class="text-muted">' + t.holgura + ' d</span>') + '</td>' +
+        '</tr>';
+    }).join('');
+
+    return '<div class="tabla-scroll"><table class="grilla plan-grilla"><thead><tr>' +
+      '<th>Código</th><th>Tarea</th><th class="der">Cómputo</th>' +
+      '<th class="der" title="Cuánto hace una cuadrilla por día">Rend. diario</th>' +
+      '<th class="der">Cuadr.</th><th class="der">Duración</th>' +
+      '<th>Va después de</th><th>Inicio</th><th>Fin</th><th class="der">Holgura</th>' +
+      '</tr></thead><tbody>' + filas + '</tbody>' +
+      '<tfoot><tr><td colspan="7" class="der"><strong>OBRA</strong></td>' +
+      '<td class="fecha">' + esc(pr.inicio) + '</td><td class="fecha">' + esc(pr.fin) + '</td>' +
+      '<td class="der"><strong>' + pr.duracionObra + ' d</strong></td></tr></tfoot></table></div>';
+  }
+
+  function tablaRapida() {
+    var meses = ultimo.reparto.meses;
+    var p = plan();
+    var filas = ultimo.calculo.items.map(function (it) {
+      var fila = p.avances[it.id] || {};
+      var suma = meses.reduce(function (s, m) { return s + M.safeNum(fila[m.numero]); }, 0);
+      var estado = Math.abs(suma - 100) < 0.5
+        ? '<span class="tag ok">100%</span>'
+        : '<span class="tag aviso">' + num(suma) + '%</span>';
+      return '<tr data-plan="' + it.id + '">' +
+        '<td class="cod">' + esc(it.code) + '</td>' +
+        '<td>' + esc(it.desc || '—') + '</td>' +
+        meses.map(function (m) {
+          return '<td class="der"><input class="mini" type="number" step="any" min="0" max="100" ' +
+            'data-avance="' + m.numero + '" value="' + (fila[m.numero] !== undefined ? fila[m.numero] : '') +
+            '" placeholder="—"></td>';
+        }).join('') +
+        '<td class="der">' + estado + '</td></tr>';
+    }).join('');
+
+    return '<div class="tabla-scroll"><table class="grilla plan-grilla"><thead><tr>' +
+      '<th>Código</th><th>Tarea</th>' +
+      meses.map(function (m) { return '<th class="der">' + esc(m.label) + '</th>'; }).join('') +
+      '<th class="der">Cargado</th></tr></thead><tbody>' + filas + '</tbody></table></div>';
+  }
+
+  /* ── el gantt ──────────────────────────────────────────────── */
+  function pintarGantt() {
+    var cont = $('plan-gantt');
+    if (!ultimo) { cont.innerHTML = '<div class="empty-state">Sin plan todavía</div>'; return; }
+
+    var meses = ultimo.reparto.meses;
+    var filas = ultimo.calculo.items.filter(function (it) {
+      if (!soloCriticas || !ultimo.programacion) return true;
+      var t = ultimo.programacion.tareas.filter(function (x) { return x.id === it.id; })[0];
+      return t && t.critica;
+    });
+    if (!filas.length) {
+      cont.innerHTML = '<div class="empty-state">Nada para mostrar con ese filtro</div>';
+      return;
+    }
+
+    var html = '<div class="tabla-scroll"><table class="gantt"><thead><tr>' +
+      '<th class="g-tarea">Tarea</th>' +
+      meses.map(function (m) { return '<th class="g-mes">' + esc(m.label) + '</th>'; }).join('') +
+      '</tr></thead><tbody>';
+
+    filas.forEach(function (it) {
+      var fr = ultimo.reparto.fraccion[it.id] || [];
+      var t = ultimo.programacion
+        ? ultimo.programacion.tareas.filter(function (x) { return x.id === it.id; })[0]
+        : null;
+      var titulo = (t && t.critica) ? ' class="critica"' : '';
+      html += '<tr' + titulo + '><td class="g-tarea" title="' + esc(it.desc) + '">' +
+        '<span class="cod">' + esc(it.code) + '</span> ' + esc((it.desc || '').slice(0, 34)) +
+        (t ? '<span class="g-fechas">' + esc(t.inicio) + ' → ' + esc(t.fin) + '</span>' : '') +
+        '</td>';
+      meses.forEach(function (m, i) {
+        var f = fr[i] || 0;
+        if (f <= 0.0001) { html += '<td class="g-mes"></td>'; return; }
+        // el ancho de la barra ES la parte de la tarea que cae en el mes
+        html += '<td class="g-mes"><div class="g-barra' + (t && t.critica ? ' critica' : '') + '" ' +
+          'style="width:' + Math.max(8, f * 100).toFixed(1) + '%" ' +
+          'title="' + num(f * 100) + '% de la tarea en ' + esc(m.label) + '">' +
+          (f > 0.28 ? num(f * 100) + '%' : '') + '</div></td>';
+      });
+      html += '</tr>';
+    });
+
+    // la fila de abajo: cuanto de la obra cae en cada mes
+    var c = ultimo.curvas;
+    html += '</tbody><tfoot><tr><td class="g-tarea"><strong>AVANCE DEL MES</strong></td>' +
+      c.meses.map(function (m) {
+        return '<td class="g-mes"><div class="g-avance" style="height:' +
+          Math.min(100, m.avancePct * 2.2).toFixed(1) + '%" title="' + num(m.avancePct) + '% de la obra"></div>' +
+          '<span class="g-pct">' + num(m.avancePct) + '%</span></td>';
+      }).join('') + '</tr></tfoot></table></div>';
+
+    cont.innerHTML = html;
+  }
+
+  /* ── look ahead semanal ────────────────────────────────────── */
+  function pintarLookAhead() {
+    var cont = $('plan-lookahead');
+    if (!ultimo || !ultimo.programacion) {
+      cont.innerHTML = '<div class="empty-state">El look ahead necesita fechas: es el plan calculado, ' +
+        'no el gantt rápido</div>';
+      return;
+    }
+    var desde = P.aFecha($('plan-la-desde').value) || P.aFecha(ultimo.programacion.inicio);
+    var n = Math.max(2, Math.min(12, parseInt($('plan-la-semanas').value, 10) || 4));
+    var c = cal();
+
+    // las semanas arrancan el lunes
+    var lunes = new Date(desde.getTime());
+    while (lunes.getUTCDay() !== 1) lunes = new Date(lunes.getTime() - 86400000);
+
+    var semanas = [];
+    for (var i = 0; i < n; i++) {
+      var a = new Date(lunes.getTime() + i * 7 * 86400000);
+      var b = new Date(a.getTime() + 6 * 86400000);
+      semanas.push({
+        inicio: a, fin: b,
+        label: 'sem ' + (i + 1),
+        rango: a.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', timeZone: 'UTC' }) + ' al ' +
+               b.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', timeZone: 'UTC' })
+      });
+    }
+
+    var filas = ultimo.programacion.tareas.filter(function (t) {
+      var fi = P.aFecha(t.inicio), ff = P.aFecha(t.fin);
+      return ff >= semanas[0].inicio && fi <= semanas[n - 1].fin;
+    });
+    if (!filas.length) {
+      cont.innerHTML = '<div class="empty-state">No hay tareas en esas semanas</div>';
+      return;
+    }
+
+    var html = '<div class="tabla-scroll"><table class="gantt lookahead"><thead><tr><th class="g-tarea">Tarea</th>' +
+      semanas.map(function (s) {
+        return '<th class="g-mes">' + s.label + '<span class="g-rango">' + s.rango + '</span></th>';
+      }).join('') + '</tr></thead><tbody>';
+
+    filas.forEach(function (t) {
+      var fi = P.aFecha(t.inicio), ff = P.aFecha(t.fin);
+      var totalHabiles = c.habiles(fi, ff) || 1;
+      html += '<tr' + (t.critica ? ' class="critica"' : '') + '><td class="g-tarea">' +
+        '<span class="cod">' + esc(t.code) + '</span> ' + esc((t.desc || '').slice(0, 30)) + '</td>';
+      semanas.forEach(function (s) {
+        var a = fi > s.inicio ? fi : s.inicio;
+        var b = ff < s.fin ? ff : s.fin;
+        if (b < a) { html += '<td class="g-mes"></td>'; return; }
+        var d = c.habiles(a, b);
+        if (d <= 0) { html += '<td class="g-mes"></td>'; return; }
+        html += '<td class="g-mes"><div class="g-barra' + (t.critica ? ' critica' : '') + '" ' +
+          'style="width:' + Math.min(100, (d / 5) * 100).toFixed(0) + '%" ' +
+          'title="' + d + ' día(s) hábil(es), ' + num(d / totalHabiles * 100) + '% de la tarea">' +
+          d + 'd</div></td>';
+      });
+      html += '</tr>';
+    });
+    cont.innerHTML = html + '</tbody></table></div>';
+  }
+
+  /* ── las curvas ────────────────────────────────────────────────
+     Tres lecturas del mismo plan. La real se dibuja CONTINUA hasta el
+     ultimo mes con certificado cargado y PUNTEADA de ahi en adelante:
+     lo que ya paso es un hecho, lo que viene es una proyeccion, y la
+     linea tiene que decir cual es cual sin que haya que preguntar.   */
+  function pintarCurvas() {
+    var cont = $('plan-curvas');
+    if (!ultimo) { cont.innerHTML = '<div class="empty-state">Sin plan todavía</div>'; return; }
+
+    var c = ultimo.curvas, p = plan();
+    var meses = c.meses;
+    var W = 900, H = 320, ml = 62, mr = 16, mt = 16, mb = 46;
+    var ancho = W - ml - mr, alto = H - mt - mb;
+    var x = function (i) { return ml + (meses.length < 2 ? ancho / 2 : (i / (meses.length - 1)) * ancho); };
+    var y = function (pct) { return mt + alto - (Math.max(0, Math.min(110, pct)) / 110) * alto; };
+
+    // certificado: acumulado que carga la persona
+    var cert = [], ultimoCert = -1;
+    meses.forEach(function (m, i) {
+      var v = p.certificado[m.numero];
+      if (v === undefined || v === null || v === '') { cert.push(null); return; }
+      cert.push(M.safeNum(v));
+      ultimoCert = i;
+    });
+
+    function camino(puntos) {
+      return puntos.map(function (pt, i) { return (i ? 'L' : 'M') + pt[0].toFixed(1) + ' ' + pt[1].toFixed(1); }).join(' ');
+    }
+    var ptsCliente = meses.map(function (m, i) { return [x(i), y(m.avanceAcumPct)]; });
+
+    // la real: lo certificado, y desde ahi la proyeccion siguiendo el ritmo del plan
+    var ptsReal = [], ptsProy = [];
+    if (ultimoCert >= 0) {
+      for (var i = 0; i <= ultimoCert; i++) if (cert[i] !== null) ptsReal.push([x(i), y(cert[i])]);
+      var desvio = cert[ultimoCert] - meses[ultimoCert].avanceAcumPct;
+      ptsProy.push([x(ultimoCert), y(cert[ultimoCert])]);
+      for (var j = ultimoCert + 1; j < meses.length; j++) {
+        ptsProy.push([x(j), y(meses[j].avanceAcumPct + desvio)]);
+      }
+    }
+
+    var grilla = '';
+    [0, 25, 50, 75, 100].forEach(function (v) {
+      grilla += '<line x1="' + ml + '" y1="' + y(v) + '" x2="' + (W - mr) + '" y2="' + y(v) +
+        '" class="c-grilla"/><text x="' + (ml - 8) + '" y="' + (y(v) + 4) + '" class="c-eje der">' + v + '%</text>';
+    });
+    var ejeX = meses.map(function (m, i) {
+      return '<text x="' + x(i) + '" y="' + (H - mb + 18) + '" class="c-eje medio">' + esc(m.label) + '</text>' +
+             '<text x="' + x(i) + '" y="' + (H - mb + 32) + '" class="c-eje medio tenue">' + fmtCorto(m.clienteAcum) + '</text>';
+    }).join('');
+
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="curvas" role="img" ' +
+      'aria-label="Curvas de inversión del plan">' + grilla + ejeX +
+      '<path d="' + camino(ptsCliente) + '" class="c-plan"/>' +
+      ptsCliente.map(function (pt) { return '<circle cx="' + pt[0].toFixed(1) + '" cy="' + pt[1].toFixed(1) + '" r="3" class="c-plan-pt"/>'; }).join('') +
+      (ptsReal.length > 1 ? '<path d="' + camino(ptsReal) + '" class="c-real"/>' : '') +
+      (ptsReal.length ? ptsReal.map(function (pt) { return '<circle cx="' + pt[0].toFixed(1) + '" cy="' + pt[1].toFixed(1) + '" r="3.5" class="c-real-pt"/>'; }).join('') : '') +
+      (ptsProy.length > 1 ? '<path d="' + camino(ptsProy) + '" class="c-proy"/>' : '') +
+      '</svg>';
+
+    var leyenda = '<div class="c-leyenda">' +
+      '<span><i class="c-m-plan"></i> Plan (avance previsto)</span>' +
+      '<span><i class="c-m-real"></i> Certificado — línea llena</span>' +
+      '<span><i class="c-m-proy"></i> Proyectado — punteada</span>' +
+      (ultimoCert >= 0
+        ? '<span class="' + (cert[ultimoCert] >= meses[ultimoCert].avanceAcumPct ? 'c-ok' : 'c-mal') + '">' +
+          (cert[ultimoCert] >= meses[ultimoCert].avanceAcumPct ? 'adelantado ' : 'atrasado ') +
+          num(Math.abs(cert[ultimoCert] - meses[ultimoCert].avanceAcumPct)) + ' puntos</span>'
+        : '<span class="text-muted">cargá el certificado de cada mes para ver la curva real</span>') +
+      '</div>';
+
+    cont.innerHTML = svg + leyenda;
+    pintarTablaCurvas(cert);
+  }
+
+  function pintarTablaCurvas(cert) {
+    var c = ultimo.curvas;
+    var filas = c.meses.map(function (m, i) {
+      var v = cert[i];
+      return '<tr><td>' + esc(m.label) + '</td>' +
+        '<td class="der">' + num(m.avancePct) + '%</td>' +
+        '<td class="der"><strong>' + num(m.avanceAcumPct) + '%</strong></td>' +
+        '<td class="der">' + num(m.empresa) + '</td>' +
+        '<td class="der">' + num(m.cliente) + '</td>' +
+        '<td class="der">' + num(m.clienteAcum) + '</td>' +
+        '<td class="der"><input class="mini" type="number" step="any" min="0" max="120" ' +
+          'data-cert="' + m.numero + '" value="' + (v === null || v === undefined ? '' : v) +
+          '" placeholder="—"></td>' +
+        '<td class="der">' + (v === null || v === undefined ? '<span class="text-muted">·</span>'
+          : '<span class="' + (v >= m.avanceAcumPct ? 'c-ok' : 'c-mal') + '">' +
+            (v >= m.avanceAcumPct ? '+' : '') + num(v - m.avanceAcumPct) + '</span>') + '</td>' +
+        '</tr>';
+    }).join('');
+
+    $('plan-curvas-tabla').innerHTML =
+      '<div class="tabla-scroll" style="margin-top:14px"><table class="grilla"><thead><tr>' +
+      '<th>Mes</th><th class="der">Avance</th><th class="der">Acumulado</th>' +
+      '<th class="der">Costo empresa</th><th class="der">Certifica cliente</th><th class="der">Acum. cliente</th>' +
+      '<th class="der">Certificado real %</th><th class="der">Desvío</th>' +
+      '</tr></thead><tbody>' + filas + '</tbody>' +
+      '<tfoot><tr><td colspan="3" class="der"><strong>TOTAL</strong></td>' +
+      '<td class="der"><strong>' + num(c.totalEmpresa) + '</strong></td>' +
+      '<td class="der"><strong>' + num(c.totalCliente) + '</strong></td>' +
+      '<td colspan="3"></td></tr></tfoot></table></div>';
+  }
+
+  /* ── materiales por mes ────────────────────────────────────── */
+  function pintarMateriales() {
+    var cont = $('plan-materiales');
+    if (!ultimo) { cont.innerHTML = '<div class="empty-state">Sin plan todavía</div>'; return; }
+    var cat = $('plan-mat-categoria').value;
+    var filas = P.materialesPorMesDesde(ultimo.calculo.items, recetas, ultimo.reparto, cat || null);
+    if (!filas.length) {
+      cont.innerHTML = '<div class="empty-state">No hay insumos de esa categoría en el cómputo</div>';
+      return;
+    }
+    var meses = ultimo.reparto.meses;
+    cont.innerHTML = '<div class="tabla-scroll"><table class="grilla"><thead><tr>' +
+      '<th>Código</th><th>Insumo</th><th>Un. compra</th>' +
+      meses.map(function (m) { return '<th class="der">' + esc(m.label) + '</th>'; }).join('') +
+      '<th class="der">Total</th></tr></thead><tbody>' +
+      filas.slice(0, 60).map(function (r) {
+        return '<tr><td class="cod">' + esc(r.code) + '</td>' +
+          '<td>' + esc(r.desc) + '</td>' +
+          '<td>' + esc(r.unidadCompra) + (r.factor > 1 ? ' <span class="text-muted">×' + num(r.factor) + '</span>' : '') + '</td>' +
+          r.compraMes.map(function (q) {
+            return '<td class="der">' + (q ? '<strong>' + num(q) + '</strong>' : '<span class="text-muted">·</span>') + '</td>';
+          }).join('') +
+          '<td class="der">' + num(r.compraTotal) + '</td></tr>';
+      }).join('') +
+      '</tbody></table></div>' +
+      (filas.length > 60 ? '<div class="text-muted" style="padding:8px">Mostrando 60 de ' + filas.length + ' insumos · exportá el plan para verlos todos</div>' : '');
+  }
+
+  /* ══════════════════ EXPORTAR ══════════════════ */
+  function exportar() {
+    if (!ultimo) { toast('No hay plan para exportar', 'error'); return; }
+    if (A.pedirEmailAntes('plan', exportar)) return;
+
+    var meses = ultimo.reparto.meses, c = ultimo.curvas, p = plan();
+    var hojas = [];
+
+    var cro = [['Código', 'Tarea', 'Cómputo', 'Unidad', 'Rend. diario', 'Cuadrillas', 'Duración (d)',
+                'Va después de', 'Inicio', 'Fin', 'Holgura (d)', 'Crítica']];
+    if (ultimo.programacion) {
+      ultimo.programacion.tareas.forEach(function (t) {
+        var r = ritmo(t.id);
+        cro.push([t.code, t.desc, t.qty, t.unit, r.rendimiento || '', r.cuadrillas || 1, t.duracion,
+          idsACodigos(t.predecesoras), t.inicio, t.fin, t.holgura, t.critica ? 'SÍ' : '']);
+      });
+    }
+    hojas.push({ nombre: 'Cronograma', filas: cro });
+
+    var cur = [['Mes', 'Desde', 'Hasta', 'Avance %', 'Acumulado %', 'Costo empresa', 'Certifica cliente',
+                'Acum. cliente', 'Certificado real %']];
+    c.meses.forEach(function (m) {
+      cur.push([m.label, m.inicio, m.fin, m.avancePct, m.avanceAcumPct, m.empresa, m.cliente, m.clienteAcum,
+        p.certificado[m.numero] === undefined ? '' : p.certificado[m.numero]]);
+    });
+    cur.push([]);
+    cur.push(['TOTAL', '', '', '', '', c.totalEmpresa, c.totalCliente, '', '']);
+    hojas.push({ nombre: 'Curvas', filas: cur });
+
+    var mats = P.materialesPorMesDesde(ultimo.calculo.items, recetas, ultimo.reparto, null);
+    var hm = [['Código', 'Insumo', 'Tipo', 'Un. obra', 'Un. compra', 'Contenido']
+      .concat(meses.map(function (m) { return m.label; })).concat(['Total a pedir'])];
+    mats.forEach(function (r) {
+      hm.push([r.code, r.desc, r.category, r.unit, r.unidadCompra, r.factor > 1 ? r.factor : '']
+        .concat(r.compraMes).concat([r.compraTotal]));
+    });
+    hojas.push({ nombre: 'Materiales por mes', filas: hm });
+
+    var nombre = (A.estado().obra.nombre || 'Plan de trabajo').replace(/[\\/:*?"<>|]/g, '-');
+    window.Importar.exportarLibro(hojas, nombre + ' - plan.xlsx');
+    toast('Plan exportado: cronograma, curvas y materiales por mes', 'ok');
+  }
+
+  /* ══════════════════ EVENTOS ══════════════════ */
+  function conRespiro(fn, ms) {
+    var t = null;
+    return function () {
+      var args = arguments, self = this;
+      clearTimeout(t);
+      t = setTimeout(function () { fn.apply(self, args); }, ms || 400);
+    };
+  }
+  var renderConRespiro = conRespiro(render, 450);
+
+  function conectar() {
+    ['plan-modo', 'plan-inicio', 'plan-baseline', 'plan-meses'].forEach(function (id) {
+      $(id).onchange = function () {
+        var p = plan();
+        if (id === 'plan-modo') p.modo = this.value;
+        else if (id === 'plan-inicio') p.fechaInicio = this.value;
+        else if (id === 'plan-baseline') p.baseline = this.value;
+        else p.meses = Math.max(1, Math.min(60, parseInt(this.value, 10) || 6));
+        render();
+      };
+    });
+    $('plan-sabado').onchange = function () { plan().sabado = this.checked; render(); };
+    $('plan-domingo').onchange = function () { plan().domingo = this.checked; render(); };
+    $('plan-solo-criticas').onchange = function () { soloCriticas = this.checked; pintarGantt(); };
+    $('plan-la-desde').onchange = pintarLookAhead;
+    $('plan-la-semanas').oninput = conRespiro(pintarLookAhead, 300);
+    $('plan-mat-categoria').onchange = pintarMateriales;
+    $('plan-export').onclick = exportar;
+
+    // la grilla de tareas
+    $('plan-tabla').addEventListener('input', function (e) {
+      var tr = e.target.closest('tr');
+      if (!tr || !tr.getAttribute('data-plan')) return;
+      var id = parseInt(tr.getAttribute('data-plan'), 10);
+      var campo = e.target.getAttribute('data-campo');
+      var mesAvance = e.target.getAttribute('data-avance');
+
+      if (mesAvance) {
+        var p = plan();
+        if (!p.avances[id]) p.avances[id] = {};
+        if (e.target.value === '') delete p.avances[id][mesAvance];
+        else p.avances[id][mesAvance] = M.safeNum(e.target.value);
+        renderConRespiro();
+        return;
+      }
+      if (!campo) return;
+
+      if (campo === 'predecesoras') {
+        var r = codigosAIds(e.target.value, id);
+        nodo(id).predecesoras = r.ids;
+        e.target.classList.toggle('mal', r.noEncontrados.length > 0);
+        e.target.title = r.noEncontrados.length
+          ? 'No está en el cómputo: ' + r.noEncontrados.join(', ')
+          : 'códigos separados por coma';
+      } else {
+        var n = ritmo(id);
+        if (e.target.value === '') delete n[campo];
+        else n[campo] = M.safeNum(e.target.value);
+        nodo(id)[plan().baseline] = n;
+      }
+      renderConRespiro();
+    });
+
+    // el certificado de cada mes
+    $('plan-curvas-tabla').addEventListener('input', function (e) {
+      var mes = e.target.getAttribute && e.target.getAttribute('data-cert');
+      if (!mes) return;
+      var p = plan();
+      if (e.target.value === '') delete p.certificado[mes];
+      else p.certificado[mes] = M.safeNum(e.target.value);
+      conRespiro(function () { pintarCurvas(); A.guardar(); }, 400)();
+    });
+  }
+
+  /* La pantalla se dibuja cuando se entra, no antes: armar el gantt de
+     una obra que todavia no tiene computo no le sirve a nadie, y pedir
+     las recetas de entrada serian llamadas al pedo. */
+  window.PlanUI = {
+    mostrar: function () {
+      var p = plan();
+      if (!$('plan-la-desde').value) $('plan-la-desde').value = p.fechaInicio;
+      return render();
+    },
+    render: render,
+    recalcular: recalcular,
+    estado: function () { return ultimo; }
+  };
+
+  conectar();
+})();

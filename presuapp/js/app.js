@@ -408,6 +408,9 @@
       renderPresupuesto();
       renderMateriales();
       renderInsumos();
+      // el plan cuelga del computo: si cambio una cantidad, el gantt y
+      // las curvas que estan en pantalla ya no son de esta obra
+      if (window.PlanUI && $('tab-plan').classList.contains('active')) window.PlanUI.render();
       guardar();
     });
   }
@@ -834,6 +837,7 @@
     document.querySelectorAll('.tab').forEach(function (t) { t.classList.toggle('active', t.getAttribute('data-tab') === nombre); });
     $('tab-' + nombre).classList.add('active');
     if (nombre === 'control') renderControl();
+    if (nombre === 'plan' && window.PlanUI) window.PlanUI.mostrar();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -1007,12 +1011,22 @@
   });
 
   /* Puerta para los tests y para mirar el estado desde la consola. */
+  /* La puerta para los tests, para la consola y para la pantalla del
+     plan, que vive en su propio archivo pero comparte el estado y los
+     formateadores: dos criterios de redondeo en la misma app seria un
+     numero distinto en cada pestaña. */
   window.App = {
     estado: function () { return estado; },
     calcular: calcular,
+    recalcular: recalcular,
     armarLibro: armarLibro,
     renderTodo: renderTodo,
     importarComputo: importarComputo,
-    importarPrecios: importarPrecios
+    importarPrecios: importarPrecios,
+    guardar: guardar,
+    remoto: remoto,
+    pedirEmailAntes: pedirEmailAntes,
+    esc: esc, num: num, pct: pct, rend: rend, fmt: fmt, fmtCorto: fmtCorto,
+    toast: toast
   };
 })();
