@@ -315,3 +315,13 @@
 .feriado-chip b { font-family: var(--title); font-weight: 600; color: var(--ink-800); }
 .feriado-chip.propio { border-color: var(--red-500); color: var(--red-500); }
 .feriado-chip.propio b { color: var(--red-500); }
+/* el rubro de obra en el que cae la tarea: es lo que la ata */
+.nodo-tag { display: inline-block; font-family: var(--title); font-size: .58rem;
+            letter-spacing: .08em; text-transform: uppercase; color: var(--gray-500);
+            border: 1px solid var(--border); padding: .05rem .35rem; margin-left: 6px;
+            vertical-align: 1px; }
+.aviso-fila { display: flex; gap: 10px; align-items: stretch; background: var(--gray-050);
+              border: 1px solid var(--border); padding: .7rem .8rem; margin-bottom: 8px;
+              font-size: 12.5px; line-height: 1.55; }
+.aviso-fila.grave { background: var(--red-050); border-color: var(--red-dim2); }
+.aviso-fila.grave .aviso-marca { background: var(--red-500); }

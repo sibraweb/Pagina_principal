@@ -321,10 +321,26 @@
         avisos.push('…y ' + (ultimo.reparto.incompletas.length - 6) + ' tareas más sin completar el 100%');
       }
     }
-    $('plan-avisos').innerHTML = avisos.length
+    /* Lo que la malla no puede saber -si hay dos plantas, si el revoque
+       esta duplicado- se dice, no se inventa. */
+    var deLaMalla = '';
+    if (ultimaPropuesta) {
+      deLaMalla = (ultimaPropuesta.avisos || []).map(function (a) {
+        return '<div class="aviso-fila' + (a.grave ? ' grave' : '') + '">' +
+          '<div class="aviso-marca"></div><div>' + esc(a.texto) + '</div></div>';
+      }).join('');
+      if (ultimaPropuesta.sinNodo.length) {
+        deLaMalla += '<div class="aviso-fila"><div class="aviso-marca"></div><div>' +
+          '<strong>' + ultimaPropuesta.sinNodo.length + ' tarea(s) sin ubicar en la malla:</strong> ' +
+          esc(ultimaPropuesta.sinNodo.slice(0, 8).map(function (x) { return x.code; }).join(', ')) +
+          (ultimaPropuesta.sinNodo.length > 8 ? '…' : '') +
+          '. Arrancan con la obra; atalas a mano si van después de algo.</div></div>';
+      }
+    }
+    $('plan-avisos').innerHTML = deLaMalla + (avisos.length
       ? '<div class="aviso-fila"><div class="aviso-marca"></div><div>' +
         avisos.map(esc).join('<br>') + '</div></div>'
-      : '';
+      : '');
 
     if (!ultimo) { $('plan-resumen').textContent = '—'; return; }
     if (ultimo.programacion) {
@@ -377,7 +393,9 @@
         '<td class="cod">' + esc(t.code) + '</td>' +
         '<td>' + esc(t.desc || '—') +
           (sinSalida ? ' <span class="tag suelta" title="No es predecesora de ninguna otra: ' +
-                       'no llega al FIN">sin sucesora</span>' : '') + '</td>' +
+                       'no llega al FIN">sin sucesora</span>' : '') +
+          (window.Malla && Malla.nodoDe(t.code)
+            ? '<span class="nodo-tag">' + esc(Malla.nodoDe(t.code).nombre) + '</span>' : '') + '</td>' +
         '<td class="der">' + num(t.qty) + ' <span class="text-muted">' + esc(t.unit) + '</span></td>' +
         '<td class="der"><input class="mini' + (esAutomatico(t.id) ? ' auto' : '') + '" type="number" ' +
           'step="any" data-campo="rendimiento" value="' + (r.rendimiento || '') + '" ' +
@@ -909,6 +927,41 @@
       (filas.length > 60 ? '<div class="text-muted" style="padding:8px">Mostrando 60 de ' + filas.length + ' insumos · exportá el plan para verlos todos</div>' : '');
   }
 
+  /* ── armar el plan solo ───────────────────────────────────────
+     La malla sabe el orden en que se construye una obra: primero se
+     excava, despues se funda, despues se levanta, y la pintura va al
+     final. Cada tarea cae en un nodo por su codigo y sale un plan
+     completo, que despues se corrige donde haga falta.
+
+     PISA lo que haya, y por eso pregunta antes: si alguien paso media
+     hora atando dependencias a mano, no se las borramos de callado.   */
+  function proponerPlan() {
+    if (!window.Malla) { toast('No se pudo cargar la malla de obra', 'error'); return; }
+    var items = A.estado().items;
+    if (!items.length) { toast('Cargá el cómputo primero', 'error'); return; }
+
+    var p = plan();
+    var yaHay = Object.keys(p.tareas).filter(function (id) {
+      return (p.tareas[id].predecesoras || []).length;
+    }).length;
+    if (yaHay && !confirm('Ya hay ' + yaHay + ' tarea(s) con dependencias cargadas.\n\n' +
+        '¿Reemplazarlas por el plan que propone la malla?')) return;
+
+    var r = Malla.proponer(items);
+    items.forEach(function (it) {
+      nodo(it.id).predecesoras = (r.predecesoras[it.id] || []).slice();
+    });
+    ultimaPropuesta = r;
+
+    render().then(function () {
+      var atadas = items.length - r.sinNodo.length;
+      toast(atadas + ' de ' + items.length + ' tareas ordenadas en ' + r.nodos.length + ' rubros' +
+        (r.sinNodo.length ? ' · ' + r.sinNodo.length + ' sin ubicar' : ''),
+        r.sinNodo.length ? 'aviso' : 'ok');
+    });
+  }
+  var ultimaPropuesta = null;
+
   /* ══════════════════ EXPORTAR ══════════════════ */
   function exportar() {
     if (!ultimo) { toast('No hay plan para exportar', 'error'); return; }
@@ -984,6 +1037,7 @@
     $('plan-la-semanas').oninput = conRespiro(pintarLookAhead, 300);
     $('plan-mat-categoria').onchange = pintarMateriales;
     $('plan-export').onclick = exportar;
+    $('plan-proponer').onclick = proponerPlan;
 
     // el calendario
     $('feriados-ver').onclick = function () { pintarFeriados(); A.abrirModal('modal-feriados'); };
