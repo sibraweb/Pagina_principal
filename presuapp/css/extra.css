@@ -271,3 +271,36 @@
 /* `display:flex` le gana a [hidden]: sin esto, el campo que se esconde
    por JS sigue en pantalla. */
 [hidden] { display: none !important; }
+
+/* ── hitos y predecesoras ───────────────────────────────────────── */
+.plan-grilla tr.hito td { background: var(--gray-050); font-family: var(--title); font-size: .76rem; }
+.plan-grilla tr.hito td strong { letter-spacing: .06em; }
+.pred-btn { width: 100%; text-align: left; background: none; border: 1px solid transparent;
+            padding: .3rem .4rem; cursor: pointer; font: inherit; }
+.pred-btn:hover { border-color: var(--gray-300); background: #fff; }
+.pred-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+.pred-chip { font-family: var(--title); font-weight: 600; font-size: .66rem; background: var(--ink-900);
+             color: #fff; padding: .1rem .35rem; }
+.pred-inicio { font-family: var(--title); font-weight: 600; font-size: .62rem; letter-spacing: .1em;
+               color: var(--gray-500); }
+/* una tarea suelta no es un error de calculo: es un olvido, y tiene que
+   verse como tal y no como una decision */
+.pred-inicio.suelta { color: var(--aviso); }
+.tag.suelta { background: #fbf1e3; color: var(--aviso); font-size: .6rem; padding: .1em .4em;
+              font-family: var(--title); font-weight: 600; }
+
+.pred-op { display: flex; align-items: center; gap: 10px; padding: .5rem .6rem;
+           border-bottom: 1px solid var(--border); cursor: pointer; font-size: 13px; }
+.pred-op:hover { background: var(--gray-050); }
+.pred-op input { width: auto; margin: 0; }
+.pred-op .cod { min-width: 78px; }
+.pred-desc { flex: 1; }
+.pred-op.no { opacity: .45; cursor: not-allowed; }
+
+/* ── seguimiento de obra ────────────────────────────────────────── */
+.dato-fijo { font-family: var(--title); font-weight: 600; font-size: .9rem; padding: .6rem .7rem;
+             border: 1px solid var(--border); background: var(--gray-050); color: var(--ink-800); }
+.explicacion { border-left: 3px solid var(--gray-300); background: var(--gray-050);
+               padding: .7rem .9rem; margin-top: 12px; font-size: 12.5px; line-height: 1.6;
+               color: var(--gray-700); }
+.explicacion strong { color: var(--ink-900); }

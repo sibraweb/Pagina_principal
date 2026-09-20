@@ -218,19 +218,40 @@
       d.critica = d.holgura === 0;
     });
 
+    /* INICIO y FIN son dos hitos, no dos tareas. El calculo ya los trata
+       asi -la que no tiene predecesora arranca en el inicio de obra, y la
+       que no tiene sucesora define el fin-, pero hasta ahora eran
+       invisibles: en la pantalla se veia un guion en "va despues de" y
+       cuatro tareas arrancando todas el mismo dia sin que nada dijera
+       que eso era un olvido y no una decision.
+
+       La regla de la casa: TODA tarea tiene predecesora y sucesora,
+       salvo la primera (cuelga del INICIO) y la ultima (es predecesora
+       del FIN). Lo que sigue es lo que hace falta para poder decirlo. */
+    var desdeInicio = datos.filter(function (d) { return !d.predecesoras.length; });
+    var hastaFin = datos.filter(function (d) { return !(sucesoras[d.id] || []).length; });
+
     return {
       tareas: datos.map(function (d) {
         return {
           id: d.id, code: d.code, desc: d.desc, rubro: d.rubro, unit: d.unit, qty: d.qty,
           rendimiento: d.rendimiento, cuadrillas: d.cuadrillas, duracion: d.duracion,
           predecesoras: d.predecesoras,
+          sucesoras: (sucesoras[d.id] || []).slice(),
+          desdeInicio: !d.predecesoras.length,
+          hastaFin: !(sucesoras[d.id] || []).length,
           inicio: iso(d.fi), fin: iso(d.ff), holgura: d.holgura, critica: d.critica
         };
       }),
       baseline: baseline,
       inicio: iso(inicioObra),
+      // el primer dia que de verdad se trabaja: el inicio de obra puede
+      // caer domingo y entonces no arranca nadie ese dia
+      primerDia: iso(cal.proximoHabil(inicioObra)),
       fin: iso(fin),
       duracionObra: cal.habiles(inicioObra, fin),
+      desdeInicio: desdeInicio.map(function (d) { return d.id; }),
+      hastaFin: hastaFin.map(function (d) { return d.id; }),
       avisos: avisos
     };
   }

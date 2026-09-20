@@ -42,7 +42,8 @@
         sabado: false, domingo: false,   // el sabado NO es laborable
         tareas: {},                      // id -> {predecesoras, cliente:{...}, empresa:{...}}
         avances: {},                     // id -> {1: 40, 2: 60}  (gantt rapido)
-        certificado: {}                  // numero de mes -> % acumulado certificado
+        certificado: {},                 // numero de mes -> % acumulado certificado
+        realInicio: '', realFin: ''      // cuando arranco y cuando termino DE VERDAD
       };
     }
     return e.plan;
@@ -129,6 +130,7 @@
       pintarTabla();
       pintarGantt();
       pintarLookAhead();
+      pintarSeguimiento();
       pintarCurvas();
       pintarMateriales();
       A.guardar();
@@ -186,21 +188,44 @@
     cont.innerHTML = p.modo === 'rapido' ? tablaRapida() : tablaCalculada();
   }
 
+  /* La tabla arranca en el hito INICIO y termina en el hito FIN.
+     Antes esos dos eran invisibles y "va despues de" mostraba un guion:
+     cuatro tareas arrancando el mismo dia se veian igual que un plan
+     bien armado, y no habia forma de distinguir la decision del olvido.
+
+     La regla: toda tarea tiene predecesora y sucesora. La unica que
+     puede colgar del INICIO es la primera, y la unica que puede no
+     tener sucesora es la que cierra la obra. Todo lo demas suelto se
+     marca en la fila y se cuenta arriba.                             */
   function tablaCalculada() {
     var pr = ultimo.programacion;
+    var sueltas = 0;
+
     var filas = pr.tareas.map(function (t) {
       var r = ritmo(t.id);
+      var colgadaDeMas = t.desdeInicio && pr.desdeInicio.length > 1;
+      var sinSalida = t.hastaFin && pr.hastaFin.length > 1;
+      if (colgadaDeMas || sinSalida) sueltas++;
+
+      var celdaPred = t.predecesoras.length
+        ? '<span class="pred-chips">' + idsACodigos(t.predecesoras).split(', ').map(function (c) {
+            return '<span class="pred-chip">' + esc(c) + '</span>';
+          }).join('') + '</span>'
+        : '<span class="pred-inicio' + (colgadaDeMas ? ' suelta' : '') + '">INICIO</span>';
+
       return '<tr data-plan="' + t.id + '"' + (t.critica ? ' class="critica"' : '') + '>' +
         '<td class="cod">' + esc(t.code) + '</td>' +
-        '<td>' + esc(t.desc || '—') + '</td>' +
+        '<td>' + esc(t.desc || '—') +
+          (sinSalida ? ' <span class="tag suelta" title="No es predecesora de ninguna otra: ' +
+                       'no llega al FIN">sin sucesora</span>' : '') + '</td>' +
         '<td class="der">' + num(t.qty) + ' <span class="text-muted">' + esc(t.unit) + '</span></td>' +
         '<td class="der"><input class="mini" type="number" step="any" data-campo="rendimiento" ' +
           'value="' + (r.rendimiento || '') + '" placeholder="—" title="' + esc(t.unit) + ' por día y por cuadrilla"></td>' +
         '<td class="der"><input class="mini" type="number" step="1" min="1" data-campo="cuadrillas" ' +
           'value="' + (r.cuadrillas || '') + '" placeholder="1"></td>' +
         '<td class="der"><strong>' + t.duracion + '</strong> <span class="text-muted">d</span></td>' +
-        '<td><input class="pred" type="text" data-campo="predecesoras" value="' +
-          esc(idsACodigos(t.predecesoras)) + '" placeholder="—" title="códigos separados por coma"></td>' +
+        '<td><button class="pred-btn" data-pred="' + t.id + '" ' +
+          'title="Elegir de qué tareas depende">' + celdaPred + '</button></td>' +
         '<td class="fecha">' + esc(t.inicio) + '</td>' +
         '<td class="fecha">' + esc(t.fin) + '</td>' +
         '<td class="der">' + (t.critica
@@ -209,15 +234,94 @@
         '</tr>';
     }).join('');
 
-    return '<div class="tabla-scroll"><table class="grilla plan-grilla"><thead><tr>' +
+    var hitoInicio = '<tr class="hito"><td class="cod">—</td>' +
+      '<td><strong>INICIO DE OBRA</strong> <span class="text-muted">hito</span></td>' +
+      '<td colspan="4"></td>' +
+      '<td class="text-muted">' + pr.desdeInicio.length + ' tarea(s) arrancan acá</td>' +
+      '<td class="fecha">' + esc(pr.primerDia || pr.inicio) + '</td><td colspan="2"></td></tr>';
+
+    var hitoFin = '<tr class="hito"><td class="cod">—</td>' +
+      '<td><strong>FIN DE OBRA</strong> <span class="text-muted">hito</span></td>' +
+      '<td colspan="4"></td>' +
+      '<td class="text-muted">va después de ' + esc(idsACodigos(pr.hastaFin) || '—') + '</td>' +
+      '<td class="fecha"></td><td class="fecha">' + esc(pr.fin) + '</td>' +
+      '<td class="der"><strong>' + pr.duracionObra + ' d</strong></td></tr>';
+
+    var nota = sueltas
+      ? '<div class="aviso-fila"><div class="aviso-marca"></div><div>' +
+        '<strong>' + sueltas + ' tarea(s) sueltas.</strong> Cada tarea tiene que ir después de alguna y ' +
+        'antes de alguna: sólo la primera cuelga del INICIO y sólo la última llega al FIN. ' +
+        'Las sueltas arrancan todas el primer día y el plazo de obra queda más corto de lo que es.</div></div>'
+      : '';
+
+    return nota + '<div class="tabla-scroll"><table class="grilla plan-grilla"><thead><tr>' +
       '<th>Código</th><th>Tarea</th><th class="der">Cómputo</th>' +
       '<th class="der" title="Cuánto hace una cuadrilla por día">Rend. diario</th>' +
       '<th class="der">Cuadr.</th><th class="der">Duración</th>' +
       '<th>Va después de</th><th>Inicio</th><th>Fin</th><th class="der">Holgura</th>' +
-      '</tr></thead><tbody>' + filas + '</tbody>' +
-      '<tfoot><tr><td colspan="7" class="der"><strong>OBRA</strong></td>' +
-      '<td class="fecha">' + esc(pr.inicio) + '</td><td class="fecha">' + esc(pr.fin) + '</td>' +
-      '<td class="der"><strong>' + pr.duracionObra + ' d</strong></td></tr></tfoot></table></div>';
+      '</tr></thead><tbody>' + hitoInicio + filas + hitoFin + '</tbody></table></div>';
+  }
+
+  /* ── el selector de predecesoras ──────────────────────────────
+     Antes habia que escribir el codigo de memoria en un campo de texto.
+     Con 40 tareas eso es imposible: ahora se filtra y se marca.
+
+     Las que crearian un circulo quedan deshabilitadas, no ocultas: si
+     una tarea no se puede elegir conviene que se vea por que.        */
+  var predAbierta = null;
+
+  function esAlcanzable(desde, hasta, visto) {
+    // ¿`hasta` depende, directa o indirectamente, de `desde`?
+    if (desde === hasta) return true;
+    visto = visto || {};
+    if (visto[hasta]) return false;
+    visto[hasta] = true;
+    var pr = ultimo && ultimo.programacion;
+    if (!pr) return false;
+    var t = pr.tareas.filter(function (x) { return x.id === hasta; })[0];
+    if (!t) return false;
+    return t.predecesoras.some(function (p) { return esAlcanzable(desde, p, visto); });
+  }
+
+  function abrirPredecesoras(id) {
+    predAbierta = id;
+    var it = A.estado().items.filter(function (x) { return x.id === id; })[0];
+    $('pred-titulo').textContent = '¿Después de qué va ' + (it ? it.code : '') + '?';
+    $('pred-buscar').value = '';
+    pintarListaPred();
+    A.abrirModal('modal-pred');
+    $('pred-buscar').focus();
+  }
+
+  function pintarListaPred() {
+    var id = predAbierta;
+    if (id === null) return;
+    var q = $('pred-buscar').value.trim().toLowerCase();
+    var elegidas = nodo(id).predecesoras || [];
+    var filas = A.estado().items.filter(function (it) {
+      if (it.id === id) return false;
+      if (!q) return true;
+      return String(it.code).toLowerCase().indexOf(q) > -1 ||
+             String(it.desc || '').toLowerCase().indexOf(q) > -1;
+    });
+
+    $('pred-lista').innerHTML = filas.length ? filas.map(function (it) {
+      var marcada = elegidas.indexOf(it.id) > -1;
+      // elegirla haria que esta tarea dependa de si misma
+      var circulo = !marcada && esAlcanzable(id, it.id);
+      return '<label class="pred-op' + (circulo ? ' no' : '') + '">' +
+        '<input type="checkbox" data-pred-id="' + it.id + '"' +
+          (marcada ? ' checked' : '') + (circulo ? ' disabled' : '') + '>' +
+        '<span class="cod">' + esc(it.code) + '</span>' +
+        '<span class="pred-desc">' + esc(it.desc || '') +
+          (it.sector ? ' <span class="text-muted">· ' + esc(it.sector) + '</span>' : '') + '</span>' +
+        (circulo ? '<span class="text-muted">ya depende de ésta</span>' : '') +
+        '</label>';
+    }).join('') : '<div class="empty-state">Nada con ese texto</div>';
+
+    $('pred-cuenta').textContent = elegidas.length
+      ? elegidas.length + ' elegida(s)'
+      : 'ninguna: arranca con la obra';
   }
 
   function tablaRapida() {
@@ -364,6 +468,110 @@
     cont.innerHTML = html + '</tbody></table></div>';
   }
 
+  /* ── como viene la obra ───────────────────────────────────────
+     El plan dice cuando TENDRIA que terminar. Esto dice cuando va a
+     terminar al ritmo que se viene trabajando, que casi nunca es el
+     mismo. La cuenta es la de siempre en obra:
+
+        rendimiento real = avance certificado / dias trabajados
+        dias que faltan  = lo que falta / rendimiento real
+
+     Todo en dias HABILES, que son los que se trabaja. Si la obra
+     arranco tarde, el atraso ya esta contado: se mide desde el
+     arranque real, no desde el que decia el plan.                   */
+  function seguimiento() {
+    var p = plan();
+    if (!ultimo) return null;
+
+    var c = ultimo.curvas, meses = c.meses, calen = cal();
+    var finPrevisto = ultimo.programacion ? ultimo.programacion.fin
+                    : (meses.length ? meses[meses.length - 1].fin : '');
+
+    // el ultimo mes con certificado cargado
+    var iUlt = -1, avance = 0;
+    meses.forEach(function (m, i) {
+      var v = p.certificado[m.numero];
+      if (v === undefined || v === null || v === '') return;
+      iUlt = i; avance = M.safeNum(v);
+    });
+
+    var arranque = P.aFecha(p.realInicio) ||
+                   P.aFecha(ultimo.programacion ? ultimo.programacion.primerDia : p.fechaInicio);
+    var res = {
+      arranque: P.iso(arranque),
+      finPrevisto: finPrevisto,
+      finReal: p.realFin || '',
+      avance: iUlt >= 0 ? avance : null,
+      mesUltimo: iUlt >= 0 ? meses[iUlt] : null,
+      finEstimado: '', desvioDias: null, ritmo: null, diasTrabajados: 0, diasQueFaltan: 0
+    };
+
+    if (p.realFin) {                       // ya termino: no hay nada que estimar
+      res.finEstimado = p.realFin;
+      res.desvioDias = calen.habiles(P.aFecha(finPrevisto), P.aFecha(p.realFin)) - 1;
+      if (P.aFecha(p.realFin) < P.aFecha(finPrevisto)) {
+        res.desvioDias = -(calen.habiles(P.aFecha(p.realFin), P.aFecha(finPrevisto)) - 1);
+      }
+      res.cerrada = true;
+      return res;
+    }
+
+    if (iUlt < 0 || avance <= 0) return res;   // sin certificado no se estima nada
+
+    var corte = P.aFecha(meses[iUlt].fin);
+    res.diasTrabajados = calen.habiles(arranque, corte);
+    if (res.diasTrabajados <= 0) return res;
+
+    res.ritmo = avance / res.diasTrabajados;           // % por dia habil
+    if (avance >= 100) { res.finEstimado = P.iso(corte); res.diasQueFaltan = 0; }
+    else {
+      res.diasQueFaltan = Math.ceil((100 - avance) / res.ritmo);
+      res.finEstimado = P.iso(calen.finTrasHabiles(calen.proximoHabil(new Date(corte.getTime() + 86400000)),
+                                                   res.diasQueFaltan));
+    }
+    var fp = P.aFecha(finPrevisto), fe = P.aFecha(res.finEstimado);
+    res.desvioDias = fe >= fp ? (calen.habiles(fp, fe) - 1) : -(calen.habiles(fe, fp) - 1);
+    return res;
+  }
+
+  function pintarSeguimiento() {
+    var p = plan(), sg = seguimiento();
+    $('real-inicio').value = p.realInicio || '';
+    $('real-fin').value = p.realFin || '';
+    if (!sg) {
+      $('fin-previsto').textContent = $('fin-estimado').textContent = $('desvio-plazo').textContent = '—';
+      $('obra-estado').textContent = 'sin datos';
+      $('obra-explicacion').innerHTML = '';
+      return;
+    }
+    $('fin-previsto').textContent = sg.finPrevisto || '—';
+    $('fin-estimado').textContent = sg.finEstimado || '—';
+
+    if (sg.desvioDias === null) {
+      $('desvio-plazo').innerHTML = '<span class="text-muted">falta el certificado</span>';
+      $('obra-estado').textContent = 'sin certificar';
+      $('obra-explicacion').innerHTML = '';
+      return;
+    }
+    var d = sg.desvioDias;
+    var clase = d > 0 ? 'c-mal' : 'c-ok';
+    var texto = d === 0 ? 'en fecha' : (d > 0 ? Math.abs(d) + ' días de atraso' : Math.abs(d) + ' días de adelanto');
+    $('desvio-plazo').innerHTML = '<span class="' + clase + '">' + texto + '</span>';
+    $('obra-estado').textContent = sg.cerrada ? 'obra terminada'
+      : (sg.avance !== null ? num(sg.avance) + '% certificado' : 'sin certificar');
+
+    $('obra-explicacion').innerHTML = sg.cerrada
+      ? '<div class="explicacion">La obra terminó el <strong>' + esc(sg.finReal) + '</strong>. ' +
+        'El plan decía ' + esc(sg.finPrevisto) + '.</div>'
+      : (sg.ritmo
+        ? '<div class="explicacion">Desde el <strong>' + esc(sg.arranque) + '</strong> se trabajaron ' +
+          '<strong>' + sg.diasTrabajados + ' días hábiles</strong> y se certificó <strong>' +
+          num(sg.avance) + '%</strong>: son <strong>' + num(sg.ritmo) + '% por día</strong>. ' +
+          'A ese ritmo, el ' + num(100 - sg.avance) + '% que falta lleva <strong>' + sg.diasQueFaltan +
+          ' días</strong> más.</div>'
+        : '');
+  }
+
   /* ── las curvas ────────────────────────────────────────────────
      Tres lecturas del mismo plan. La real se dibuja CONTINUA hasta el
      ultimo mes con certificado cargado y PUNTEADA de ahi en adelante:
@@ -394,15 +602,33 @@
     }
     var ptsCliente = meses.map(function (m, i) { return [x(i), y(m.avanceAcumPct)]; });
 
-    // la real: lo certificado, y desde ahi la proyeccion siguiendo el ritmo del plan
+    /* La real: lo certificado, y desde ahi la proyeccion AL RITMO REAL,
+       no al del plan. Si se viene avanzando 3 puntos por mes, la
+       punteada avanza 3 puntos por mes — no repite la curva del plan
+       corrida hacia abajo, que haria terminar en fecha a una obra que
+       no va a terminar en fecha. */
     var ptsReal = [], ptsProy = [];
+    var sg = seguimiento();
     if (ultimoCert >= 0) {
       for (var i = 0; i <= ultimoCert; i++) if (cert[i] !== null) ptsReal.push([x(i), y(cert[i])]);
-      var desvio = cert[ultimoCert] - meses[ultimoCert].avanceAcumPct;
       ptsProy.push([x(ultimoCert), y(cert[ultimoCert])]);
-      for (var j = ultimoCert + 1; j < meses.length; j++) {
-        ptsProy.push([x(j), y(meses[j].avanceAcumPct + desvio)]);
+
+      // cuanto se avanza por mes al ritmo real
+      var porMes = null;
+      if (sg && sg.ritmo) {
+        var habilesPorMes = ultimo.reparto.meses.map(function (m) {
+          return cal().habiles(P.aFecha(m.inicio), P.aFecha(m.fin));
+        });
+        porMes = habilesPorMes;
       }
+      var acum = cert[ultimoCert];
+      for (var j = ultimoCert + 1; j < meses.length && acum < 100; j++) {
+        acum += (sg && sg.ritmo && porMes) ? sg.ritmo * porMes[j]
+                                           : (meses[j].avanceAcumPct - meses[j - 1].avanceAcumPct);
+        ptsProy.push([x(j), y(Math.min(100, acum))]);
+      }
+      // si al ritmo real no llega al 100% dentro del plan, la punteada
+      // muere en el borde y el fin estimado lo dice en numeros arriba
     }
 
     var grilla = '';
@@ -571,6 +797,41 @@
     $('plan-mat-categoria').onchange = pintarMateriales;
     $('plan-export').onclick = exportar;
 
+    // como viene la obra
+    $('real-inicio').onchange = function () { plan().realInicio = this.value; render(); };
+    $('real-fin').onchange = function () { plan().realFin = this.value; render(); };
+
+    /* Bajar y volver a subir: el mes que viene se carga el avance nuevo
+       y se sigue. Sin esto habria que volver a cargar rendimientos y
+       predecesoras de cero, que es el trabajo caro de todo esto. */
+    $('plan-guardar').onclick = function () { A.guardarProyecto(); };
+    $('plan-abrir').onchange = function (e) {
+      if (e.target.files[0]) A.abrirProyecto(e.target.files[0]);
+      e.target.value = '';
+    };
+
+    // el selector de predecesoras
+    $('plan-tabla').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-pred]');
+      if (!b) return;
+      abrirPredecesoras(parseInt(b.getAttribute('data-pred'), 10));
+    });
+    $('pred-buscar').oninput = pintarListaPred;
+    $('pred-lista').addEventListener('change', function (e) {
+      var quien = e.target.getAttribute && e.target.getAttribute('data-pred-id');
+      if (quien === null || quien === undefined) return;
+      var otra = parseInt(quien, 10);
+      var n = nodo(predAbierta);
+      var i = n.predecesoras.indexOf(otra);
+      if (e.target.checked) { if (i < 0) n.predecesoras.push(otra); }
+      else if (i >= 0) n.predecesoras.splice(i, 1);
+      render().then(pintarListaPred);
+    });
+    $('pred-ninguna').onclick = function () {
+      nodo(predAbierta).predecesoras = [];
+      render().then(pintarListaPred);
+    };
+
     // la grilla de tareas
     $('plan-tabla').addEventListener('input', function (e) {
       var tr = e.target.closest('tr');
@@ -589,19 +850,10 @@
       }
       if (!campo) return;
 
-      if (campo === 'predecesoras') {
-        var r = codigosAIds(e.target.value, id);
-        nodo(id).predecesoras = r.ids;
-        e.target.classList.toggle('mal', r.noEncontrados.length > 0);
-        e.target.title = r.noEncontrados.length
-          ? 'No está en el cómputo: ' + r.noEncontrados.join(', ')
-          : 'códigos separados por coma';
-      } else {
-        var n = ritmo(id);
-        if (e.target.value === '') delete n[campo];
-        else n[campo] = M.safeNum(e.target.value);
-        nodo(id)[plan().baseline] = n;
-      }
+      var n = ritmo(id);
+      if (e.target.value === '') delete n[campo];
+      else n[campo] = M.safeNum(e.target.value);
+      nodo(id)[plan().baseline] = n;
       renderConRespiro();
     });
 

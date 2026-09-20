@@ -1026,6 +1026,8 @@
     guardar: guardar,
     remoto: remoto,
     pedirEmailAntes: pedirEmailAntes,
+    abrirModal: abrir, cerrarModal: cerrar,
+    guardarProyecto: guardarProyecto, abrirProyecto: abrirProyecto,
     esc: esc, num: num, pct: pct, rend: rend, fmt: fmt, fmtCorto: fmtCorto,
     toast: toast
   };

@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700;800&family=Libre+Franklin:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=202609201954">
-<link rel="stylesheet" href="css/extra.css?v=202609201954">
+<link rel="stylesheet" href="css/app.css?v=202609202006">
+<link rel="stylesheet" href="css/extra.css?v=202609202006">
 </head>
 <body>
 
@@ -305,6 +305,54 @@
   </div>
 
   <div class="card">
+    <div class="flex-row mb8">
+      <div class="card-title" style="margin:0">CÓMO VIENE LA OBRA</div>
+      <div class="spacer"></div>
+      <span class="badge" id="obra-estado">sin datos</span>
+    </div>
+    <p class="text-muted mb8">El plan dice cuándo tendría que terminar. Esto dice cuándo va a terminar
+      <strong>al ritmo que se viene trabajando</strong>. Cargá el arranque real y el avance certificado
+      de cada mes; el resto sale solo.</p>
+
+    <div class="plan-config">
+      <div class="obra-field">
+        <label>Arrancó el</label>
+        <input type="date" id="real-inicio">
+      </div>
+      <div class="obra-field">
+        <label>Terminó el <span class="text-muted">(si ya terminó)</span></label>
+        <input type="date" id="real-fin">
+      </div>
+      <div class="obra-field">
+        <label>Fin previsto <span class="text-muted">(plan)</span></label>
+        <div class="dato-fijo" id="fin-previsto">—</div>
+      </div>
+      <div class="obra-field">
+        <label>Fin estimado <span class="text-muted">(al ritmo real)</span></label>
+        <div class="dato-fijo" id="fin-estimado">—</div>
+      </div>
+      <div class="obra-field">
+        <label>Desvío</label>
+        <div class="dato-fijo" id="desvio-plazo">—</div>
+      </div>
+    </div>
+    <div id="obra-explicacion"></div>
+  </div>
+
+  <div class="card">
+    <div class="flex-row mb8">
+      <div class="card-title" style="margin:0">GUARDAR Y SEGUIR DESPUÉS</div>
+      <div class="spacer"></div>
+      <button class="btn btn-primary" id="plan-guardar">Bajar el proyecto</button>
+      <label class="btn btn-secondary" for="plan-abrir">Subir un proyecto</label>
+      <input type="file" id="plan-abrir" accept=".json" hidden>
+    </div>
+    <p class="text-muted">Se baja <strong>todo</strong> en un archivo: el cómputo, tus precios, el K,
+      los rendimientos, las predecesoras y lo que lleves certificado. El mes que viene lo subís,
+      cargás el avance nuevo y seguís donde quedaste — no hay que volver a armar nada.</p>
+  </div>
+
+  <div class="card">
     <div class="card-title">CURVAS DE INVERSIÓN</div>
     <p class="text-muted mb8">Un solo plan físico, tres lecturas. <strong>Cliente</strong> es lo que se
       certifica (costo × K); <strong>empresa</strong> es lo que sale hacer la obra. La tercera es la real:
@@ -421,15 +469,31 @@
   </div>
 </footer>
 
+<div class="modal-overlay" id="modal-pred">
+  <div class="modal" style="max-width:720px">
+    <div class="modal-title" id="pred-titulo">¿Después de qué va esta tarea?</div>
+    <p class="text-muted mb8">Marcá las tareas que tienen que estar terminadas antes de que ésta empiece.
+      Si no marcás ninguna, arranca con la obra.</p>
+    <input type="text" id="pred-buscar" placeholder="Filtrar por código o descripción…">
+    <div id="pred-lista" class="lista-scroll"></div>
+    <div class="flex-row" style="margin-top:12px">
+      <span class="text-muted" id="pred-cuenta"></span>
+      <div class="spacer"></div>
+      <button class="btn btn-secondary" id="pred-ninguna">Arranca con la obra</button>
+      <button class="btn btn-primary" data-cerrar="modal-pred">Listo</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast-zona"></div>
 
-<script src="vendor/xlsx.full.min.js?v=202609201954"></script>
+<script src="vendor/xlsx.full.min.js?v=202609202006"></script>
 <script>window.PRESUAPP_REMOTO = true;</script>
-<script src="js/motor.js?v=202609201954"></script>
-<script src="js/datos.js?v=202609201954"></script>
-<script src="js/importar.js?v=202609201954"></script>
-<script src="js/app.js?v=202609201954"></script>
-<script src="js/plan.js?v=202609201954"></script>
-<script src="js/planui.js?v=202609201954"></script>
+<script src="js/motor.js?v=202609202006"></script>
+<script src="js/datos.js?v=202609202006"></script>
+<script src="js/importar.js?v=202609202006"></script>
+<script src="js/app.js?v=202609202006"></script>
+<script src="js/plan.js?v=202609202006"></script>
+<script src="js/planui.js?v=202609202006"></script>
 </body>
 </html>
