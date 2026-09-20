@@ -292,6 +292,13 @@
         : '';
       if ($('pag-ant')) $('pag-ant').onclick = function () { paginaInsumos--; renderInsumos(); };
       if ($('pag-sig')) $('pag-sig').onclick = function () { paginaInsumos++; renderInsumos(); };
+    }).catch(function (e) {
+      /* Sin esto, una busqueda que falla se ve igual que una que no
+         encontro nada: "0 insumos" y a otra cosa. Asi paso inadvertido
+         que la funcion habia cambiado de parametro. */
+      $('insumo-lista').innerHTML = '<div class="empty-state">No se pudo consultar el catálogo.<br>' +
+        '<span class="text-muted">' + esc(e.message) + '</span></div>';
+      $('insumo-count').textContent = '—';
     });
     $('override-count').textContent = estado.overrides.length + (estado.overrides.length === 1 ? ' precio propio' : ' precios propios');
   }
@@ -725,6 +732,9 @@
             '<td><button class="btn btn-primary" data-agregar="' + esc(a.code) + '">＋</button></td></tr>';
         }).join('') + '</tbody></table>' +
         (res.total > res.filas.length ? '<div class="text-muted" style="padding:8px">Mostrando ' + res.filas.length + ' de ' + res.total + ' · afiná la búsqueda</div>' : '');
+    }).catch(function (e) {
+      $('tarea-resultados').innerHTML = '<div class="empty-state">No se pudo consultar el catálogo.<br>' +
+        '<span class="text-muted">' + esc(e.message) + '</span></div>';
     });
   }
 

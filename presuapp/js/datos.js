@@ -111,7 +111,8 @@
       if (String(q || '').trim().length < 3) {
         return Promise.resolve({ total: 0, filas: [], offset: 0, tope: lim, minimo: 3 });
       }
-      return rpc('presuapp_buscar_insumo', { q: q, categoria: categoria || null, limite: lim })
+      // el parametro se llama p_categoria: `categoria` chocaba con la columna
+      return rpc('presuapp_buscar_insumo', { q: q, p_categoria: categoria || null, limite: lim })
         .then(function (filas) {
           return {
             total: filas.length, offset: 0, tope: lim,
