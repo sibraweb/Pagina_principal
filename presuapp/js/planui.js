@@ -151,25 +151,40 @@
   function ritmo(id) { return nodo(id)[plan().baseline] || {}; }
 
   /* ── LA DURACION NO HAY QUE CARGARLA ──────────────────────────
-     Las horas de mano de obra ya estan en el analisis unitario: el
-     azotado lleva 0,30 h de oficial y 0,10 de ayudante por m2, o sea
-     0,40 horas-hombre el m2. Eso es el rendimiento, y esta en la base
-     desde siempre; pedirlo a mano era hacer escribir un dato que ya
-     teniamos.
+     Las horas de mano de obra ya estan en el analisis unitario. Lo que
+     NO se puede hacer es sumarlas: el ayudante no levanta la pared.
 
-        horas de la tarea = Hh por unidad x computo
-        dias              = horas / (jornada x personas del frente)
+     El azotado lleva 0,30 h de oficial y 0,10 de ayudante por m2. Si se
+     suman da 0,40 Hh/m2 y con dos personas saldrian 40 m2 por dia. Pero
+     los dos oficiales de la cuadrilla ponen 16 horas y 16/0,30 son
+     53 m2: el ayudante termina a media mañana. Sumando, el rendimiento
+     se sobrestimaba hasta un 54% (piso ceramico, pintura).
 
-     El que quiera puede pisarlo: si en esta obra el revoque rinde otra
-     cosa, se escribe y el numero cargado manda sobre el calculado.    */
-  function horasPorUnidad(code) {
+     LA REGLA: manda el OFICIAL. Ayudantes siempre hay de mas, asi que
+     nunca son el cuello de botella; el oficial si. La cuadrilla son dos
+     oficiales y un ayudante, y el ritmo lo marcan los dos oficiales.
+
+        rendimiento = (oficiales x jornada) / horas de OFICIAL por unidad
+        dias        = computo / (rendimiento x cuadrillas)
+
+     Es un valor PROPUESTO. El que conoce su obra lo pisa y el numero
+     escrito manda.                                                     */
+  function horasDeOficial(code) {
     var receta = recetas[String(code || '').trim()] || [];
-    return receta.reduce(function (s, d) {
-      if (M.normalizarCategoria(d.category) !== 'Mano de obra') return s;
-      if (!/^h/i.test(String(d.unit || ''))) return s;   // el sereno viene por mes
-      return s + M.safeNum(d.qty);
-    }, 0);
+    var ofi = 0, total = 0;
+    receta.forEach(function (d) {
+      if (M.normalizarCategoria(d.category) !== 'Mano de obra') return;
+      // los O05A* son mano de obra por unidad de trabajo (subcontrato)
+      // y el sereno viene por mes: no son horas de cuadrilla
+      if (!/^h/i.test(String(d.unit || ''))) return;
+      var q = M.safeNum(d.qty);
+      total += q;
+      if (/OFICIAL/i.test(String(d.desc || ''))) ofi += q;
+    });
+    // sin oficial -una excavacion a mano es todo peon- manda el peon
+    return ofi > 0 ? ofi : total;
   }
+  function horasPorUnidad(code) { return horasDeOficial(code); }
 
   /* El plan con los rendimientos completados, que es el que se programa.
      No se toca `plan().tareas`: lo que la persona no escribio tiene que
@@ -178,7 +193,7 @@
   function planEfectivo() {
     var p = plan(), base = p.baseline;
     var jornada = M.safeNum(p.jornada) || 8;
-    var frente = M.safeNum(p.frente) || 1;
+    var oficiales = M.safeNum(p.frente) || 2;
     var out = {};
     A.estado().items.forEach(function (it) {
       var n = p.tareas[it.id] || {};
@@ -186,8 +201,8 @@
       var rend = M.safeNum(r.rendimiento);
       var auto = false;
       if (!rend) {
-        var hh = horasPorUnidad(it.code);
-        if (hh > 0) { rend = (jornada * frente) / hh; auto = true; }
+        var hOfi = horasDeOficial(it.code);
+        if (hOfi > 0) { rend = (jornada * oficiales) / hOfi; auto = true; }
       }
       out[it.id] = {
         predecesoras: (n.predecesoras || []).slice(),
@@ -293,7 +308,7 @@
     $('plan-campo-meses').hidden = p.modo !== 'rapido';
     $('plan-ayuda-modo').textContent = p.modo === 'rapido'
       ? 'escribí el % de avance de cada tarea en cada mes'
-      : 'rendimiento diario y qué va después de qué';
+      : 'la cuadrilla es ' + p.frente + ' oficiales y 1 ayudante · el ritmo lo marca el oficial';
 
     var avisos = [];
     if (ultimo && ultimo.programacion) avisos = ultimo.programacion.avisos || [];
@@ -368,7 +383,9 @@
           'step="any" data-campo="rendimiento" value="' + (r.rendimiento || '') + '" ' +
           'placeholder="' + (t.rendimiento ? num(t.rendimiento) : '—') + '" ' +
           'title="' + (esAutomatico(t.id)
-            ? esc(num(horasPorUnidad(t.code))) + ' horas-hombre por ' + esc(t.unit) + ' según el análisis. Escribí si en tu obra rinde otra cosa.'
+            ? 'el análisis pide ' + esc(num(horasDeOficial(t.code))) + ' h de oficial por ' + esc(t.unit) +
+              '; con ' + plan().frente + ' oficiales de ' + plan().jornada + ' h salen ' + esc(num(t.rendimiento)) +
+              ' por día. Escribí si en tu obra rinde otra cosa.'
             : 'lo estás fijando a mano') + '"></td>' +
         '<td class="der"><input class="mini" type="number" step="1" min="1" data-campo="cuadrillas" ' +
           'value="' + (r.cuadrillas || '') + '" placeholder="1"></td>' +
@@ -955,7 +972,7 @@
         else if (id === 'plan-inicio') p.fechaInicio = this.value;
         else if (id === 'plan-baseline') p.baseline = this.value;
         else if (id === 'plan-jornada') p.jornada = Math.max(1, Math.min(12, M.safeNum(this.value) || 8));
-        else if (id === 'plan-frente') p.frente = Math.max(1, Math.min(40, parseInt(this.value, 10) || 2));
+        else if (id === 'plan-frente') p.frente = Math.max(1, Math.min(20, parseInt(this.value, 10) || 2));
         else p.meses = Math.max(1, Math.min(60, parseInt(this.value, 10) || 6));
         render();
       };
