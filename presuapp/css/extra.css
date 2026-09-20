@@ -1,0 +1,202 @@
+/* Agregados de la version nueva: grilla de computo, K, control y avisos.
+   Se apoya en las variables de app.css (tema CLARO: --bg #f0f0f0,
+   --surface #fff, --text #1a1a1a, --red #E10600). */
+
+.spacer { flex: 1; }
+.text-muted { color: var(--muted, #777); }
+.mt8 { margin-top: 8px; } .mb8 { margin-bottom: 8px; }
+
+/* ── tabs ─────────────────────────────────────────────── */
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; max-width: 1400px; margin: 22px auto 0; padding: 0 20px; }
+.section { display: none; max-width: 1400px; margin: 0 auto; padding: 16px 20px 60px; }
+.section.active { display: block; }
+
+/* ── grillas ──────────────────────────────────────────── */
+.grilla { width: 100%; border-collapse: collapse; font-size: 13px; }
+.grilla th {
+  text-align: left; font-size: 10px; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--muted, #777); font-weight: 800; padding: 8px; border-bottom: 1px solid rgba(0,0,0,.12);
+  position: sticky; top: 0; background: var(--surface, #fff); z-index: 2;
+}
+.grilla td { padding: 6px 8px; border-bottom: 1px solid rgba(0,0,0,.06); vertical-align: middle; }
+.grilla tbody tr:hover { background: rgba(0,0,0,.025); }
+.grilla tfoot td { border-top: 2px solid rgba(0,0,0,.15); border-bottom: 0; padding-top: 10px; }
+.grilla .num, .grilla .der { text-align: right; font-variant-numeric: tabular-nums; }
+.grilla input, .grilla select { margin: 0; padding: 5px 7px; font-size: 13px; }
+.grilla input.cant { width: 100px; text-align: right; }
+.grilla input.sector { width: 140px; }
+.grilla input.precio { width: 120px; text-align: right; }
+.grilla .cod { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; color: var(--muted, #777); white-space: nowrap; }
+.grilla .fila-rubro td {
+  background: rgba(0,0,0,.05); font-weight: 800; font-size: 11px;
+  letter-spacing: .07em; text-transform: uppercase; border-left: 3px solid var(--rubro, #E10600);
+}
+.tabla-scroll { max-height: 62vh; overflow: auto; }
+.icon-btn { background: none; border: 0; color: var(--muted, #777); cursor: pointer; font-size: 14px; padding: 2px 6px; border-radius: 6px; }
+.icon-btn:hover { background: rgba(0,0,0,.07); color: #111; }
+.icon-btn.peligro:hover { background: rgba(225,6,0,.12); color: #E10600; }
+
+/* ── etiquetas ────────────────────────────────────────── */
+.tag { display: inline-block; font-size: 9.5px; font-weight: 800; letter-spacing: .06em;
+  text-transform: uppercase; padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+.tag.propio { background: rgba(26,122,58,.14); color: #14682f; }
+.tag.catalogo { background: rgba(0,0,0,.06); color: #777; }
+.tag.sin-precio { background: rgba(225,6,0,.12); color: #c00500; }
+.tag.manual { background: rgba(179,134,0,.16); color: #8a6800; }
+.tag.mat { background: rgba(0,87,184,.12); color: #0057b8; }
+.tag.mo { background: rgba(26,122,58,.14); color: #14682f; }
+.tag.eq { background: rgba(179,92,0,.14); color: #a35400; }
+
+/* ── coeficiente K ────────────────────────────────────── */
+.k-input { width: 90px; text-align: right; margin: 0; padding: 5px 8px; }
+.k-resultado {
+  margin-top: 10px; padding: 10px 12px; border-radius: 6px; background: rgba(0,0,0,.05);
+  font-size: 14px; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  border-left: 3px solid var(--red, #E10600);
+}
+.k-resultado strong { font-size: 22px; color: var(--text, #1a1a1a); font-variant-numeric: tabular-nums; }
+.k-resultado .text-muted { font-size: 11px; }
+
+/* ── incidencia ───────────────────────────────────────── */
+.incidencia { display: flex; height: 34px; border-radius: 4px; overflow: hidden; background: rgba(0,0,0,.06); }
+.incidencia div {
+  display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;
+  color: #fff; white-space: nowrap; overflow: hidden; min-width: 0;
+}
+.incidencia .i-mat { background: #0057b8; } .incidencia .i-mo { background: #1a7a3a; } .incidencia .i-eq { background: #e67e00; }
+.incidencia-leyenda { display: flex; gap: 18px; margin-top: 8px; font-size: 11.5px; color: var(--muted, #777); flex-wrap: wrap; }
+.incidencia-leyenda strong { color: var(--text, #1a1a1a); }
+
+/* ── rubros ───────────────────────────────────────────── */
+.rubro-fila { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 7px 0; border-bottom: 1px solid rgba(0,0,0,.06); }
+.rubro-nombre { font-size: 12.5px; display: flex; align-items: center; gap: 8px; }
+.rubro-punto { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+.rubro-monto { font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.rubro-barra { grid-column: 1 / -1; height: 4px; border-radius: 2px; background: rgba(0,0,0,.07); overflow: hidden; }
+.rubro-barra span { display: block; height: 100%; }
+.rubro-summary-total { display: flex; justify-content: space-between; padding-top: 10px; margin-top: 8px;
+  border-top: 2px solid rgba(0,0,0,.15); font-weight: 800; font-size: 14px; }
+
+/* ── control de coherencia ────────────────────────────── */
+.control-kpis { display: flex; gap: 12px; flex-wrap: wrap; }
+.control-kpi { background: rgba(0,0,0,.04); border-radius: 6px; padding: 12px 16px; min-width: 150px; }
+.control-kpi .v { font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.control-kpi .l { font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted, #777); }
+.control-kpi.alerta .v { color: #c00500; }
+.control-kpi.ok .v { color: #1a7a3a; }
+.ratio { font-weight: 800; font-variant-numeric: tabular-nums; }
+.ratio.grave { color: #c00500; } .ratio.leve { color: #a35400; }
+
+/* ── modales / listas ─────────────────────────────────── */
+.lista-scroll { max-height: 52vh; overflow: auto; margin-top: 10px; }
+.mapeo-preview { margin-top: 12px; max-height: 220px; overflow: auto; border-radius: 4px; background: rgba(0,0,0,.03); }
+.mapeo-preview table { font-size: 11.5px; width: 100%; border-collapse: collapse; }
+.mapeo-preview td, .mapeo-preview th { padding: 4px 8px; border-bottom: 1px solid rgba(0,0,0,.07); white-space: nowrap; text-align: left; }
+.mapeo-campo { display: grid; grid-template-columns: 180px 1fr; gap: 10px; align-items: center; margin-bottom: 8px; }
+.mapeo-campo label { font-size: 12px; color: var(--muted, #777); }
+.mapeo-campo select { margin: 0; }
+.chk { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted, #777); cursor: pointer; }
+.chk input { width: auto; margin: 0; }
+
+/* ── toast ────────────────────────────────────────────── */
+#toast-zona { position: fixed; right: 18px; bottom: 18px; display: flex; flex-direction: column; gap: 8px; z-index: 9999; }
+.toast-msg {
+  background: #1a1a1a; color: #fff; border-left: 3px solid var(--red, #E10600); padding: 11px 16px;
+  border-radius: 4px; font-size: 13px; box-shadow: 0 10px 30px rgba(0,0,0,.25); max-width: 380px;
+  animation: entra .18s ease-out;
+}
+.toast-msg.ok { border-left-color: #1a7a3a; } .toast-msg.error { border-left-color: #E10600; }
+.toast-msg.aviso { border-left-color: #e0a800; }
+@keyframes entra { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+.aviso-fila { display: flex; gap: 10px; align-items: flex-start; background: rgba(224,168,0,.12);
+  border-left: 3px solid #e0a800; padding: 10px 12px; border-radius: 4px; font-size: 12.5px; margin-bottom: 10px; }
+
+@media (max-width: 900px) {
+  .budget-bottom-grid { grid-template-columns: 1fr; }
+  .obra-header-grid { grid-template-columns: 1fr 1fr; }
+  .grilla .col-hide { display: none; }
+}
+
+/* ── cabecera de la obra y barra de totales ──────────────────────
+   Estaban en el skin viejo; se reescriben con la tipografia de la
+   marca. La barra es lo unico que el que presupuesta mira de reojo
+   mientras toca el K, asi que va pegada arriba al hacer scroll.    */
+.obra-header-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px;
+}
+.obra-field { display: flex; flex-direction: column; gap: 5px; }
+.obra-field label { margin: 0; }
+.obra-field input { margin: 0; width: 100%; }
+
+.budget-bottom-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 12px; }
+
+.param-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; padding: 6px 0; border-bottom: 1px dotted var(--border);
+}
+.param-row:last-child { border-bottom: none; }
+.param-row label { margin: 0; flex: 1; }
+.param-row .k-input { width: 92px; margin: 0; text-align: right; }
+
+.resumen-general-bar {
+  display: flex; align-items: stretch; gap: 0; flex-wrap: wrap;
+  background: var(--ink-900); color: var(--white);
+  border-left: 3px solid var(--red-500); margin: 14px 0; padding: 14px 18px;
+}
+.rg-block { flex: 1; min-width: 132px; padding: 0 14px; }
+.rg-sep { width: 1px; background: rgba(255,255,255,.14); flex: 0 0 1px; }
+.rg-label {
+  font-family: var(--title); font-weight: 600; font-size: .58rem;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--gray-500); margin-bottom: 5px;
+}
+.rg-value {
+  font-family: var(--title); font-weight: 600; font-size: 1.05rem;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.rg-total-block { flex: 1.25; }
+.rg-total { color: var(--red-500); font-weight: 800; font-size: 1.3rem; }
+
+.k-resultado {
+  font-family: var(--title); font-size: .8rem; color: var(--gray-700);
+  border-top: 1px solid var(--border); margin-top: 10px; padding-top: 10px;
+}
+.k-resultado strong { color: var(--red-500); font-weight: 700; font-size: 1rem; }
+
+@media (max-width: 900px) {
+  .obra-header-grid { grid-template-columns: 1fr 1fr; }
+  .budget-bottom-grid { grid-template-columns: 1fr; }
+  .rg-sep { display: none; }
+  .rg-block { flex: 1 1 45%; padding: 8px 0; }
+}
+@media (max-width: 520px) {
+  .obra-header-grid { grid-template-columns: 1fr; }
+  .rg-block { flex: 1 1 100%; }
+}
+
+/* ── ventanas ────────────────────────────────────────────────────
+   El CSS original las pegaba al borde de abajo (venia de una app de
+   celular). En escritorio van centradas; en pantalla chica vuelven
+   abajo, que es donde llega el pulgar.                             */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 300; display: none;
+  background: rgba(11,11,11,.55); backdrop-filter: blur(2px);
+  align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--white); border: 1px solid var(--border);
+  border-top: 3px solid var(--red-500); border-radius: 0;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  padding: 22px 24px; width: 100%; max-height: 86vh; overflow-y: auto;
+}
+.modal-title {
+  font-family: var(--title); font-weight: 700; font-size: 1.1rem;
+  letter-spacing: -.01em; color: var(--ink-900); margin-bottom: 14px;
+}
+.lista-scroll { max-height: 54vh; overflow-y: auto; margin-top: 10px; }
+
+@media (max-width: 640px) {
+  .modal-overlay { align-items: flex-end; padding: 0; }
+  .modal { max-height: 88vh; }
+}

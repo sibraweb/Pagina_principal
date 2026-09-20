@@ -1,0 +1,674 @@
+/* Estilos base tomados de PresupuestApp (identidad SIBRATECH). */
+:root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3350;
+    --accent: #f0c060;
+    --accent2: #60c0f0;
+    --danger: #f06060;
+    --success: #60f0a0;
+    --text: #e8eaf2;
+    --muted: #7a80a0;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  /* Header */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+
+  .logo span { color: var(--accent2); }
+
+  /* Nav tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 12px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    padding: 8px 16px;
+    border: none;
+    background: none;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all .2s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* Sections */
+  .section { display: none; padding: 16px; }
+  .section.active { display: block; }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .card-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .15s;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 500;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #111;
+  }
+  .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  .btn-success {
+    background: var(--success);
+    color: #111;
+  }
+
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Google auth status */
+  #auth-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+    flex-shrink: 0;
+  }
+  .dot.connected { background: var(--success); box-shadow: 0 0 6px var(--success); }
+  .dot.error { background: var(--danger); }
+
+  /* Form elements */
+  input, select, textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color .2s;
+    margin-bottom: 10px;
+  }
+  input:focus, select:focus { border-color: var(--accent2); }
+  select option { background: var(--surface2); }
+
+  label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* Item list en presupuesto */
+  .item-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 6px;
+  }
+
+  .item-name { font-size: 12px; }
+  .item-detail { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .item-qty input {
+    width: 60px;
+    text-align: center;
+    margin: 0;
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+  .item-price { font-size: 12px; color: var(--accent); text-align: right; white-space: nowrap; }
+
+  /* Totals */
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .total-row:last-child { border-bottom: none; }
+  .total-row.grand {
+    font-size: 16px;
+    color: var(--accent);
+    font-weight: 500;
+    padding-top: 12px;
+  }
+
+  /* Search */
+  .search-box {
+    position: relative;
+    margin-bottom: 12px;
+  }
+  .search-box input {
+    padding-left: 36px;
+    margin: 0;
+  }
+  .search-icon {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  /* Price list table */
+  .price-item {
+    display: grid;
+    grid-template-columns: 60px 1fr auto auto;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .price-item:hover, .price-item:active { border-color: var(--accent); }
+  .price-item.adding { border-color: var(--success); animation: flash .3s; }
+
+  @keyframes flash {
+    0% { background: var(--bg); }
+    50% { background: rgba(96,240,160,.1); }
+    100% { background: var(--bg); }
+  }
+
+  .price-code { font-size: 10px; color: var(--accent2); }
+  .price-desc { font-size: 12px; }
+  .price-unit { font-size: 10px; color: var(--muted); text-align: center; }
+  .price-val { font-size: 12px; color: var(--accent); text-align: right; }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 12px;
+    opacity: 0;
+    transition: all .3s;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  #toast.success { border-color: var(--success); color: var(--success); }
+  #toast.error { border-color: var(--danger); color: var(--danger); }
+
+  /* FAB */
+  .fab {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: none;
+    color: #111;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(240,192,96,.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    transition: transform .15s;
+  }
+  .fab:hover { transform: scale(1.08); }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.7);
+    z-index: 300;
+    display: none;
+    align-items: flex-end;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px 20px 0 0;
+    padding: 24px 20px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  .modal-title {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    margin-bottom: 16px;
+    color: var(--accent);
+  }
+
+  /* Config inputs row */
+  .config-row { display: flex; gap: 8px; align-items: flex-start; }
+  .config-row input { flex: 1; }
+
+  /* Chip */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .chip.ok { border-color: var(--success); color: var(--success); }
+
+  .flex-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .spacer { flex: 1; }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .empty-state .icon { font-size: 36px; margin-bottom: 12px; }
+
+  /* Budget name */
+  .budget-header {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .budget-header input {
+    margin: 0;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    color: var(--text);
+    flex: 1;
+  }
+
+  /* Scrollable list */
+  .scroll-list { max-height: 55vh; overflow-y: auto; }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+
+  .text-muted { color: var(--muted); font-size: 11px; }
+  .mt8 { margin-top: 8px; }
+  .mb8 { margin-bottom: 8px; }
+
+
+
+  /* Analysis cards */
+  .analysis-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+  .analysis-head {
+    display: grid;
+    grid-template-columns: 78px 1fr auto;
+    gap: 10px;
+    align-items: start;
+  }
+  .analysis-code { color: var(--accent2); font-size: 11px; }
+  .analysis-title { font-size: 12px; line-height: 1.35; }
+  .analysis-rubro { color: var(--muted); font-size: 10px; margin-top: 3px; }
+  .analysis-total { color: var(--accent); font-size: 12px; text-align: right; white-space: nowrap; }
+  .analysis-breakdown {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .break-pill {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px;
+    font-size: 10px;
+  }
+  .break-pill span { display:block; color: var(--muted); margin-bottom:2px; }
+  .detail-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10px; }
+  .detail-table th, .detail-table td { border-bottom: 1px solid var(--border); padding: 5px 4px; text-align: left; }
+  .detail-table th { color: var(--muted); font-weight: 500; text-transform: uppercase; }
+  .detail-table td.num { text-align: right; white-space: nowrap; }
+  .filter-row { display:grid; grid-template-columns: 1fr 170px; gap:8px; margin-bottom:12px; }
+  @media (max-width: 640px) {
+    .analysis-head { grid-template-columns: 1fr; }
+    .analysis-total { text-align:left; }
+    .analysis-breakdown { grid-template-columns: 1fr; }
+    .filter-row { grid-template-columns: 1fr; }
+  }
+
+  .badge {
+    background: var(--accent);
+    color: #111;
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-size: 10px;
+    font-weight: 500;
+  }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   IDENTIDAD SIBRATECH — la misma de sibratech.com.ar
+
+   Los tokens y las dos familias salen del :root de la pagina, no de
+   una version parecida: Jost para todo lo que se lee de un vistazo
+   (titulos, botones, cifras) y Libre Franklin para el texto corrido.
+   Si maniana cambia la marca, se cambia aca y en la pagina, y no hay
+   una tercera paleta dando vueltas.
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  /* marca */
+  --red-500:#E10600; --red-600:#b80500; --red-700:#8f0400; --red-050:#fdecea;
+  --ink-900:#0B0B0B; --ink-800:#1a1a1a;
+  --gray-700:#5A6060; --gray-600:#666; --gray-500:#9AA0A0; --gray-300:#d9dada;
+  --gray-200:#eaeaea; --gray-100:#F5F5F5; --gray-050:#f9f9f9; --white:#fff;
+
+  /* los nombres que ya usa la app, apuntando a la marca */
+  --red:var(--red-500); --red-dark:var(--red-600);
+  --red-dim:rgba(225,6,0,.06); --red-dim2:rgba(225,6,0,.16);
+  --bg:var(--gray-100); --surface:var(--white); --surface2:var(--gray-050);
+  --border:var(--gray-200); --border-fuerte:var(--gray-300);
+  --accent:var(--red-500); --accent2:var(--ink-800);
+  --danger:var(--red-500); --success:#1a7a3a; --aviso:#a35400;
+  --text:var(--ink-800); --muted:var(--gray-600);
+  --radius:0px;
+
+  --title:'Jost','Century Gothic',system-ui,sans-serif;
+  --sans:'Libre Franklin',system-ui,sans-serif;
+  --shadow-card:0 2px 10px rgba(0,0,0,.08);
+  --shadow-hover:0 8px 25px rgba(225,6,0,.15);
+  --gutter:5%;
+}
+
+body {
+  background:var(--bg); color:var(--text);
+  font-family:var(--sans); font-size:14px; line-height:1.6;
+  padding-bottom:0; -webkit-font-smoothing:antialiased;
+}
+
+/* ── barra de marca ─────────────────────────────────────────── */
+.sibra-nav {
+  position:sticky; top:0; z-index:999;
+  display:flex; align-items:center; justify-content:space-between; gap:1rem;
+  padding:.85rem var(--gutter);
+  background:rgba(255,255,255,.97); backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border);
+}
+.nav-brand { display:flex; align-items:center; gap:12px; text-decoration:none; color:var(--text); }
+/* el wordmark va debajo del isotipo: por debajo de 52px no se lee */
+.nav-brand img { height:52px; width:auto; display:block; }
+.nav-sep { width:1px; height:26px; background:var(--gray-300); }
+.nav-app {
+  font-family:var(--title); font-weight:600; font-size:.72rem;
+  letter-spacing:.22em; text-transform:uppercase; color:var(--gray-600);
+}
+.nav-app strong { color:var(--red-500); font-weight:700; }
+.nav-acciones { display:flex; align-items:center; gap:.5rem; }
+.nav-link {
+  font-family:var(--title); font-weight:600; font-size:.66rem;
+  letter-spacing:.14em; text-transform:uppercase; text-decoration:none;
+  color:var(--gray-600); padding:.55rem .8rem; border:1px solid transparent; transition:.2s;
+}
+.nav-link:hover { color:var(--red-500); border-color:var(--red-dim2); }
+.nav-link.marcado { color:var(--white); background:var(--red-500); border-color:var(--red-500); }
+.nav-link.marcado:hover { background:var(--red-600); border-color:var(--red-600); }
+
+/* ── portada ────────────────────────────────────────────────── */
+.hero {
+  background:var(--white); border-bottom:1px solid var(--border);
+  padding:2.6rem var(--gutter) 2.2rem; position:relative; overflow:hidden;
+}
+.hero::before {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background-image:linear-gradient(rgba(225,6,0,.035) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(225,6,0,.035) 1px,transparent 1px);
+  background-size:48px 48px;
+}
+.hero-inner {
+  position:relative; z-index:1; max-width:1400px; margin:0 auto;
+  display:grid; grid-template-columns:1fr auto; gap:2rem; align-items:center;
+}
+.hero-logo { display:none; }
+.hero-eyebrow {
+  display:flex; align-items:center; gap:12px;
+  font-family:var(--title); font-weight:700; font-size:.66rem;
+  letter-spacing:.3em; text-transform:uppercase; color:var(--red-500); margin-bottom:.9rem;
+}
+.hero-eyebrow::before { content:''; width:28px; height:2px; background:var(--red-500); }
+.hero-title {
+  font-family:var(--title); font-weight:800;
+  font-size:clamp(1.6rem,2.9vw,2.6rem); line-height:1.08; letter-spacing:-.02em;
+  margin:0 0 .7rem; color:var(--ink-900); text-wrap:balance;
+}
+.hero-title span { color:var(--red-500); }
+.hero-desc { max-width:62ch; font-size:.95rem; color:var(--gray-700); line-height:1.7; }
+
+/* ── pestanias ──────────────────────────────────────────────── */
+.tabs {
+  display:flex; gap:0; flex-wrap:wrap; max-width:1400px;
+  margin:0 auto; padding:0 var(--gutter);
+  background:var(--white); border-bottom:1px solid var(--border);
+}
+.tab {
+  font-family:var(--title); font-weight:600; font-size:.7rem;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--gray-600);
+  padding:.95rem 1rem; border:none; background:none; cursor:pointer;
+  border-bottom:3px solid transparent; transition:.2s; white-space:nowrap;
+}
+.tab:hover { color:var(--ink-800); }
+.tab.active { color:var(--red-500); border-bottom-color:var(--red-500); background:var(--red-dim); }
+
+.section { max-width:1400px; margin:0 auto; padding:1.4rem var(--gutter) 3rem; }
+
+/* ── tarjetas ───────────────────────────────────────────────── */
+.card,.budget-header,.analysis-item,.price-item,.item-row {
+  background:var(--white); border:1px solid var(--border);
+  border-radius:0; box-shadow:var(--shadow-card);
+}
+.card { padding:1.1rem 1.2rem; margin-bottom:.9rem; }
+.card-title {
+  font-family:var(--title); font-weight:700; font-size:.66rem;
+  letter-spacing:.22em; text-transform:uppercase; color:var(--red-500); margin-bottom:.8rem;
+}
+
+/* ── controles ──────────────────────────────────────────────── */
+input,select,textarea {
+  background:var(--white); color:var(--text);
+  border:1px solid var(--gray-300); border-radius:0;
+  font-family:var(--title); font-weight:500; font-size:.85rem;
+  padding:.6rem .7rem; transition:border-color .2s;
+}
+input:focus,select:focus,textarea:focus { border-color:var(--red-500); outline:2px solid var(--red-dim2); outline-offset:-1px; }
+label {
+  font-family:var(--title); font-weight:600; font-size:.6rem;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--gray-600);
+}
+
+.btn {
+  font-family:var(--title); font-weight:700; font-size:.68rem;
+  letter-spacing:.13em; text-transform:uppercase; border-radius:0;
+  padding:.65rem 1.05rem; cursor:pointer; transition:.2s;
+  /* la esquina cortada es el gesto de la marca */
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));
+}
+.btn-primary,.btn-success { background:var(--red-500); color:var(--white); border:none; }
+.btn-primary:hover,.btn-success:hover { background:var(--red-600); transform:translateY(-1px); box-shadow:var(--shadow-hover); }
+.btn-secondary { background:var(--white); color:var(--gray-700); border:1px solid var(--gray-300); }
+.btn-secondary:hover { border-color:var(--red-500); color:var(--red-500); }
+.btn-danger { background:var(--white); color:var(--red-500); border:1px solid var(--red-500); padding:.5rem .8rem; font-size:.62rem; }
+.btn-danger:hover { background:var(--red-500); color:var(--white); }
+.btn:focus-visible { outline:2px solid var(--ink-900); outline-offset:2px; }
+
+/* ── cifras ─────────────────────────────────────────────────── */
+.price-code,.analysis-code,.cod { font-family:var(--title); font-weight:600; color:var(--red-500); }
+.price-val,.analysis-total,.total-row.grand { font-family:var(--title); font-weight:700; color:var(--red-500); }
+.badge {
+  background:var(--ink-900); color:var(--white); border-radius:0;
+  font-family:var(--title); font-weight:600; font-size:.62rem;
+  letter-spacing:.08em; padding:.2rem .5rem;
+}
+.chip {
+  font-family:var(--title); font-weight:600; font-size:.62rem; letter-spacing:.08em;
+  background:var(--gray-050); border:1px solid var(--border); border-radius:0;
+  color:var(--gray-600); padding:.32rem .7rem;
+}
+.chip.ok { border-color:var(--success); color:var(--success); background:#eaf3ec; }
+.chip.error { border-color:var(--red-500); color:var(--red-500); background:var(--red-050); }
+
+/* ── pie ────────────────────────────────────────────────────── */
+.sibra-footer { background:var(--ink-900); border-top:3px solid var(--red-500); padding:2rem var(--gutter); margin-top:2rem; }
+.footer-inner {
+  max-width:1400px; margin:0 auto; display:flex; align-items:center;
+  justify-content:space-between; gap:2rem; flex-wrap:wrap;
+}
+.footer-logo img { height:52px; width:auto; display:block; }
+.footer-texto { font-size:.78rem; color:var(--gray-500); line-height:1.7; max-width:52ch; }
+.footer-texto a { color:var(--white); text-decoration:none; border-bottom:1px solid var(--red-500); }
+.footer-texto a:hover { color:var(--red-500); }
+
+/* ── celulares ──────────────────────────────────────────────── */
+@media (max-width:820px) {
+  :root { --gutter:16px; }
+  .hero-inner { grid-template-columns:1fr; }
+  .nav-app,.nav-sep { display:none; }
+  .nav-brand img { height:40px; }
+  .tab { padding:.8rem .7rem; font-size:.62rem; }
+  .footer-inner { flex-direction:column; align-items:flex-start; }
+}
+/* En un telefono la barra no entra: se quedan la marca y el unico
+   boton que alguien va a tocar desde aca. */
+@media (max-width:620px) {
+  .sibra-nav { padding:.7rem var(--gutter); }
+  .nav-link { display:none; }
+  .nav-link.marcado { display:inline-block; padding:.5rem .7rem; }
+}
+@media (prefers-reduced-motion:reduce) {
+  * { transition:none !important; animation:none !important; }
+  .btn:hover { transform:none; }
+}
+
+/* ── detalles ───────────────────────────────────────────────── */
+.icon-btn {
+  font-family:var(--title); font-weight:600; font-size:.62rem;
+  letter-spacing:.1em; text-transform:uppercase;
+  background:none; border:1px solid var(--gray-300); color:var(--gray-600);
+  padding:.25rem .5rem; cursor:pointer; transition:.15s; margin-left:4px;
+}
+.icon-btn:hover { border-color:var(--red-500); color:var(--red-500); }
+.icon-btn.peligro:hover { background:var(--red-500); color:var(--white); border-color:var(--red-500); }
+.empty-state { color:var(--gray-500); font-family:var(--title); font-size:.8rem; padding:2.4rem 1rem; text-align:center; }
+.empty-state .icon { display:none; }
+/* la barrita roja al costado dice "mira esto" sin un emoji amarillo */
+.aviso-marca { width:3px; align-self:stretch; background:var(--red-500); flex:0 0 3px; }
