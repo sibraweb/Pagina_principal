@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700;800&family=Libre+Franklin:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=202609202006">
-<link rel="stylesheet" href="css/extra.css?v=202609202006">
+<link rel="stylesheet" href="css/app.css?v=202609202020">
+<link rel="stylesheet" href="css/extra.css?v=202609202020">
 </head>
 <body>
 
@@ -44,7 +44,8 @@
   <button class="tab" data-tab="precios">Precios</button>
   <button class="tab" data-tab="materiales">Materiales</button>
   <button class="tab" data-tab="plan">Plan de trabajo</button>
-  <button class="tab" data-tab="control">Control</button>
+  <button class="tab" data-tab="control-obra">Control de obra</button>
+  <button class="tab" data-tab="control">Catálogo</button>
 </div>
 
 <!-- ══════════════════ CÓMPUTO ══════════════════ -->
@@ -262,6 +263,14 @@
         <input type="number" id="plan-meses" min="1" max="60" value="6">
       </div>
       <div class="obra-field">
+        <label>Jornada (h)</label>
+        <input type="number" id="plan-jornada" min="1" max="12" step="0.5" value="8">
+      </div>
+      <div class="obra-field">
+        <label>Personas por frente</label>
+        <input type="number" id="plan-frente" min="1" max="40" value="2">
+      </div>
+      <div class="obra-field">
         <label>Días laborables</label>
         <div class="flex-row" style="gap:14px;padding-top:6px">
           <label class="chk"><input type="checkbox" id="plan-sabado"> sábado</label>
@@ -270,6 +279,20 @@
       </div>
     </div>
     <div id="plan-avisos"></div>
+  </div>
+
+  <div class="card">
+    <div class="flex-row mb8">
+      <div class="card-title" style="margin:0">CALENDARIO · FERIADOS QUE SE ESTÁN USANDO</div>
+      <div class="spacer"></div>
+      <span class="badge" id="feriados-cuenta">—</span>
+      <button class="btn btn-secondary" id="feriados-ver">Ver / editar</button>
+    </div>
+    <p class="text-muted">Los días que no se trabajan salen del plazo de obra. Los nacionales se
+      calculan solos —Carnaval y Viernes Santo incluidos, y los trasladables movidos como manda la
+      ley—, pero <strong>los puentes turísticos salen por decreto cada año</strong> y los
+      provinciales, municipales y los de la obra hay que cargarlos. Acá se ve cuáles se están usando.</p>
+    <div id="feriados-resumen"></div>
   </div>
 
   <div class="card">
@@ -306,64 +329,6 @@
 
   <div class="card">
     <div class="flex-row mb8">
-      <div class="card-title" style="margin:0">CÓMO VIENE LA OBRA</div>
-      <div class="spacer"></div>
-      <span class="badge" id="obra-estado">sin datos</span>
-    </div>
-    <p class="text-muted mb8">El plan dice cuándo tendría que terminar. Esto dice cuándo va a terminar
-      <strong>al ritmo que se viene trabajando</strong>. Cargá el arranque real y el avance certificado
-      de cada mes; el resto sale solo.</p>
-
-    <div class="plan-config">
-      <div class="obra-field">
-        <label>Arrancó el</label>
-        <input type="date" id="real-inicio">
-      </div>
-      <div class="obra-field">
-        <label>Terminó el <span class="text-muted">(si ya terminó)</span></label>
-        <input type="date" id="real-fin">
-      </div>
-      <div class="obra-field">
-        <label>Fin previsto <span class="text-muted">(plan)</span></label>
-        <div class="dato-fijo" id="fin-previsto">—</div>
-      </div>
-      <div class="obra-field">
-        <label>Fin estimado <span class="text-muted">(al ritmo real)</span></label>
-        <div class="dato-fijo" id="fin-estimado">—</div>
-      </div>
-      <div class="obra-field">
-        <label>Desvío</label>
-        <div class="dato-fijo" id="desvio-plazo">—</div>
-      </div>
-    </div>
-    <div id="obra-explicacion"></div>
-  </div>
-
-  <div class="card">
-    <div class="flex-row mb8">
-      <div class="card-title" style="margin:0">GUARDAR Y SEGUIR DESPUÉS</div>
-      <div class="spacer"></div>
-      <button class="btn btn-primary" id="plan-guardar">Bajar el proyecto</button>
-      <label class="btn btn-secondary" for="plan-abrir">Subir un proyecto</label>
-      <input type="file" id="plan-abrir" accept=".json" hidden>
-    </div>
-    <p class="text-muted">Se baja <strong>todo</strong> en un archivo: el cómputo, tus precios, el K,
-      los rendimientos, las predecesoras y lo que lleves certificado. El mes que viene lo subís,
-      cargás el avance nuevo y seguís donde quedaste — no hay que volver a armar nada.</p>
-  </div>
-
-  <div class="card">
-    <div class="card-title">CURVAS DE INVERSIÓN</div>
-    <p class="text-muted mb8">Un solo plan físico, tres lecturas. <strong>Cliente</strong> es lo que se
-      certifica (costo × K); <strong>empresa</strong> es lo que sale hacer la obra. La tercera es la real:
-      cargá el avance certificado de cada mes y la curva se dibuja <strong>continua hasta donde llega lo
-      certificado</strong> y <strong>punteada</strong> de ahí en adelante, que es proyección.</p>
-    <div id="plan-curvas"></div>
-    <div id="plan-curvas-tabla"></div>
-  </div>
-
-  <div class="card">
-    <div class="flex-row mb8">
       <div class="card-title" style="margin:0">MATERIALES POR MES</div>
       <div class="spacer"></div>
       <select id="plan-mat-categoria" style="width:auto;margin:0">
@@ -378,6 +343,92 @@
       <strong>en cada mes</strong>: si en marzo hacen falta 26 kg de cemento y en abril 30, son dos bolsas
       y dos bolsas, no las tres que saldrían de sumar primero.</p>
     <div id="plan-materiales"></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════ CONTROL DE OBRA ══════════════════ -->
+<div class="section" id="tab-control-obra">
+
+  <div class="card">
+    <div class="flex-row mb8">
+      <div class="card-title" style="margin:0">FECHA DE CORTE</div>
+      <div class="spacer"></div>
+      <span class="badge" id="corte-resumen">—</span>
+    </div>
+    <p class="text-muted mb8">Todo lo que sigue se mide <strong>a un día</strong>. Sin decir a qué día,
+      un 60% certificado no dice nada: contra el calendario puede ser un adelanto o un atraso de un mes.
+      Es el día hasta el cual está medida la obra, normalmente el cierre del último certificado.</p>
+    <div class="plan-config">
+      <div class="obra-field">
+        <label>Medido al</label>
+        <input type="date" id="corte-fecha">
+      </div>
+      <div class="obra-field">
+        <label>Arrancó el</label>
+        <input type="date" id="real-inicio">
+      </div>
+      <div class="obra-field">
+        <label>Terminó el <span class="text-muted">(si ya terminó)</span></label>
+        <input type="date" id="real-fin">
+      </div>
+      <div class="obra-field">
+        <label>Avance certificado a esa fecha</label>
+        <input type="number" id="corte-avance" step="any" min="0" max="120" placeholder="%">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="flex-row mb8">
+      <div class="card-title" style="margin:0">CÓMO VIENE LA OBRA</div>
+      <div class="spacer"></div>
+      <span class="badge" id="obra-estado">sin datos</span>
+    </div>
+    <div class="plan-config">
+      <div class="obra-field">
+        <label>Fin previsto <span class="text-muted">(plan)</span></label>
+        <div class="dato-fijo" id="fin-previsto">—</div>
+      </div>
+      <div class="obra-field">
+        <label>Fin estimado <span class="text-muted">(al ritmo real)</span></label>
+        <div class="dato-fijo" id="fin-estimado">—</div>
+      </div>
+      <div class="obra-field">
+        <label>Desvío de plazo</label>
+        <div class="dato-fijo" id="desvio-plazo">—</div>
+      </div>
+      <div class="obra-field">
+        <label>Días hábiles trabajados</label>
+        <div class="dato-fijo" id="dias-trabajados">—</div>
+      </div>
+    </div>
+    <div id="obra-explicacion"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">CURVAS: PLAN, CERTIFICADO Y PROYECCIÓN</div>
+    <p class="text-muted mb8">Un solo plan físico, tres lecturas. <strong>Cliente</strong> es lo que se
+      certifica (costo × K); <strong>empresa</strong> es lo que sale hacer la obra. La tercera es la real:
+      cargá el avance certificado de cada mes y la curva se dibuja <strong>continua hasta la fecha de
+      corte</strong> y <strong>punteada</strong> de ahí en adelante, proyectada al ritmo que se viene
+      trabajando —no al del plan, que es lo que haría terminar en fecha a una obra que no va a terminar
+      en fecha.</p>
+    <div id="plan-curvas"></div>
+    <div id="plan-curvas-tabla"></div>
+  </div>
+
+  <div class="card">
+    <div class="flex-row mb8">
+      <div class="card-title" style="margin:0">GUARDAR Y SEGUIR DESPUÉS</div>
+      <div class="spacer"></div>
+      <button class="btn btn-primary" id="plan-guardar">Bajar el proyecto</button>
+      <label class="btn btn-secondary" for="plan-abrir">Subir un proyecto</label>
+      <input type="file" id="plan-abrir" accept=".json" hidden>
+    </div>
+    <p class="text-muted">Se baja <strong>todo</strong> en un archivo: el cómputo, tus precios, el K,
+      los rendimientos, las predecesoras, el calendario y lo que lleves certificado. El mes que viene
+      lo subís, cargás el corte nuevo y seguís donde quedaste — no hay que volver a armar nada.</p>
   </div>
 
 </div>
@@ -485,15 +536,31 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-feriados">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-title">Feriados del período de obra</div>
+    <p class="text-muted mb8">Destildá el que en tu obra sí se trabaja. Agregá los provinciales,
+      los municipales, los puentes turísticos del decreto y los de la obra.</p>
+    <div class="flex-row mb8">
+      <input type="date" id="feriado-fecha" style="width:auto;margin:0">
+      <input type="text" id="feriado-nombre" placeholder="Por qué no se trabaja" style="margin:0">
+      <button class="btn btn-primary" id="feriado-agregar">Agregar</button>
+    </div>
+    <div id="feriados-lista" class="lista-scroll"></div>
+    <div class="flex-row" style="margin-top:12px"><div class="spacer"></div>
+      <button class="btn btn-secondary" data-cerrar="modal-feriados">Listo</button></div>
+  </div>
+</div>
+
 <div id="toast-zona"></div>
 
-<script src="vendor/xlsx.full.min.js?v=202609202006"></script>
+<script src="vendor/xlsx.full.min.js?v=202609202020"></script>
 <script>window.PRESUAPP_REMOTO = true;</script>
-<script src="js/motor.js?v=202609202006"></script>
-<script src="js/datos.js?v=202609202006"></script>
-<script src="js/importar.js?v=202609202006"></script>
-<script src="js/app.js?v=202609202006"></script>
-<script src="js/plan.js?v=202609202006"></script>
-<script src="js/planui.js?v=202609202006"></script>
+<script src="js/motor.js?v=202609202020"></script>
+<script src="js/datos.js?v=202609202020"></script>
+<script src="js/importar.js?v=202609202020"></script>
+<script src="js/app.js?v=202609202020"></script>
+<script src="js/plan.js?v=202609202020"></script>
+<script src="js/planui.js?v=202609202020"></script>
 </body>
 </html>

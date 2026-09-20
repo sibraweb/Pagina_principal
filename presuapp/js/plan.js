@@ -98,6 +98,92 @@
     };
   }
 
+  /* ── FERIADOS ─────────────────────────────────────────────────
+     Un plan que cuenta el 25 de mayo como dia trabajado miente, y
+     miente para el lado peor: promete una fecha que no se va a cumplir.
+
+     Los nacionales se calculan. Pascua sale del algoritmo de Meeus, y
+     de ahi Carnaval (48 y 47 dias antes) y Viernes Santo (2 antes).
+     Los trasladables se mueven como manda la ley 27.399: martes o
+     miercoles al lunes anterior, jueves o viernes al lunes siguiente.
+
+     LO QUE ESTE CALCULO NO SABE, y por eso la lista se edita a mano:
+
+       · los puentes turisticos, que salen por decreto cada año y
+         cambian;
+       · los feriados provinciales y municipales;
+       · los de la obra: la semana que para el gremio, la fiesta del
+         pueblo, el dia que no se hormigona.
+
+     Por eso los feriados usados se muestran SIEMPRE en pantalla. Un
+     calendario que no se puede mirar es un calendario en el que no se
+     puede confiar.                                                   */
+  function pascua(anio) {
+    var a = anio % 19, b = Math.floor(anio / 100), c = anio % 100;
+    var d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
+    var g = Math.floor((b - f + 1) / 3);
+    var h = (19 * a + b - d - g + 15) % 30;
+    var i = Math.floor(c / 4), k = c % 4;
+    var l = (32 + 2 * e + 2 * i - h - k) % 7;
+    var m = Math.floor((a + 11 * h + 22 * l) / 451);
+    var n = h + l - 7 * m + 114;
+    return new Date(Date.UTC(anio, Math.floor(n / 31) - 1, (n % 31) + 1, 12));
+  }
+
+  /* Ley 27.399: el feriado trasladable que cae martes o miercoles pasa
+     al lunes anterior; el que cae jueves o viernes, al lunes siguiente.
+     Si cae lunes, sabado o domingo, se queda donde esta. */
+  function trasladar(f) {
+    var d = f.getUTCDay();
+    if (d === 2 || d === 3) return sumarDias(f, -(d - 1));
+    if (d === 4 || d === 5) return sumarDias(f, 8 - d);
+    return f;
+  }
+
+  function feriadosArgentina(anio) {
+    var P = pascua(anio), out = [];
+    function fijo(mes, dia, nombre) {
+      out.push({ fecha: iso(new Date(Date.UTC(anio, mes - 1, dia, 12))), nombre: nombre, tipo: 'nacional' });
+    }
+    function movil(f, nombre) { out.push({ fecha: iso(f), nombre: nombre, tipo: 'nacional' }); }
+    function trasl(mes, dia, nombre) {
+      var f = trasladar(new Date(Date.UTC(anio, mes - 1, dia, 12)));
+      out.push({ fecha: iso(f), nombre: nombre, tipo: 'trasladable' });
+    }
+
+    fijo(1, 1, 'Año Nuevo');
+    movil(sumarDias(P, -48), 'Carnaval');
+    movil(sumarDias(P, -47), 'Carnaval');
+    fijo(3, 24, 'Día de la Memoria');
+    fijo(4, 2, 'Malvinas');
+    movil(sumarDias(P, -2), 'Viernes Santo');
+    fijo(5, 1, 'Día del Trabajador');
+    fijo(5, 25, 'Revolución de Mayo');
+    trasl(6, 17, 'Paso a la Inmortalidad de Güemes');
+    fijo(6, 20, 'Día de la Bandera');
+    fijo(7, 9, 'Día de la Independencia');
+    trasl(8, 17, 'Paso a la Inmortalidad de San Martín');
+    trasl(10, 12, 'Diversidad Cultural');
+    trasl(11, 20, 'Soberanía Nacional');
+    fijo(12, 8, 'Inmaculada Concepción');
+    fijo(12, 25, 'Navidad');
+
+    return out.sort(function (a, b) { return a.fecha < b.fecha ? -1 : 1; });
+  }
+
+  /* Los del período de la obra, sin repetir. */
+  function feriadosEntre(desde, hasta) {
+    var a = aFecha(desde), b = aFecha(hasta);
+    if (!a || !b) return [];
+    var out = [];
+    for (var y = a.getUTCFullYear(); y <= b.getUTCFullYear(); y++) {
+      feriadosArgentina(y).forEach(function (f) {
+        if (f.fecha >= iso(a) && f.fecha <= iso(b)) out.push(f);
+      });
+    }
+    return out;
+  }
+
   /* ── duración de una tarea ────────────────────────────────────
      cantidad / (rendimiento diario x cuadrillas), redondeado para
      arriba: media jornada es una jornada.                          */
@@ -499,6 +585,8 @@
     aFecha: aFecha, iso: iso, armarMeses: armarMeses,
     materialesPorMesDesde: materialesPorMesDesde,
     calendario: calendario,
+    feriadosArgentina: feriadosArgentina,
+    feriadosEntre: feriadosEntre,
     duracionTarea: duracionTarea,
     programar: programar,
     repartirPorFechas: repartirPorFechas,

@@ -40,6 +40,10 @@
         baseline: 'cliente',
         meses: 6,
         sabado: false, domingo: false,   // el sabado NO es laborable
+        jornada: 8, frente: 2,           // con esto la duracion sale sola
+        feriadosOff: {},                 // los nacionales que en ESTA obra se trabajan
+        feriadosPropios: [],             // provinciales, del pueblo, del gremio
+        corte: '',                       // el dia hasta el cual esta medida la obra
         tareas: {},                      // id -> {predecesoras, cliente:{...}, empresa:{...}}
         avances: {},                     // id -> {1: 40, 2: 60}  (gantt rapido)
         certificado: {},                 // numero de mes -> % acumulado certificado
@@ -54,9 +58,86 @@
   var soloCriticas = false;
 
   /* ── helpers ──────────────────────────────────────────────── */
+  /* El calendario con los feriados puestos. Hasta ahora `calendario()`
+     los aceptaba y nadie se los pasaba: el plan contaba el 25 de mayo
+     como dia trabajado. */
   function cal() {
     var p = plan();
-    return P.calendario({ sabado: !!p.sabado, domingo: !!p.domingo });
+    return P.calendario({
+      sabado: !!p.sabado, domingo: !!p.domingo,
+      feriados: feriadosActivos().map(function (f) { return f.fecha; })
+    });
+  }
+
+  /* ── los feriados que se estan usando ─────────────────────────
+     Los nacionales se calculan para los años que toca la obra. Los que
+     en esta obra si se trabajan se destildan, y los propios se agregan:
+     el feriado provincial, la fiesta del pueblo, la semana que para el
+     gremio. Todo se guarda con el proyecto.                          */
+  function periodoObra() {
+    var p = plan();
+    var desde = p.fechaInicio || new Date().toISOString().slice(0, 10);
+    var hasta = (ultimo && ultimo.programacion && ultimo.programacion.fin)
+      || (ultimo && ultimo.reparto.meses.length && ultimo.reparto.meses[ultimo.reparto.meses.length - 1].fin)
+      || (desde.slice(0, 4) + '-12-31');
+    // siempre al menos un año, para que la lista no salga vacia al empezar
+    var min = P.iso(new Date(new Date(desde).getTime() + 365 * 86400000));
+    return { desde: desde, hasta: hasta > min ? hasta : min };
+  }
+
+  function feriadosDelPeriodo() {
+    var p = plan(), per = periodoObra();
+    var nac = P.feriadosEntre(per.desde, per.hasta).map(function (f) {
+      return { fecha: f.fecha, nombre: f.nombre, tipo: f.tipo, propio: false,
+               activo: !p.feriadosOff[f.fecha + '|' + f.nombre] };
+    });
+    var mios = (p.feriadosPropios || []).filter(function (f) {
+      return f.fecha >= per.desde && f.fecha <= per.hasta;
+    }).map(function (f) {
+      return { fecha: f.fecha, nombre: f.nombre, tipo: 'propio', propio: true, activo: true };
+    });
+    return nac.concat(mios).sort(function (a, b) { return a.fecha < b.fecha ? -1 : 1; });
+  }
+  function feriadosActivos() {
+    return feriadosDelPeriodo().filter(function (f) { return f.activo; });
+  }
+
+  function pintarFeriados() {
+    var todos = feriadosDelPeriodo(), activos = todos.filter(function (f) { return f.activo; });
+    $('feriados-cuenta').textContent = activos.length + ' día(s) no laborables';
+    $('feriados-resumen').innerHTML = activos.length
+      ? '<div class="feriados-chips">' + activos.slice(0, 14).map(function (f) {
+          return '<span class="feriado-chip' + (f.propio ? ' propio' : '') + '">' +
+            esc(f.fecha.slice(8) + '/' + f.fecha.slice(5, 7)) + ' <b>' + esc(f.nombre) + '</b></span>';
+        }).join('') +
+        (activos.length > 14 ? '<span class="text-muted">y ' + (activos.length - 14) + ' más</span>' : '') +
+        '</div>'
+      : '<div class="text-muted">Ninguno: se trabaja todos los días hábiles.</div>';
+
+    var lista = $('feriados-lista');
+    if (!lista) return;
+    lista.innerHTML = todos.map(function (f) {
+      return '<label class="pred-op">' +
+        '<input type="checkbox" data-feriado="' + esc(f.fecha + '|' + f.nombre) + '"' +
+          (f.activo ? ' checked' : '') + (f.propio ? ' disabled' : '') + '>' +
+        '<span class="cod">' + esc(f.fecha) + '</span>' +
+        '<span class="pred-desc">' + esc(f.nombre) + '</span>' +
+        (f.propio
+          ? '<button class="icon-btn peligro" data-borrar-feriado="' + esc(f.fecha + '|' + f.nombre) + '">quitar</button>'
+          : '<span class="text-muted">' + esc(f.tipo) + '</span>') +
+        '</label>';
+    }).join('');
+  }
+
+  /* ── la fecha de corte ────────────────────────────────────────
+     Sin decir a que dia esta medida la obra, un 60% certificado no
+     dice nada: contra el calendario puede ser un mes de adelanto o un
+     mes de atraso. Por defecto es hoy, pero se fija a mano porque el
+     certificado casi nunca cierra el ultimo dia del mes.             */
+  function fechaCorte() {
+    var p = plan();
+    if (p.corte) return p.corte;
+    return new Date().toISOString().slice(0, 10);
   }
   function nodo(id) {
     var p = plan();
@@ -68,6 +149,59 @@
     return n;
   }
   function ritmo(id) { return nodo(id)[plan().baseline] || {}; }
+
+  /* ── LA DURACION NO HAY QUE CARGARLA ──────────────────────────
+     Las horas de mano de obra ya estan en el analisis unitario: el
+     azotado lleva 0,30 h de oficial y 0,10 de ayudante por m2, o sea
+     0,40 horas-hombre el m2. Eso es el rendimiento, y esta en la base
+     desde siempre; pedirlo a mano era hacer escribir un dato que ya
+     teniamos.
+
+        horas de la tarea = Hh por unidad x computo
+        dias              = horas / (jornada x personas del frente)
+
+     El que quiera puede pisarlo: si en esta obra el revoque rinde otra
+     cosa, se escribe y el numero cargado manda sobre el calculado.    */
+  function horasPorUnidad(code) {
+    var receta = recetas[String(code || '').trim()] || [];
+    return receta.reduce(function (s, d) {
+      if (M.normalizarCategoria(d.category) !== 'Mano de obra') return s;
+      if (!/^h/i.test(String(d.unit || ''))) return s;   // el sereno viene por mes
+      return s + M.safeNum(d.qty);
+    }, 0);
+  }
+
+  /* El plan con los rendimientos completados, que es el que se programa.
+     No se toca `plan().tareas`: lo que la persona no escribio tiene que
+     seguir sin escribir, para que el dia que cambie el analisis la
+     duracion se mueva sola. */
+  function planEfectivo() {
+    var p = plan(), base = p.baseline;
+    var jornada = M.safeNum(p.jornada) || 8;
+    var frente = M.safeNum(p.frente) || 1;
+    var out = {};
+    A.estado().items.forEach(function (it) {
+      var n = p.tareas[it.id] || {};
+      var r = n[base] || {};
+      var rend = M.safeNum(r.rendimiento);
+      var auto = false;
+      if (!rend) {
+        var hh = horasPorUnidad(it.code);
+        if (hh > 0) { rend = (jornada * frente) / hh; auto = true; }
+      }
+      out[it.id] = {
+        predecesoras: (n.predecesoras || []).slice(),
+        cliente: base === 'cliente' ? { rendimiento: rend, cuadrillas: r.cuadrillas } : (n.cliente || {}),
+        empresa: base === 'empresa' ? { rendimiento: rend, cuadrillas: r.cuadrillas } : (n.empresa || {}),
+        _auto: auto
+      };
+    });
+    return out;
+  }
+  function esAutomatico(id) {
+    var r = ritmo(id);
+    return !M.safeNum(r.rendimiento);
+  }
 
   /* Las predecesoras se escriben por CODIGO, que es lo que la persona
      tiene en la cabeza, y se guardan por id, que es lo que no se repite
@@ -102,13 +236,24 @@
     var items = c.items || [];
     if (!items.length) { ultimo = null; return Promise.resolve(null); }
 
+    // las recetas se piden PRIMERO: de ahi salen las horas con las que
+    // se calcula la duracion de cada tarea
+    return D.analisisDeVarias(items.map(function (it) { return it.code; }))
+      .catch(function () { return recetas; })
+      .then(function (mapa) {
+        if (mapa) recetas = mapa;
+        return programarYRepartir(p, c, items);
+      });
+  }
+
+  function programarYRepartir(p, c, items) {
     var reparto, programacion = null;
     if (p.modo === 'rapido') {
       reparto = P.repartirAMano(items, {
         meses: p.meses, fechaInicio: p.fechaInicio, valores: p.avances
       });
     } else {
-      programacion = P.programar(items, p.tareas, {
+      programacion = P.programar(items, planEfectivo(), {
         calendario: cal(), fechaInicio: p.fechaInicio, baseline: p.baseline
       });
       reparto = P.repartirPorFechas(programacion, { calendario: cal() });
@@ -116,11 +261,7 @@
 
     var curvas = P.curvas(c, reparto, c.k || 1);
     ultimo = { calculo: c, programacion: programacion, reparto: reparto, curvas: curvas };
-
-    // las recetas, para los materiales por mes
-    return D.analisisDeVarias(items.map(function (it) { return it.code; }))
-      .then(function (mapa) { recetas = mapa; return ultimo; })
-      .catch(function () { return ultimo; });
+    return ultimo;
   }
 
   /* ══════════════════ RENDER ══════════════════ */
@@ -130,6 +271,8 @@
       pintarTabla();
       pintarGantt();
       pintarLookAhead();
+      pintarFeriados();
+      pintarCorte();
       pintarSeguimiento();
       pintarCurvas();
       pintarMateriales();
@@ -143,6 +286,8 @@
     $('plan-inicio').value = p.fechaInicio;
     $('plan-baseline').value = p.baseline;
     $('plan-meses').value = p.meses;
+    $('plan-jornada').value = p.jornada;
+    $('plan-frente').value = p.frente;
     $('plan-sabado').checked = !!p.sabado;
     $('plan-domingo').checked = !!p.domingo;
     $('plan-campo-meses').hidden = p.modo !== 'rapido';
@@ -219,8 +364,12 @@
           (sinSalida ? ' <span class="tag suelta" title="No es predecesora de ninguna otra: ' +
                        'no llega al FIN">sin sucesora</span>' : '') + '</td>' +
         '<td class="der">' + num(t.qty) + ' <span class="text-muted">' + esc(t.unit) + '</span></td>' +
-        '<td class="der"><input class="mini" type="number" step="any" data-campo="rendimiento" ' +
-          'value="' + (r.rendimiento || '') + '" placeholder="—" title="' + esc(t.unit) + ' por día y por cuadrilla"></td>' +
+        '<td class="der"><input class="mini' + (esAutomatico(t.id) ? ' auto' : '') + '" type="number" ' +
+          'step="any" data-campo="rendimiento" value="' + (r.rendimiento || '') + '" ' +
+          'placeholder="' + (t.rendimiento ? num(t.rendimiento) : '—') + '" ' +
+          'title="' + (esAutomatico(t.id)
+            ? esc(num(horasPorUnidad(t.code))) + ' horas-hombre por ' + esc(t.unit) + ' según el análisis. Escribí si en tu obra rinde otra cosa.'
+            : 'lo estás fijando a mano') + '"></td>' +
         '<td class="der"><input class="mini" type="number" step="1" min="1" data-campo="cuadrillas" ' +
           'value="' + (r.cuadrillas || '') + '" placeholder="1"></td>' +
         '<td class="der"><strong>' + t.duracion + '</strong> <span class="text-muted">d</span></td>' +
@@ -518,7 +667,12 @@
 
     if (iUlt < 0 || avance <= 0) return res;   // sin certificado no se estima nada
 
-    var corte = P.aFecha(meses[iUlt].fin);
+    /* Se mide hasta la FECHA DE CORTE. Antes se usaba el fin del ultimo
+       mes con certificado, que es una suposicion: si el certificado
+       cierra el 20, contar hasta el 30 regala diez dias de obra. */
+    var corte = P.aFecha(fechaCorte());
+    if (!corte || corte < arranque) corte = P.aFecha(meses[iUlt].fin);
+    res.corte = P.iso(corte);
     res.diasTrabajados = calen.habiles(arranque, corte);
     if (res.diasTrabajados <= 0) return res;
 
@@ -532,6 +686,20 @@
     var fp = P.aFecha(finPrevisto), fe = P.aFecha(res.finEstimado);
     res.desvioDias = fe >= fp ? (calen.habiles(fp, fe) - 1) : -(calen.habiles(fe, fp) - 1);
     return res;
+  }
+
+  function pintarCorte() {
+    var p = plan();
+    $('corte-fecha').value = fechaCorte();
+    var sg = seguimiento();
+    $('corte-resumen').textContent = sg && sg.diasTrabajados
+      ? sg.diasTrabajados + ' días hábiles desde el arranque'
+      : 'sin medir';
+    $('dias-trabajados').textContent = sg && sg.diasTrabajados ? sg.diasTrabajados + ' d' : '—';
+    // el avance a la fecha de corte: el del ultimo mes certificado
+    if (sg && sg.avance !== null && $('corte-avance').value === '') {
+      $('corte-avance').value = sg.avance;
+    }
   }
 
   function pintarSeguimiento() {
@@ -779,12 +947,15 @@
   var renderConRespiro = conRespiro(render, 450);
 
   function conectar() {
-    ['plan-modo', 'plan-inicio', 'plan-baseline', 'plan-meses'].forEach(function (id) {
+    ['plan-modo', 'plan-inicio', 'plan-baseline', 'plan-meses',
+     'plan-jornada', 'plan-frente'].forEach(function (id) {
       $(id).onchange = function () {
         var p = plan();
         if (id === 'plan-modo') p.modo = this.value;
         else if (id === 'plan-inicio') p.fechaInicio = this.value;
         else if (id === 'plan-baseline') p.baseline = this.value;
+        else if (id === 'plan-jornada') p.jornada = Math.max(1, Math.min(12, M.safeNum(this.value) || 8));
+        else if (id === 'plan-frente') p.frente = Math.max(1, Math.min(40, parseInt(this.value, 10) || 2));
         else p.meses = Math.max(1, Math.min(60, parseInt(this.value, 10) || 6));
         render();
       };
@@ -796,6 +967,47 @@
     $('plan-la-semanas').oninput = conRespiro(pintarLookAhead, 300);
     $('plan-mat-categoria').onchange = pintarMateriales;
     $('plan-export').onclick = exportar;
+
+    // el calendario
+    $('feriados-ver').onclick = function () { pintarFeriados(); A.abrirModal('modal-feriados'); };
+    $('feriados-lista').addEventListener('change', function (e) {
+      var clave = e.target.getAttribute && e.target.getAttribute('data-feriado');
+      if (!clave) return;
+      var p = plan();
+      if (e.target.checked) delete p.feriadosOff[clave];
+      else p.feriadosOff[clave] = true;
+      render().then(pintarFeriados);
+    });
+    $('feriados-lista').addEventListener('click', function (e) {
+      var clave = e.target.getAttribute && e.target.getAttribute('data-borrar-feriado');
+      if (!clave) return;
+      var p = plan();
+      p.feriadosPropios = p.feriadosPropios.filter(function (f) {
+        return (f.fecha + '|' + f.nombre) !== clave;
+      });
+      render().then(pintarFeriados);
+    });
+    $('feriado-agregar').onclick = function () {
+      var f = $('feriado-fecha').value, n = $('feriado-nombre').value.trim();
+      if (!f) { toast('Poné la fecha', 'error'); return; }
+      plan().feriadosPropios.push({ fecha: f, nombre: n || 'No se trabaja' });
+      $('feriado-fecha').value = ''; $('feriado-nombre').value = '';
+      render().then(pintarFeriados);
+    };
+
+    // la fecha de corte
+    $('corte-fecha').onchange = function () { plan().corte = this.value; render(); };
+    $('corte-avance').onchange = function () {
+      // el avance a la fecha de corte se guarda contra el mes en que cae
+      var p = plan(), c = fechaCorte();
+      if (!ultimo) return;
+      var m = ultimo.reparto.meses.filter(function (x) { return c >= x.inicio && c <= x.fin; })[0]
+           || ultimo.reparto.meses[ultimo.reparto.meses.length - 1];
+      if (!m) return;
+      if (this.value === '') delete p.certificado[m.numero];
+      else p.certificado[m.numero] = M.safeNum(this.value);
+      render();
+    };
 
     // como viene la obra
     $('real-inicio').onchange = function () { plan().realInicio = this.value; render(); };

@@ -304,3 +304,14 @@
                padding: .7rem .9rem; margin-top: 12px; font-size: 12.5px; line-height: 1.6;
                color: var(--gray-700); }
 .explicacion strong { color: var(--ink-900); }
+/* el rendimiento que salio del analisis se ve distinto del que se fijo
+   a mano: uno sigue al catalogo, el otro no */
+.plan-grilla input.mini.auto { color: var(--gray-500); font-style: italic; }
+.plan-grilla input.mini.auto::placeholder { color: var(--gray-600); font-style: normal; }
+/* ── feriados ───────────────────────────────────────────────────── */
+.feriados-chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.feriado-chip { font-size: 11px; background: var(--gray-050); border: 1px solid var(--border);
+                padding: .2rem .5rem; color: var(--gray-700); }
+.feriado-chip b { font-family: var(--title); font-weight: 600; color: var(--ink-800); }
+.feriado-chip.propio { border-color: var(--red-500); color: var(--red-500); }
+.feriado-chip.propio b { color: var(--red-500); }
