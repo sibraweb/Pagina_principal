@@ -89,7 +89,10 @@
           total: filas.length, offset: 0, tope: lim,
           filas: filas.map(function (f) {
             return {
-              code: f.codigo, rubro: f.rubro, desc: f.descripcion, unit: f.unidad,
+              // RUBRO = el capitulo (04-FUNDACIONES), que agrupa el presupuesto;
+              // SUBRUBRO = el capitulo mas cercano (TAREAS COMPLEMENTARIAS)
+              code: f.codigo, rubro: f.capitulo || f.rubro, subrubro: f.rubro,
+              rubroCodigo: f.capitulo_codigo, desc: f.descripcion, unit: f.unidad,
               price: f.precio, edadDias: f.edad_dias, edadMaxima: f.edad_maxima_dias,
               pctConFecha: f.pct_con_fecha, insumosSinFecha: f.insumos_sin_fecha
             };
@@ -189,7 +192,9 @@
           code: it.code,
           desc: f.descripcion || it.desc || '',
           unit: f.unidad || it.unit || 'gl',
-          rubro: f.rubro || it.rubro || 'Sin rubro',
+          // el presupuesto se agrupa por RUBRO (el capitulo), no por subrubro
+          rubro: f.capitulo || f.rubro || it.rubro || 'Sin rubro',
+          subrubro: f.rubro || it.subrubro || '',
           sector: it.sector || '',
           qty: qty,
           precioUnitario: pu,
@@ -238,7 +243,8 @@
     if (modo === 'remoto') {
       return rpc('presuapp_rubros', {}).then(function (filas) {
         cacheRubros = filas.map(function (f) {
-          return { rubro: f.rubro, tareas: f.tareas, primerCodigo: f.primer_codigo };
+          return { rubro: f.capitulo || '', rubroCodigo: f.capitulo_codigo || '',
+                   subrubro: f.rubro, tareas: f.tareas, primerCodigo: f.primer_codigo };
         });
         return cacheRubros;
       });
@@ -246,7 +252,7 @@
     var mapa = {};
     (catalogo.analisis || []).forEach(function (a) {
       var r = a.rubro || 'Sin rubro';
-      if (!mapa[r]) mapa[r] = { rubro: r, tareas: 0, primerCodigo: a.code };
+      if (!mapa[r]) mapa[r] = { rubro: '', rubroCodigo: '', subrubro: r, tareas: 0, primerCodigo: a.code };
       mapa[r].tareas++;
       if (a.code < mapa[r].primerCodigo) mapa[r].primerCodigo = a.code;
     });
@@ -255,10 +261,10 @@
     return Promise.resolve(cacheRubros);
   }
 
-  /* Las tareas de UN rubro, por la misma puerta que el buscador. */
-  function tareasDeRubro(rubro) {
-    return buscarTareas(rubro).then(function (res) {
-      res.filas = res.filas.filter(function (f) { return f.rubro === rubro; });
+  /* Las tareas de UN subrubro, por la misma puerta que el buscador. */
+  function tareasDeRubro(subrubro) {
+    return buscarTareas(subrubro).then(function (res) {
+      res.filas = res.filas.filter(function (f) { return (f.subrubro || f.rubro) === subrubro; });
       res.total = res.filas.length;
       return res;
     });

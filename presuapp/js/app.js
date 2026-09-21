@@ -792,24 +792,35 @@
       var total = lista.reduce(function (s, r) { return s + r.tareas; }, 0);
       var grupos = [], porCap = {};
       lista.forEach(function (r) {
-        var cap = capituloDe(r.primerCodigo);
+        var cap = r.rubro || capituloDe(r.primerCodigo);
         if (!porCap[cap]) { porCap[cap] = []; grupos.push(cap); }
         porCap[cap].push(r);
       });
-      // lo que no es obra propiamente dicha va al final
-      var alFinal = ['Mezclas, hormigones e instalaciones', 'Otros'];
-      grupos.sort(function (a, b) { return (alFinal.indexOf(a) > -1) - (alFinal.indexOf(b) > -1); });
+      /* Los rubros de obra (E02, E04...) primero, en su orden; los de
+         materiales y mano de obra (A01, P03...) al final: no son tareas
+         que uno salga a buscar para presupuestar. */
+      var codigoDe = {};
+      lista.forEach(function (r) {
+        var cap = r.rubro || capituloDe(r.primerCodigo);
+        if (!codigoDe[cap]) codigoDe[cap] = r.rubroCodigo || String(r.primerCodigo || '').slice(0, 3);
+      });
+      grupos.sort(function (a, b) {
+        var ca = codigoDe[a] || '', cb = codigoDe[b] || '';
+        var ea = ca.charAt(0) === 'E' ? 0 : 1, eb = cb.charAt(0) === 'E' ? 0 : 1;
+        return ea - eb || (ca < cb ? -1 : ca > cb ? 1 : 0);
+      });
       $('tarea-resultados').innerHTML =
         '<p class="text-muted mb8"><strong>' + total + ' tareas</strong> con su análisis, en ' +
-        lista.length + ' rubros. Tocá un rubro para ver sus tareas, o escribí para buscar.</p>' +
+        grupos.length + ' rubros y ' + lista.length + ' subrubros. Tocá un subrubro para ver sus tareas, ' +
+        'o escribí para buscar.</p>' +
         grupos.map(function (cap) {
           return '<div class="indice-cap"><div class="indice-titulo">' + esc(cap) + '</div>' +
             '<div class="indice-rubros">' + porCap[cap].map(function (r) {
-              return '<button class="indice-rubro' + (rubroAbierto === r.rubro ? ' abierto' : '') + '" ' +
-                'data-rubro="' + esc(r.rubro) + '">' + esc(r.rubro) +
+              return '<button class="indice-rubro' + (rubroAbierto === r.subrubro ? ' abierto' : '') + '" ' +
+                'data-rubro="' + esc(r.subrubro) + '">' + esc(r.subrubro) +
                 ' <span>' + r.tareas + '</span></button>';
             }).join('') + '</div>' +
-            (porCap[cap].some(function (r) { return r.rubro === rubroAbierto; })
+            (porCap[cap].some(function (r) { return r.subrubro === rubroAbierto; })
               ? '<div id="indice-tareas"></div>' : '') +
             '</div>';
         }).join('');
@@ -832,12 +843,13 @@
     var idx = remoto() ? null : M.indexar(catalogo(), estado.overrides);
     res.filas.forEach(function (a) { ultimaBusqueda[a.code] = a; });
     (destino || $('tarea-resultados')).innerHTML = (encabezado || '') +
-      '<table class="grilla"><thead><tr><th>Código</th><th>Tarea</th><th>Rubro</th>' +
+      '<table class="grilla"><thead><tr><th>Código</th><th>Tarea</th><th>Rubro</th><th>Subrubro</th>' +
       '<th class="der">P. unitario</th><th class="der">Cantidad</th><th></th></tr></thead><tbody>' +
       res.filas.map(function (a) {
         var c = idx ? M.calcularAnalisis(a, idx) : { price: a.price };
         return '<tr><td class="cod">' + esc(a.code) + '</td><td>' + esc(a.desc) + '</td>' +
-          '<td class="text-muted" style="font-size:11.5px">' + esc(a.rubro) + '</td>' +
+          '<td class="text-muted" style="font-size:11px">' + esc(a.rubro) + '</td>' +
+          '<td class="text-muted" style="font-size:11px">' + esc(a.subrubro || '') + '</td>' +
           '<td class="der">' + num(c.price) + ' <span class="text-muted">/' + esc(a.unit) + '</span></td>' +
           '<td class="der"><input class="cant" type="number" step="any" value="1" data-qty="' + esc(a.code) + '"></td>' +
           '<td><button class="btn btn-primary" data-agregar="' + esc(a.code) + '">＋</button></td></tr>';
@@ -998,7 +1010,8 @@
       var input = document.querySelector('[data-qty="' + code + '"]');
       var qty = M.safeNum(input ? input.value : 1) || 1;
       var a = ultimaBusqueda[code];
-      estado.items.push({ id: proximoId++, code: code, desc: a ? a.desc : '', unit: a ? a.unit : '', rubro: a ? a.rubro : '', sector: '', qty: qty });
+      estado.items.push({ id: proximoId++, code: code, desc: a ? a.desc : '', unit: a ? a.unit : '',
+        rubro: a ? a.rubro : '', subrubro: a ? (a.subrubro || '') : '', sector: '', qty: qty });
       renderTodo();
       toast((a ? a.desc.slice(0, 40) : code) + ' · ' + num(qty) + ' ' + (a ? a.unit : ''), 'ok');
     });
