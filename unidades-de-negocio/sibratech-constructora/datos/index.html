@@ -684,7 +684,7 @@ function dibujar() {
   for (var i = 1; i < etiquetas.length; i++) if (etiquetas[i].y - etiquetas[i - 1].y < 14) etiquetas[i].y = etiquetas[i - 1].y + 14;
   var fin = etiquetas.map(function (e) {
     return '<circle cx="' + e.x + '" cy="' + Y(e.v) + '" r="3" fill="' + e.c + '"/>' +
-      '<text class="fin" x="' + (W - mr + 8) + '" y="' + (e.y + 4) + '" fill="' + e.c + '">' + numAR(e.v, 0) + ' · ' + e.n.split(' (')[0] + '</text>';
+      '<text class="fin" x="' + (W - mr + 8) + '" y="' + (e.y + 4) + '" style="fill:' + e.c + '">' + numAR(e.v, 0) + ' · ' + e.n.split(' (')[0] + '</text>';
   }).join('');
   svg.innerHTML = g + años + lineas + fin;
 
@@ -747,7 +747,7 @@ function dibujarRelaciones() {
   });
 
   var svg = document.getElementById('r-svg');
-  var W = 900, H = 360, ml = 52, mr = 110, mt = 14, mb = 30;
+  var W = 900, H = 360, ml = 52, mr = 130, mt = 14, mb = 30;
   var vals = [100];
   vis.forEach(function (r) { serie[r.k].forEach(function (v) { if (v !== null) vals.push(v); }); });
   var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
@@ -772,7 +772,7 @@ function dibujarRelaciones() {
   for (var i = 1; i < etiquetas.length; i++) if (etiquetas[i].y - etiquetas[i - 1].y < 14) etiquetas[i].y = etiquetas[i - 1].y + 14;
   var fin = etiquetas.map(function (e) {
     return '<circle cx="' + e.x + '" cy="' + Y(e.v) + '" r="3" fill="' + e.c + '"/>' +
-      '<text class="fin" x="' + (W - mr + 8) + '" y="' + (e.y + 4) + '" fill="' + e.c + '">' + numAR(e.v, 0) + ' · ' + e.n + '</text>';
+      '<text class="fin" x="' + (W - mr + 8) + '" y="' + (e.y + 4) + '" style="fill:' + e.c + '">' + numAR(e.v, 0) + ' · ' + e.n + '</text>';
   }).join('');
   svg.innerHTML = g + años + lineas + fin;
 
