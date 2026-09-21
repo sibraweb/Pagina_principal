@@ -254,35 +254,63 @@
   }
 
   /* ══════════════════ PRECIOS ══════════════════ */
+  /* Las filas de la pestaña Precios. Un precio SIBRATECH en null -los
+     insumos de la obra en remoto, que no traen el nuestro- se ve como un
+     punto: se busca por nombre y aparece. */
+  function pintarFilasInsumos(lista, encabezado) {
+    var filas = lista.map(function (i) {
+      // el precio propio esta en el estado: no hace falta el catalogo
+      var mio = estado.overrides.filter(function (o) { return o.code === i.code; })[0];
+      var p = { origen: mio ? 'propio' : (i.price > 0 ? 'catalogo' : (i.price === null ? '' : 'sin-precio')),
+                precio: mio ? mio.price : i.price };
+      return '<tr data-insumo="' + esc(i.code) + '">' +
+        '<td class="cod">' + esc(i.code) + '</td>' +
+        '<td>' + esc(i.desc) + '</td>' +
+        '<td class="col-hide">' + tagCategoria(M.normalizarCategoria(i.category)) + '</td>' +
+        '<td class="col-hide">' + esc(i.unit) + '</td>' +
+        '<td class="der text-muted">' + (i.price === null || i.price === undefined ? PUNTO : num(i.price)) + '</td>' +
+        '<td class="der"><input class="precio" type="number" step="any" data-precio-propio="' + esc(i.code) + '" ' +
+          'value="' + (p.origen === 'propio' ? p.precio : '') + '" placeholder="—"></td>' +
+        '<td>' + tagOrigen(p.origen) + '</td></tr>';
+    }).join('');
+    $('insumo-lista').innerHTML = (encabezado || '') + '<div class="tabla-scroll"><table class="grilla"><thead><tr>' +
+      '<th>Código</th><th>Insumo</th><th class="col-hide">Tipo</th><th class="col-hide">Un.</th>' +
+      '<th class="der">Precio SIBRATECH</th><th class="der">Mi precio</th><th></th>' +
+      '</tr></thead><tbody>' + filas + '</tbody></table></div>';
+  }
+
   function renderInsumos() {
     var q = $('buscar-insumo').value.trim();
     var cat = $('filtro-categoria').value;
+    /* Con el buscador vacio NO se muestra "0 insumos": eso parece que la
+       base no esta, y esta. Lo que pasa es que la base no se lista entera
+       -es el candado, hacen falta 3 letras-. Mientras tanto se muestran
+       los insumos de TU obra, que es justo donde vas a poner tus precios. */
+    if (q.length < 3) {
+      var deLaObra = insumosDeLaObra(cat).map(function (r) {
+        return { code: r.code, desc: r.desc, unit: r.unit, category: r.category,
+                 price: remoto() ? null : r.unitPrice };
+      });
+      var ayuda = '<div class="aviso-fila"><div class="aviso-marca"></div><div>' +
+        '<strong>La base de SIBRATECH está en línea.</strong> Escribí al menos 3 letras ' +
+        '(“cem”, “are”, “ofi”) para buscar cualquier insumo con su precio.' +
+        (deLaObra.length ? ' Abajo, los ' + deLaObra.length + ' insumos que usa tu obra: ' +
+          'cargá tu precio donde lo tengas más barato.' : '') + '</div></div>';
+      $('insumo-count').textContent = deLaObra.length ? deLaObra.length + ' de tu obra' : 'escribí para buscar';
+      $('insumo-mas').textContent = '';
+      if (!deLaObra.length) { $('insumo-lista').innerHTML = ayuda; return; }
+      pintarFilasInsumos(deLaObra, ayuda);
+      $('override-count').textContent = estado.overrides.length + (estado.overrides.length === 1 ? ' precio propio' : ' precios propios');
+      return;
+    }
     D.buscarInsumos(q, cat, paginaInsumos * D.TOPE).then(function (res) {
       $('insumo-count').textContent = res.total + (res.total === 1 ? ' insumo' : ' insumos');
       if (!res.filas.length) {
-        $('insumo-lista').innerHTML = '<div class="empty-state">Nada con ese texto</div>';
+        $('insumo-lista').innerHTML = '<div class="empty-state">Nada con “' + esc(q) + '” en la base</div>';
         $('insumo-mas').textContent = '';
         return;
       }
-      var filas = res.filas.map(function (i) {
-        // el precio propio esta en el estado: no hace falta el catalogo
-        var mio = estado.overrides.filter(function (o) { return o.code === i.code; })[0];
-        var p = { origen: mio ? 'propio' : (i.price > 0 ? 'catalogo' : 'sin-precio'),
-                  precio: mio ? mio.price : i.price };
-        return '<tr data-insumo="' + esc(i.code) + '">' +
-          '<td class="cod">' + esc(i.code) + '</td>' +
-          '<td>' + esc(i.desc) + '</td>' +
-          '<td class="col-hide">' + tagCategoria(M.normalizarCategoria(i.category)) + '</td>' +
-          '<td class="col-hide">' + esc(i.unit) + '</td>' +
-          '<td class="der text-muted">' + num(i.price) + '</td>' +
-          '<td class="der"><input class="precio" type="number" step="any" data-precio-propio="' + esc(i.code) + '" ' +
-            'value="' + (p.origen === 'propio' ? p.precio : '') + '" placeholder="—"></td>' +
-          '<td>' + tagOrigen(p.origen) + '</td></tr>';
-      }).join('');
-      $('insumo-lista').innerHTML = '<div class="tabla-scroll"><table class="grilla"><thead><tr>' +
-        '<th>Código</th><th>Insumo</th><th class="col-hide">Tipo</th><th class="col-hide">Un.</th>' +
-        '<th class="der">Precio SIBRATECH</th><th class="der">Mi precio</th><th></th>' +
-        '</tr></thead><tbody>' + filas + '</tbody></table></div>';
+      pintarFilasInsumos(res.filas, '');
 
       var desde = res.offset + 1, hasta = Math.min(res.offset + res.tope, res.total);
       $('insumo-mas').innerHTML = res.total > res.tope
@@ -712,33 +740,106 @@
   }
 
   /* ══════════════════ TAREAS (buscador) ══════════════════ */
+  /* ── el buscador de tareas ────────────────────────────────────
+     Con el buscador vacio antes decia "escribi al menos 3 letras" y
+     nada mas: parecia que la base no estaba. Ahora muestra el INDICE,
+     por capitulo y rubro, para recorrerla. Tocando un rubro aparecen sus
+     tareas con su precio; escribiendo, se busca como siempre.
+
+     El indice son solo nombres de rubros y cuantas tareas tiene cada
+     uno. Las tareas se piden de a un rubro, por la misma puerta con
+     tope que el buscador.                                            */
+  var CAPITULOS = {
+    E02: 'Movimiento de suelos', E04: 'Fundaciones', E05: 'Estructuras',
+    E06: 'Contrapisos', E07: 'Mamposterías y cercos', E08: 'Revoques y cielorrasos',
+    E09: 'Cubiertas', E10: 'Aislaciones', E11: 'Pisos y carpetas', E12: 'Revestimientos',
+    E15: 'Herrería', E20: 'Instalación sanitaria', E27: 'Pinturas', E28: 'Parquización',
+    E44: 'Construcción en seco', E45: 'Construcción en seco'
+  };
+  function capituloDe(codigo) {
+    var c = String(codigo || '').toUpperCase();
+    if (CAPITULOS[c.slice(0, 3)]) return CAPITULOS[c.slice(0, 3)];
+    if (c.charAt(0) === 'A') return 'Mezclas, hormigones e instalaciones';
+    return 'Otros';
+  }
+  var rubroAbierto = null;
+
   function buscarTareas() {
     var q = $('buscar-tarea').value.trim();
-    // en remoto el precio ya viene con la fila; en local hay que sacarlo
-    var idx = remoto() ? null : M.indexar(catalogo(), estado.overrides);
+    if (q.length < 3) { pintarIndiceRubros(); return; }
+    rubroAbierto = null;
     D.buscarTareas(q).then(function (res) {
-      ultimaBusqueda = {};
-      res.filas.forEach(function (a) { ultimaBusqueda[a.code] = a; });
       if (!res.filas.length) {
-        $('tarea-resultados').innerHTML = '<div class="empty-state">' +
-          (q.length < 3 ? 'Escribí al menos 3 letras' : 'Nada con ese texto') + '</div>';
+        $('tarea-resultados').innerHTML = '<div class="empty-state">Nada con “' + esc(q) + '”. ' +
+          'Borrá el texto para recorrer los rubros.</div>';
         return;
       }
-      $('tarea-resultados').innerHTML = '<table class="grilla"><thead><tr><th>Código</th><th>Tarea</th><th>Rubro</th>' +
-        '<th class="der">P. unitario</th><th class="der">Cantidad</th><th></th></tr></thead><tbody>' +
-        res.filas.map(function (a) {
-          var c = idx ? M.calcularAnalisis(a, idx) : { price: a.price };
-          return '<tr><td class="cod">' + esc(a.code) + '</td><td>' + esc(a.desc) + '</td>' +
-            '<td class="text-muted" style="font-size:11.5px">' + esc(a.rubro) + '</td>' +
-            '<td class="der">' + num(c.price) + ' <span class="text-muted">/' + esc(a.unit) + '</span></td>' +
-            '<td class="der"><input class="cant" type="number" step="any" value="1" data-qty="' + esc(a.code) + '"></td>' +
-            '<td><button class="btn btn-primary" data-agregar="' + esc(a.code) + '">＋</button></td></tr>';
-        }).join('') + '</tbody></table>' +
-        (res.total > res.filas.length ? '<div class="text-muted" style="padding:8px">Mostrando ' + res.filas.length + ' de ' + res.total + ' · afiná la búsqueda</div>' : '');
-    }).catch(function (e) {
-      $('tarea-resultados').innerHTML = '<div class="empty-state">No se pudo consultar el catálogo.<br>' +
-        '<span class="text-muted">' + esc(e.message) + '</span></div>';
-    });
+      pintarTareas(res, '');
+    }).catch(errorCatalogo);
+  }
+
+  function errorCatalogo(e) {
+    $('tarea-resultados').innerHTML = '<div class="empty-state">No se pudo consultar el catálogo.<br>' +
+      '<span class="text-muted">' + esc(e.message) + '</span></div>';
+  }
+
+  function pintarIndiceRubros() {
+    D.rubros().then(function (lista) {
+      var total = lista.reduce(function (s, r) { return s + r.tareas; }, 0);
+      var grupos = [], porCap = {};
+      lista.forEach(function (r) {
+        var cap = capituloDe(r.primerCodigo);
+        if (!porCap[cap]) { porCap[cap] = []; grupos.push(cap); }
+        porCap[cap].push(r);
+      });
+      // lo que no es obra propiamente dicha va al final
+      var alFinal = ['Mezclas, hormigones e instalaciones', 'Otros'];
+      grupos.sort(function (a, b) { return (alFinal.indexOf(a) > -1) - (alFinal.indexOf(b) > -1); });
+      $('tarea-resultados').innerHTML =
+        '<p class="text-muted mb8"><strong>' + total + ' tareas</strong> con su análisis, en ' +
+        lista.length + ' rubros. Tocá un rubro para ver sus tareas, o escribí para buscar.</p>' +
+        grupos.map(function (cap) {
+          return '<div class="indice-cap"><div class="indice-titulo">' + esc(cap) + '</div>' +
+            '<div class="indice-rubros">' + porCap[cap].map(function (r) {
+              return '<button class="indice-rubro' + (rubroAbierto === r.rubro ? ' abierto' : '') + '" ' +
+                'data-rubro="' + esc(r.rubro) + '">' + esc(r.rubro) +
+                ' <span>' + r.tareas + '</span></button>';
+            }).join('') + '</div>' +
+            (porCap[cap].some(function (r) { return r.rubro === rubroAbierto; })
+              ? '<div id="indice-tareas"></div>' : '') +
+            '</div>';
+        }).join('');
+      if (rubroAbierto) abrirRubro(rubroAbierto);
+    }).catch(errorCatalogo);
+  }
+
+  function abrirRubro(rubro) {
+    rubroAbierto = rubro;
+    var cont = $('indice-tareas');
+    if (!cont) { pintarIndiceRubros(); return; }
+    cont.innerHTML = '<div class="text-muted" style="padding:8px">Buscando las tareas…</div>';
+    D.tareasDeRubro(rubro).then(function (res) {
+      pintarTareas(res, '', cont);
+    }).catch(errorCatalogo);
+  }
+
+  function pintarTareas(res, encabezado, destino) {
+    // en remoto el precio ya viene con la fila; en local hay que sacarlo
+    var idx = remoto() ? null : M.indexar(catalogo(), estado.overrides);
+    res.filas.forEach(function (a) { ultimaBusqueda[a.code] = a; });
+    (destino || $('tarea-resultados')).innerHTML = (encabezado || '') +
+      '<table class="grilla"><thead><tr><th>Código</th><th>Tarea</th><th>Rubro</th>' +
+      '<th class="der">P. unitario</th><th class="der">Cantidad</th><th></th></tr></thead><tbody>' +
+      res.filas.map(function (a) {
+        var c = idx ? M.calcularAnalisis(a, idx) : { price: a.price };
+        return '<tr><td class="cod">' + esc(a.code) + '</td><td>' + esc(a.desc) + '</td>' +
+          '<td class="text-muted" style="font-size:11.5px">' + esc(a.rubro) + '</td>' +
+          '<td class="der">' + num(c.price) + ' <span class="text-muted">/' + esc(a.unit) + '</span></td>' +
+          '<td class="der"><input class="cant" type="number" step="any" value="1" data-qty="' + esc(a.code) + '"></td>' +
+          '<td><button class="btn btn-primary" data-agregar="' + esc(a.code) + '">＋</button></td></tr>';
+      }).join('') + '</tbody></table>' +
+      (res.total > res.filas.length ? '<div class="text-muted" style="padding:8px">Mostrando ' +
+        res.filas.length + ' de ' + res.total + ' · afiná la búsqueda</div>' : '');
   }
 
   /* El analisis se pide al origen de datos. Cuando el catalogo no baja
@@ -881,6 +982,13 @@
     $('buscar-tarea').oninput = buscarTareas;
 
     $('modal-buscar').addEventListener('click', function (e) {
+      var rb = e.target.closest && e.target.closest('[data-rubro]');
+      if (rb) {
+        var r = rb.getAttribute('data-rubro');
+        if (rubroAbierto === r) { rubroAbierto = null; pintarIndiceRubros(); }
+        else { rubroAbierto = r; pintarIndiceRubros(); }
+        return;
+      }
       var code = e.target.getAttribute && e.target.getAttribute('data-agregar');
       if (!code) return;
       var input = document.querySelector('[data-qty="' + code + '"]');

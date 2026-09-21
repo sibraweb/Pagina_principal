@@ -230,6 +230,40 @@
     });
   }
 
+  /* ── los rubros, para recorrer las tareas ─────────────────────
+     Solo nombres y cantidad: ni un precio. Se cachea, no cambian. */
+  var cacheRubros = null;
+  function rubros() {
+    if (cacheRubros) return Promise.resolve(cacheRubros);
+    if (modo === 'remoto') {
+      return rpc('presuapp_rubros', {}).then(function (filas) {
+        cacheRubros = filas.map(function (f) {
+          return { rubro: f.rubro, tareas: f.tareas, primerCodigo: f.primer_codigo };
+        });
+        return cacheRubros;
+      });
+    }
+    var mapa = {};
+    (catalogo.analisis || []).forEach(function (a) {
+      var r = a.rubro || 'Sin rubro';
+      if (!mapa[r]) mapa[r] = { rubro: r, tareas: 0, primerCodigo: a.code };
+      mapa[r].tareas++;
+      if (a.code < mapa[r].primerCodigo) mapa[r].primerCodigo = a.code;
+    });
+    cacheRubros = Object.keys(mapa).map(function (k) { return mapa[k]; })
+      .sort(function (a, b) { return a.primerCodigo < b.primerCodigo ? -1 : 1; });
+    return Promise.resolve(cacheRubros);
+  }
+
+  /* Las tareas de UN rubro, por la misma puerta que el buscador. */
+  function tareasDeRubro(rubro) {
+    return buscarTareas(rubro).then(function (res) {
+      res.filas = res.filas.filter(function (f) { return f.rubro === rubro; });
+      res.total = res.filas.length;
+      return res;
+    });
+  }
+
   /* ── los analisis de varias tareas de una ─────────────────────
      Los materiales por mes necesitan la RECETA de cada tarea del
      computo: cuanto cemento lleva el m2, no cuanto sale. Eso ya viaja
@@ -275,6 +309,8 @@
     buscarInsumos: buscarInsumos,
     analisis: analisis,
     analisisDeVarias: analisisDeVarias,
+    rubros: rubros,
+    tareasDeRubro: tareasDeRubro,
     cotizar: cotizar,
     registrarDescarga: registrarDescarga,
     catalogoLocal: catalogoLocal,
