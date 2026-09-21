@@ -34,8 +34,9 @@
   function fmt(n) { return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 2 }).format(n || 0); }
   function fmtCorto(n) {
     n = n || 0;
-    if (Math.abs(n) >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
-    if (Math.abs(n) >= 1e3) return '$' + (n / 1e3).toFixed(2) + 'k';
+    // con coma, como todo lo demas: $43,82M y no $43.82M
+    if (Math.abs(n) >= 1e6) return '$ ' + num(n / 1e6) + ' M';
+    if (Math.abs(n) >= 1e3) return '$ ' + num(n / 1e3) + ' k';
     return fmt(n);
   }
   /* Todo a DOS decimales, con su símbolo: la plata con $, los
