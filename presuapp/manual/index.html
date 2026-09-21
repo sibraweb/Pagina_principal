@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de PresupuestApp</title>
+<meta name="description" content="Cómo usar PresupuestApp de SIBRATECH: cómputo, presupuesto, lista de compras, plan de trabajo y control de obra.">
+</head>
+<body>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700;800&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+  :root {
+    --rojo: #E10600;
+    --rojo-suave: #fdecea;
+    --tinta: #0B0B0B;
+    --texto: #2b2e2e;
+    --gris: #5A6060;
+    --tenue: #8d9393;
+    --linea: #e3e5e5;
+    --fondo: #f6f7f7;
+    --papel: #ffffff;
+    --nota: #f2f3f3;
+    --titulo: 'Jost', 'Century Gothic', system-ui, sans-serif;
+    --cuerpo: 'Libre Franklin', system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --rojo: #ff4b42; --rojo-suave: #2c1413;
+      --tinta: #f1f2f2; --texto: #d4d7d7; --gris: #a3a9a9; --tenue: #7c8282;
+      --linea: #2c3030; --fondo: #121414; --papel: #1a1d1d; --nota: #202424;
+    }
+  }
+  :root[data-theme="dark"] {
+    --rojo: #ff4b42; --rojo-suave: #2c1413;
+    --tinta: #f1f2f2; --texto: #d4d7d7; --gris: #a3a9a9; --tenue: #7c8282;
+    --linea: #2c3030; --fondo: #121414; --papel: #1a1d1d; --nota: #202424;
+  }
+
+  * { box-sizing: border-box; }
+  body { background: var(--fondo); color: var(--texto); font-family: var(--cuerpo);
+         font-size: 15.5px; line-height: 1.65; margin: 0; padding: 0 16px; }
+
+  .barra { max-width: 1180px; margin: 0 auto; padding-block: 22px 0;
+           display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+           border-bottom: 2px solid var(--tinta); padding-bottom: 12px; }
+  .marca { font-family: var(--titulo); font-weight: 800; font-size: 1.05rem; letter-spacing: .02em; color: var(--tinta); }
+  .marca span { color: var(--rojo); }
+  .barra .donde { font-family: var(--titulo); font-size: .72rem; letter-spacing: .18em;
+                  text-transform: uppercase; color: var(--gris); }
+  .barra a { margin-left: auto; font-family: var(--titulo); font-weight: 600; font-size: .78rem;
+             color: var(--rojo); text-decoration: none; border-bottom: 1px solid currentColor; }
+
+  .grilla { max-width: 1180px; margin: 0 auto; display: grid;
+            grid-template-columns: 220px minmax(0, 1fr); gap: 48px; padding-block: 34px 80px; }
+  nav.indice { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 20px); align-self: start; }
+  nav.indice .t { font-family: var(--titulo); font-weight: 700; font-size: .66rem; letter-spacing: .2em;
+                  text-transform: uppercase; color: var(--rojo); margin-bottom: 10px; }
+  nav.indice ol { list-style: none; margin: 0; padding: 0; counter-reset: p; }
+  nav.indice li { counter-increment: p; }
+  nav.indice a { display: flex; gap: 10px; padding: 6px 0; color: var(--gris); text-decoration: none;
+                 font-family: var(--titulo); font-size: .88rem; border-bottom: 1px solid var(--linea); }
+  nav.indice a::before { content: counter(p, decimal-leading-zero); color: var(--tenue);
+                         font-variant-numeric: tabular-nums; font-size: .78rem; padding-top: 1px; }
+  nav.indice a:hover, nav.indice a:focus-visible { color: var(--rojo); outline: none; }
+
+  main { min-width: 0; }
+  header.portada h1 { font-family: var(--titulo); font-weight: 800; color: var(--tinta);
+                      font-size: clamp(1.9rem, 4vw, 2.8rem); line-height: 1.05; letter-spacing: -.02em;
+                      margin: 0 0 .5rem; text-wrap: balance; }
+  header.portada h1 span { color: var(--rojo); }
+  .bajada { font-size: 1.05rem; color: var(--gris); max-width: 62ch; margin: 0 0 1.2rem; }
+  .ruta { display: flex; flex-wrap: wrap; gap: 6px; margin: 1.4rem 0 0; padding: 0; list-style: none; }
+  .ruta li { font-family: var(--titulo); font-size: .74rem; font-weight: 600; letter-spacing: .08em;
+             text-transform: uppercase; background: var(--papel); border: 1px solid var(--linea);
+             padding: .35rem .7rem; color: var(--texto); }
+  .ruta li b { color: var(--rojo); margin-right: 4px; font-variant-numeric: tabular-nums; }
+
+  section.paso { margin-top: 4.2rem; scroll-margin-top: 20px; }
+  .ojo { font-family: var(--titulo); font-weight: 700; font-size: .68rem; letter-spacing: .22em;
+         text-transform: uppercase; color: var(--rojo); display: flex; align-items: center; gap: 10px; }
+  .ojo::before { content: ''; width: 26px; height: 2px; background: var(--rojo); }
+  h2 { font-family: var(--titulo); font-weight: 700; color: var(--tinta); font-size: 1.65rem;
+       line-height: 1.15; letter-spacing: -.01em; margin: .4rem 0 .8rem; text-wrap: balance; }
+  h3 { font-family: var(--titulo); font-weight: 600; color: var(--tinta); font-size: 1.08rem;
+       margin: 2.2rem 0 .4rem; }
+  p { max-width: 68ch; margin: .5rem 0 .9rem; }
+  strong { color: var(--tinta); font-weight: 600; }
+  .boton { font-family: var(--titulo); font-weight: 700; font-size: .74rem; letter-spacing: .1em;
+           text-transform: uppercase; white-space: nowrap; padding: .08rem .45rem;
+           border: 1px solid var(--tinta); color: var(--tinta); }
+  .boton.rojo { background: var(--rojo); border-color: var(--rojo); color: #fff; }
+
+  ol.pasos { max-width: 68ch; padding-left: 1.3rem; margin: .5rem 0 1rem; }
+  ol.pasos li { margin: .35rem 0; padding-left: .3rem; }
+  ol.pasos li::marker { font-family: var(--titulo); font-weight: 700; color: var(--rojo); }
+
+  figure { margin: 1.4rem 0 1.8rem; }
+  figure img { display: block; width: 100%; height: auto; border: 1px solid var(--linea);
+               background: #fff; box-shadow: 0 2px 14px rgba(0,0,0,.06); }
+  figure.chica img { max-width: 620px; }
+  figure.tel img { max-width: 300px; }
+  figcaption { font-size: .82rem; color: var(--gris); margin-top: .55rem; max-width: 68ch; }
+  figcaption b { font-family: var(--titulo); font-weight: 600; color: var(--tinta); }
+
+  .nota { background: var(--nota); border-left: 3px solid var(--tinta); padding: .8rem 1rem;
+          margin: 1.2rem 0; max-width: 72ch; font-size: .93rem; }
+  .nota.roja { border-left-color: var(--rojo); background: var(--rojo-suave); }
+  .nota p { margin: .2rem 0; }
+
+  .cuenta { font-family: var(--titulo); background: var(--papel); border: 1px solid var(--linea);
+            padding: .8rem 1rem; margin: 1rem 0; max-width: 60ch; font-size: .92rem;
+            font-variant-numeric: tabular-nums; }
+  .cuenta div { display: flex; justify-content: space-between; gap: 16px; padding: .15rem 0; }
+  .cuenta div.total { border-top: 1px solid var(--linea); margin-top: .3rem; padding-top: .4rem; font-weight: 700; color: var(--tinta); }
+
+  .dos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+  .dos figure { margin: .6rem 0; }
+
+  footer.pie { margin-top: 5rem; padding-top: 1rem; border-top: 1px solid var(--linea);
+               font-size: .82rem; color: var(--tenue); }
+
+  @media (max-width: 880px) {
+    .grilla { grid-template-columns: 1fr; gap: 10px; }
+    nav.indice { position: static; }
+    nav.indice ol { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 14px; }
+    .dos { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  html { scroll-behavior: smooth; }
+</style>
+
+<div class="barra">
+  <div class="marca">SIBRA<span>TECH</span></div>
+  <div class="donde">Constructora · Manual de uso</div>
+  <a href="../">Abrir PresupuestApp</a>
+</div>
+
+<div class="grilla">
+  <nav class="indice" aria-label="Contenido">
+    <div class="t">Contenido</div>
+    <ol>
+      <li><a href="#computo">Cargar las tareas</a></li>
+      <li><a href="#analisis">Ver el análisis</a></li>
+      <li><a href="#presupuesto">Presupuesto y K</a></li>
+      <li><a href="#precios">Tus precios</a></li>
+      <li><a href="#materiales">Lista de compras</a></li>
+      <li><a href="#plan">Plan de trabajo</a></li>
+      <li><a href="#gantt">Gantt y look ahead</a></li>
+      <li><a href="#control">Control de obra</a></li>
+      <li><a href="#guardar">Guardar y seguir</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="portada">
+      <h1>Presupuestá, planificá y <span>controlá</span> una obra con los análisis de SIBRATECH</h1>
+      <p class="bajada">PresupuestApp arma el presupuesto a partir de análisis unitarios reales, saca la lista de
+        compras, propone el plan de trabajo y mide la obra contra ese plan. Es de uso libre y no hay que
+        registrarse. Este manual recorre una obra de ejemplo —una vivienda de once tareas— de punta a punta.</p>
+      <ul class="ruta">
+        <li><b>1</b>Cómputo</li><li><b>2</b>Presupuesto</li><li><b>3</b>Precios</li>
+        <li><b>4</b>Materiales</li><li><b>5</b>Plan de trabajo</li><li><b>6</b>Control de obra</li>
+      </ul>
+      <figure>
+        <img src="img/01-portada.png" alt="Pantalla de inicio de PresupuestApp con las pestañas Cómputo, Presupuesto, Precios, Materiales, Plan de trabajo y Control de obra">
+        <figcaption><b>La pantalla de inicio.</b> Las seis pestañas siguen el orden en que se trabaja. El recuadro verde
+          “Análisis y precios de SIBRATECH, en línea” confirma que la base está conectada.</figcaption>
+      </figure>
+      <div class="nota">
+        <p>Lo que cargás queda guardado <strong>en tu navegador</strong>: si cerrás la pestaña y volvés, está todo
+          como lo dejaste. Para llevarlo a otra computadora o guardarlo de verdad, bajá el proyecto (paso 9).</p>
+      </div>
+    </header>
+
+    <section class="paso" id="computo">
+      <div class="ojo">Paso 1 · Cómputo</div>
+      <h2>Cargar las tareas de la obra</h2>
+      <p>La cantidad de cada tarea es <strong>tu cómputo</strong>. Hay dos formas de cargarlo: elegir las tareas
+        de la base de SIBRATECH, o subir tu cómputo desde un Excel.</p>
+      <figure>
+        <img src="img/02-computo-vacio.png" alt="Pestaña Cómputo vacía con el botón Elegir tareas de la base">
+        <figcaption><b>Cómputo vacío.</b> El botón rojo <span class="boton rojo">+ Elegir tareas de la base</span> es
+          el primer paso. Al lado, <span class="boton">Subir cómputo (Excel)</span> y la plantilla para armarlo.</figcaption>
+      </figure>
+
+      <h3>Recorrer la base por rubro</h3>
+      <p>Al abrir la base aparece el índice: los <strong>rubros</strong> de obra en su orden (02 Movimiento de
+        suelos, 04 Fundaciones, 05 Estructuras…) y, dentro de cada uno, sus <strong>subrubros</strong> con la
+        cantidad de tareas. Tocá un subrubro para ver sus tareas con el precio por unidad.</p>
+      <div class="dos">
+        <figure>
+          <img src="img/03-indice.png" alt="Índice de tareas por rubro y subrubro">
+          <figcaption><b>El índice.</b> Rubro en rojo, subrubros debajo; el número es cuántas tareas tiene.</figcaption>
+        </figure>
+        <figure>
+          <img src="img/04-rubro-abierto.png" alt="Un subrubro abierto con sus tareas y precios">
+          <figcaption><b>Un subrubro abierto.</b> Poné la cantidad y apretá <span class="boton rojo">+</span>.</figcaption>
+        </figure>
+      </div>
+
+      <h3>O buscar por nombre</h3>
+      <p>Escribiendo <strong>al menos tres letras</strong> se busca por código, descripción, rubro o subrubro. Los
+        resultados muestran el rubro y el subrubro en dos columnas.</p>
+      <figure>
+        <img src="img/05-busqueda.png" alt="Búsqueda de tareas por la palabra revoque, con columnas Rubro y Subrubro">
+        <figcaption><b>Búsqueda “revoque”.</b> Rubro <em>08-Revoques y cielorrasos</em>, subrubros distintos para cada tipo.</figcaption>
+      </figure>
+
+      <h3>La grilla del cómputo</h3>
+      <p>Cada tarea es un renglón. La cantidad y el sector se editan ahí mismo, y el costo se recalcula mientras
+        escribís. La misma tarea en dos sectores —planta baja y planta alta— son dos renglones: no se funden.</p>
+      <figure>
+        <img src="img/06-computo.png" alt="Cómputo con once tareas cargadas">
+        <figcaption><b>La obra de ejemplo.</b> Once tareas, del desmonte a la pintura. <span class="boton">Ver</span>
+          abre el análisis; <span class="boton">✕</span> saca el renglón.</figcaption>
+      </figure>
+      <div class="nota">
+        <p><strong>Si subís un Excel</strong>, la app te pregunta qué columna es cada cosa (código, cantidad,
+          sector) y reconoce solas las más comunes. Las tareas con un código que no está en la base quedan marcadas
+          y se les puede poner un precio a mano.</p>
+      </div>
+    </section>
+
+    <section class="paso" id="analisis">
+      <div class="ojo">Paso 2 · Análisis unitario</div>
+      <h2>De dónde sale cada precio</h2>
+      <p>El botón <span class="boton">Ver</span> muestra la receta de la tarea: qué insumos lleva y cuánto de
+        cada uno por unidad. Los rendimientos van con cuatro decimales, porque en una receta los números chicos
+        importan: 0,0524 m³ de arena por m² no es lo mismo que 0,05.</p>
+      <figure class="chica">
+        <img src="img/07-analisis.png" alt="Análisis unitario con los rendimientos de cada insumo">
+        <figcaption><b>El análisis del desmonte.</b> Se muestra el rendimiento; el precio de cada insumo de la base
+          no. Si cargás tu propio precio de un insumo (paso 4), ese sí aparece.</figcaption>
+      </figure>
+    </section>
+
+    <section class="paso" id="presupuesto">
+      <div class="ojo">Paso 3 · Presupuesto</div>
+      <h2>Del costo al precio: el K y el IVA</h2>
+      <p>La pestaña Presupuesto junta el cómputo por <strong>rubro</strong> y lleva el costo al precio con el
+        coeficiente K. El K va <strong>sin IVA</strong>: el IVA se calcula al final, sobre el costo por K.</p>
+      <div class="cuenta">
+        <div><span>Costo de obra</span><span>C</span></div>
+        <div><span>+ Gastos generales, beneficio, IIBB, financiación</span><span>K</span></div>
+        <div><span>Precio sin IVA</span><span>C × K</span></div>
+        <div><span>+ IVA</span><span>C × K × IVA</span></div>
+        <div class="total"><span>Total</span><span>C × K × (1 + IVA)</span></div>
+      </div>
+      <p>El K puede ser <strong>aditivo</strong> (1 + 12% + 10%…) o <strong>en cascada</strong>
+        (1,12 × 1,10…). Todo se recalcula al cambiar cualquier porcentaje.</p>
+      <figure>
+        <img src="img/08-presupuesto.png" alt="Pestaña Presupuesto con resumen por rubro, coeficiente K, barra de totales e incidencia">
+        <figcaption><b>El presupuesto.</b> Arriba los datos de la obra; el resumen por rubro con su peso; el K; la
+          barra negra con costo, recargo, precio sin IVA, IVA y total; y la incidencia de materiales, mano de obra y
+          equipos.</figcaption>
+      </figure>
+      <p>Para mandarle el presupuesto al cliente, tildá <strong>mostrar precio de venta</strong> y la planilla pasa
+        a precio × K. <span class="boton">Exportar Excel</span> baja el presupuesto, el cómputo y los insumos con
+        los mismos números de la pantalla.</p>
+      <figure class="chica">
+        <img src="img/25-email.png" alt="Ventana que pide el email antes de bajar el archivo">
+        <figcaption><b>El email, una sola vez.</b> Antes de la primera descarga se pide un mail. El archivo se baja
+          igual; el nombre y la obra son opcionales.</figcaption>
+      </figure>
+    </section>
+
+    <section class="paso" id="precios">
+      <div class="ojo">Paso 4 · Tus precios</div>
+      <h2>Si conseguís el cemento más barato, el tuyo manda</h2>
+      <p>Los precios de SIBRATECH son el punto de partida. En la pestaña Precios, con el buscador vacío, aparecen
+        <strong>los insumos que usa tu obra</strong>: escribí tu precio en la columna <em>Mi precio</em> y todos los
+        análisis se recalculan solos.</p>
+      <figure>
+        <img src="img/09-precios-obra.png" alt="Pestaña Precios mostrando los insumos de la obra">
+        <figcaption><b>Los insumos de tu obra</b>, listos para cargarles precio.</figcaption>
+      </figure>
+      <p>Escribiendo tres letras se busca en toda la base, con el precio de SIBRATECH al lado para comparar.</p>
+      <figure>
+        <img src="img/10-precios-busqueda.png" alt="Búsqueda de insumos por cemento">
+        <figcaption><b>Búsqueda “cemento”</b> en la base. <em>Sin precio</em> marca los que no tienen valor cargado.</figcaption>
+      </figure>
+      <div class="nota roja">
+        <p><strong>El precio va por unidad de compra</strong> y sin IVA: la bolsa de cemento, el tacho de hidrófugo.
+          Es como pasa el precio el corralón. La app hace la cuenta a la unidad de obra (el kilo) sola.</p>
+      </div>
+      <p>También podés subir tu lista entera desde un Excel con <span class="boton">Subir mi lista</span>, y volver a
+        los precios de la base con <span class="boton">Volver a los de SIBRATECH</span>.</p>
+    </section>
+
+    <section class="paso" id="materiales">
+      <div class="ojo">Paso 5 · Materiales</div>
+      <h2>La lista de compras de la obra</h2>
+      <p>Materiales multiplica el rendimiento de cada insumo por tu cómputo y lo junta en una sola lista. La
+        columna <strong>Pedir</strong> ya está en unidad de compra y redondeada para arriba: nadie pide 345 kilos
+        de cemento, se piden 14 bolsas.</p>
+      <figure>
+        <img src="img/11-materiales.png" alt="Pestaña Materiales con cantidad, pedir y unidad de compra">
+        <figcaption><b>La lista de compras.</b> Cantidad en unidad de obra (kg) y lo que hay que pedir en unidad de
+          compra (bolsas).</figcaption>
+      </figure>
+      <p><span class="boton">Bajar formato para pedir precios</span> arma un Excel sólo con los insumos de esta obra,
+        para mandárselo al corralón. Cuando lo devuelven con los precios, se sube en la pestaña Precios.</p>
+    </section>
+
+    <section class="paso" id="plan">
+      <div class="ojo">Paso 6 · Plan de trabajo</div>
+      <h2>El plan sale solo, y se corrige lo que no cuadre</h2>
+      <p>Hay dos caminos. <strong>Calculado</strong>: cada tarea tiene un rendimiento diario y va después de
+        otras, y las fechas salen solas con la ruta crítica. <strong>Gantt rápido</strong>: no se declaran
+        dependencias, se escribe a mano cuánto avanza cada tarea en cada mes.</p>
+      <figure>
+        <img src="img/12-plan-config.png" alt="Configuración del plan: modo, inicio, ritmo, jornada, oficiales, días laborables">
+        <figcaption><b>Cómo se arma.</b> Modo, fecha de inicio, ritmo (cliente o empresa), cuánto más rápido va la
+          empresa, jornada, oficiales por cuadrilla y si se trabaja sábado o domingo.</figcaption>
+      </figure>
+
+      <h3>La duración no hay que cargarla</h3>
+      <p>Las horas de mano de obra ya están en cada análisis. La cuadrilla es <strong>dos oficiales y un
+        ayudante</strong>, y el ritmo lo marca el oficial, porque ayudantes siempre hay de más:</p>
+      <div class="cuenta">
+        <div><span>Azotado hidrófugo: horas de oficial por m²</span><span>0,30 h</span></div>
+        <div><span>2 oficiales × 8 h</span><span>16 h por día</span></div>
+        <div class="total"><span>Rendimiento propuesto</span><span>16 ÷ 0,30 = 53,33 m²/día</span></div>
+      </div>
+      <p>Es un valor propuesto: aparece en gris en la columna <em>Rend. diario</em>. Si en tu obra rinde otra cosa,
+        escribilo y el tuyo manda.</p>
+
+      <h3>Dos planes: el del cliente y el de la empresa</h3>
+      <p>El plan que se firma con el cliente y el plan con el que trabaja la empresa no son el mismo. La empresa se
+        arma un ritmo más rápido para tener colchón: si algo se atrasa, todavía llega al plazo del contrato. Por eso
+        la app programa la obra <strong>dos veces</strong>.</p>
+      <div class="cuenta">
+        <div><span>Rendimiento cliente (mampostería)</span><span>5,61 m²/día</span></div>
+        <div><span>Ritmo empresa</span><span>× 1,30</span></div>
+        <div><span>Rendimiento empresa</span><span>7,29 m²/día</span></div>
+        <div class="total"><span>260 m² de mampostería</span><span>47 días cliente · 36 empresa</span></div>
+      </div>
+      <p>El factor <strong>Ritmo empresa (× cliente)</strong> está en la configuración del plan y viene en 1,30: la
+        empresa se propone hacer un 30% más por día. La tabla muestra el rendimiento del ritmo que elegiste arriba;
+        el otro se calcula con ese factor. Si en una tarea querés otro valor para la empresa, elegí el ritmo
+        <em>Empresa</em> y escribilo.</p>
+
+      <h3>Los feriados</h3>
+      <p>Los días que no se trabajan salen del plazo. Los nacionales se calculan solos —Carnaval y Viernes Santo
+        incluidos, y los trasladables movidos al lunes como manda la ley—. Los <strong>puentes turísticos</strong>
+        salen por decreto cada año, y los provinciales, municipales y los de la obra se cargan en
+        <span class="boton">Ver / editar</span>.</p>
+      <figure>
+        <img src="img/13-feriados.png" alt="Feriados que se están usando en el plan">
+        <figcaption><b>Siempre a la vista</b> los feriados que se están descontando.</figcaption>
+      </figure>
+
+      <h3>Armar el plan solo</h3>
+      <p><span class="boton rojo">Armar el plan solo</span> ordena la obra por rubro: primero se excava, después se
+        funda, la capa aisladora va sobre el cimiento, recién ahí la pared, y la pintura al final. Cada tarea queda
+        atada a las que tiene que esperar.</p>
+      <figure>
+        <img src="img/14-plan-tareas.png" alt="Tabla de tareas con rendimiento, duración, predecesoras, fechas y ruta crítica">
+        <figcaption><b>El plan armado.</b> Arranca en el hito <em>Inicio de obra</em>. La columna <em>Va después
+          de</em> muestra de qué depende cada tarea; <em>Crítica</em> marca las que, si se atrasan, atrasan la obra.
+          Las demás muestran cuántos días de holgura tienen.</figcaption>
+      </figure>
+      <p>Para cambiar de qué depende una tarea, tocá la celda <em>Va después de</em>: se abre la lista de tareas de
+        la obra, que se filtra escribiendo. Las que armarían un círculo quedan deshabilitadas.</p>
+      <figure class="chica">
+        <img src="img/15-predecesoras.png" alt="Ventana para elegir las predecesoras de una tarea">
+        <figcaption><b>Elegir predecesoras.</b> Si no marcás ninguna, la tarea arranca con la obra.</figcaption>
+      </figure>
+      <div class="nota">
+        <p>Toda tarea va después de alguna y antes de alguna: sólo la primera cuelga del <strong>inicio</strong> y
+          sólo la última llega al <strong>fin</strong>. Las sueltas se marcan, porque arrancan todas el primer día y
+          dejan el plazo más corto de lo que es.</p>
+      </div>
+    </section>
+
+    <section class="paso" id="gantt">
+      <div class="ojo">Paso 7 · Gantt</div>
+      <h2>Gantt por mes, look ahead por semana</h2>
+      <p>El Gantt reparte cada tarea en los meses que ocupa, por días hábiles. En rojo, la ruta crítica; abajo,
+        cuánto de la obra cae en cada mes.</p>
+      <figure>
+        <img src="img/16-gantt.png" alt="Gantt mensual de la obra">
+        <figcaption><b>Gantt por mes.</b> El porcentaje dentro de la barra es la parte de la tarea que cae en ese mes.</figcaption>
+      </figure>
+      <p>El <strong>look ahead</strong> abre las próximas semanas en días hábiles por tarea: es lo que se mira en la
+        reunión de obra de los lunes.</p>
+      <figure>
+        <img src="img/17-lookahead.png" alt="Look ahead semanal">
+        <figcaption><b>Look ahead.</b> Elegí desde qué fecha y cuántas semanas.</figcaption>
+      </figure>
+      <p>Y <strong>materiales por mes</strong> abre la lista de compras en el tiempo. El pedido se redondea en cada
+        mes: si en marzo hacen falta 26 kg de cemento y en abril 30, son dos bolsas y dos bolsas.</p>
+      <figure>
+        <img src="img/18-materiales-mes.png" alt="Materiales por mes en unidad de compra">
+        <figcaption><b>Qué comprar y cuándo.</b> <span class="boton">Exportar el plan</span> baja el cronograma, las
+          curvas y esta tabla en un Excel.</figcaption>
+      </figure>
+    </section>
+
+    <section class="paso" id="control">
+      <div class="ojo">Paso 8 · Control de obra</div>
+      <h2>Cómo viene la obra, tarea por tarea</h2>
+      <p>Todo se mide <strong>a un día</strong>, la fecha de corte. Cada corte guarda el avance de cada tarea a esa
+        fecha, y quedan todos. Un corte nuevo arranca con los avances del anterior, así sólo cambiás lo que se
+        movió.</p>
+      <figure>
+        <img src="img/19-corte.png" alt="Fecha de corte y tolerancias">
+        <figcaption><b>El corte.</b> Elegí qué corte mirar, creá uno nuevo y fijá la tolerancia de adelanto y atraso.</figcaption>
+      </figure>
+      <figure>
+        <img src="img/20-resumen.png" alt="Resumen con inicio real, fin cliente, fin empresa, fin esperado y desvío">
+        <figcaption><b>La barra de resumen.</b> Cuándo arrancó la obra, cuándo termina según el plan del cliente y
+          el de la empresa, cuándo va a terminar al ritmo real, y el desvío contra el cliente.</figcaption>
+      </figure>
+
+      <h3>Lo que se carga</h3>
+      <ol class="pasos">
+        <li><strong>Inicio real</strong> de cada tarea, cuando arranca.</li>
+        <li><strong>Avance al corte</strong>, en porcentaje.</li>
+        <li><strong>Fin real</strong>, cuando termina.</li>
+      </ol>
+      <p>Con eso la app calcula el <strong>fin esperado</strong> al ritmo que viene la tarea: si lleva 10 días
+        hábiles y va por el 40%, dura 25. Las que no arrancaron se proyectan desde que terminan las que las
+        preceden, así sale el fin esperado de toda la obra.</p>
+      <figure>
+        <img src="img/21-control-tareas.png" alt="Tabla del control de obra tarea por tarea">
+        <figcaption><b>Tarea por tarea.</b> Estado (no iniciada, en ejecución, finalizada), lo que el plan dice que
+          tendría que llevar a esta fecha contra el ritmo del cliente y de la empresa, y si va adelantada, en fecha o
+          atrasada.</figcaption>
+      </figure>
+
+      <h3>Las curvas</h3>
+      <p>En plata. La del <strong>cliente</strong> va a precio (costo × K, sin IVA), que es lo que se certifica, y
+        termina en el precio de la obra. La de la <strong>empresa</strong> va a costo, con su ritmo más rápido, y
+        termina antes y más abajo, en el costo. La <strong>real</strong> y la <strong>proyectada</strong> van a costo,
+        para compararlas con la de la empresa: la real va llena hasta el corte y la proyectada, punteada, sigue hasta
+        el fin esperado.</p>
+      <div class="nota">
+        <p><strong>Cómo leerla:</strong> si la proyectada va por debajo de la curva de la empresa y termina después,
+          la obra viene atrasada contra el plan interno. Si además termina después de la del cliente, se pasa del
+          plazo del contrato. Sin avance cargado, la proyectada coincide con la de la empresa.</p>
+      </div>
+      <figure>
+        <img src="img/22-curvas.png" alt="Curvas de cliente, empresa, real y proyectada">
+        <figcaption><b>Las cuatro curvas.</b> La línea roja punteada vertical es el corte que estás mirando.</figcaption>
+      </figure>
+      <figure>
+        <img src="img/23-historial.png" alt="Historial de avances por corte">
+        <figcaption><b>El historial.</b> El avance de cada tarea en cada corte, y el de la obra abajo.</figcaption>
+      </figure>
+    </section>
+
+    <section class="paso" id="guardar">
+      <div class="ojo">Paso 9 · Guardar</div>
+      <h2>Bajar el proyecto y seguir el mes que viene</h2>
+      <p><span class="boton rojo">Bajar el proyecto</span> guarda todo en un solo archivo: el cómputo, tus precios,
+        el K, los rendimientos, las predecesoras, el calendario, los inicios y fines reales y el historial de cortes.
+        El mes que viene lo subís con <span class="boton">Subir un proyecto</span>, creás el corte nuevo y seguís
+        donde quedaste.</p>
+      <figure>
+        <img src="img/24-guardar.png" alt="Botones Bajar el proyecto y Subir un proyecto">
+      </figure>
+      <div class="nota roja">
+        <p>Guardá el archivo en un lugar seguro después de cada corte. Lo que está en el navegador se pierde si se
+          borran los datos de navegación.</p>
+      </div>
+
+      <h3>En el teléfono</h3>
+      <p>La app anda en el celular: las pestañas se acomodan y las tablas se desplazan de costado.</p>
+      <figure class="tel">
+        <img src="img/26-telefono.png" alt="PresupuestApp en un teléfono">
+      </figure>
+    </section>
+
+    <footer class="pie">
+      Manual de PresupuestApp · SIBRATECH Constructora · septiembre de 2026. Las capturas son de una obra de
+      ejemplo. Los análisis y precios de la base son una referencia, no una oferta.
+    </footer>
+  </main>
+</div>
+
+</body>
+</html>

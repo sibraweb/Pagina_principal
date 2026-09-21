@@ -361,3 +361,6 @@
 .c-corte { stroke: var(--red-500); stroke-width: 1; stroke-dasharray: 3 3; opacity: .6; }
 .c-m-cliente { background: var(--ink-800); }
 .c-m-empresa { background: repeating-linear-gradient(90deg, var(--gray-500) 0 2px, transparent 2px 5px); }
+.link-manual { font-family: var(--title); font-weight: 600; font-size: .78rem; color: var(--red-500);
+               text-decoration: none; border-bottom: 1px solid var(--red-dim2); }
+.link-manual:hover { border-bottom-color: var(--red-500); }
