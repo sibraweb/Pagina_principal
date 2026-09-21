@@ -41,7 +41,7 @@
         meses: 6,
         sabado: false, domingo: false,   // el sabado NO es laborable
         jornada: 8, frente: 2,           // con esto la duracion sale sola
-        factorEmpresa: 1.2,              // el ritmo empresa, sobre el del cliente
+        factorEmpresa: 1.3,              // el ritmo empresa, sobre el del cliente
         feriadosOff: {},                 // los nacionales que en ESTA obra se trabajan
         feriadosPropios: [],             // provinciales, del pueblo, del gremio
         corte: '',                       // el dia hasta el cual esta medida la obra
@@ -50,6 +50,11 @@
         certificado: {},                 // numero de mes -> % acumulado certificado
         realInicio: '', realFin: ''      // cuando arranco y cuando termino DE VERDAD
       };
+    }
+    /* Los planes guardados antes de que el factor fuera editable traen el
+       1,2 viejo por defecto (o nada): nadie lo eligio, asi que pasa al 1,3. */
+    if (!e.plan.factorElegido && (!e.plan.factorEmpresa || M.safeNum(e.plan.factorEmpresa) === 1.2)) {
+      e.plan.factorEmpresa = 1.3;
     }
     return e.plan;
   }
@@ -208,9 +213,10 @@
       /* Los DOS ritmos se completan siempre: el control de obra compara el
          avance real contra el plan del cliente y contra el de la empresa.
          Si la persona no fijo el de la empresa, se propone el del cliente
-         por un factor -en el Excel de gantt es x1,2: la empresa se arma el
-         plan un 20% mas rapido para tener colchon-. */
-      var fac = M.safeNum(p.factorEmpresa) || 1.2;
+         por un factor: la empresa se arma el plan mas rapido para tener
+         colchon. En el Excel de gantt era x1,2; Juan lo llevo a x1,3
+         (21-09-2026). Se cambia en la configuracion del plan. */
+      var fac = M.safeNum(p.factorEmpresa) || 1.3;
       var rc = M.safeNum((n.cliente || {}).rendimiento), re = M.safeNum((n.empresa || {}).rendimiento);
       var hOf = horasDeOficial(it.code);
       var rAuto = hOf > 0 ? (jornada * oficiales) / hOf : 0;
@@ -319,6 +325,7 @@
     $('plan-inicio').value = p.fechaInicio;
     $('plan-baseline').value = p.baseline;
     $('plan-meses').value = p.meses;
+    $('plan-factor').value = p.factorEmpresa;
     $('plan-jornada').value = p.jornada;
     $('plan-frente').value = p.frente;
     $('plan-sabado').checked = !!p.sabado;
@@ -789,12 +796,13 @@
 
   function conectar() {
     ['plan-modo', 'plan-inicio', 'plan-baseline', 'plan-meses',
-     'plan-jornada', 'plan-frente'].forEach(function (id) {
+     'plan-jornada', 'plan-frente', 'plan-factor'].forEach(function (id) {
       $(id).onchange = function () {
         var p = plan();
         if (id === 'plan-modo') p.modo = this.value;
         else if (id === 'plan-inicio') p.fechaInicio = this.value;
         else if (id === 'plan-baseline') p.baseline = this.value;
+        else if (id === 'plan-factor') { p.factorEmpresa = Math.max(1, Math.min(3, M.safeNum(this.value) || 1.3)); p.factorElegido = true; }
         else if (id === 'plan-jornada') p.jornada = Math.max(1, Math.min(12, M.safeNum(this.value) || 8));
         else if (id === 'plan-frente') p.frente = Math.max(1, Math.min(20, parseInt(this.value, 10) || 2));
         else p.meses = Math.max(1, Math.min(60, parseInt(this.value, 10) || 6));
