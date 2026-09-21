@@ -448,15 +448,29 @@ function pintar(filas, actualizado, respaldo) {
   if (cartel) cartel.textContent = (respaldo ? 'Sin conexión · datos del ' : 'Actualizado ') + fechaAR(actualizado);
 }
 
-fetch('data/indices_resumen.json?t=' + Date.now(), { cache: 'no-store' })
+/* 1) La corrida DIARIA del servidor, directo de la base: el scheduler
+      escribe indices_resumen_publico y esto lee la ultima publicacion.
+      No hace falta generar ni subir nada para que la pagina se actualice.
+   2) Si la base no contesta, el ultimo JSON que se imprimio en data/.
+   3) Si tampoco, la foto guardada en la pagina, diciendo de que fecha es. */
+var SB = { url: 'https://mkbeddulfbqgyutrzyvr.supabase.co',
+           key: 'sb_publishable_ewknnbpVirEVndioUqqDrw_5_N5oyZf' };
+function ultimaDe(filas, campo) {
+  return filas.reduce(function (m, f) { return f[campo] && f[campo] > m ? f[campo] : m; }, '');
+}
+fetch(SB.url + '/rest/v1/rpc/indices_resumen_hoy', {
+  method: 'POST', headers: { apikey: SB.key, 'Content-Type': 'application/json' }, body: '{}'
+})
   .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
   .then(function (filas) {
-    var act = filas.reduce(function (m, f) { return f.actualizado && f.actualizado > m ? f.actualizado : m; }, '');
-    pintar(filas, act, false);
+    if (!filas.length) throw new Error('vacio');
+    pintar(filas, ultimaDe(filas, 'publicado'), false);
   })
   .catch(function () {
-    // respaldo: la ultima foto que quedo guardada en la pagina
-    pintar(RESPALDO, '2026-07-19', true);
+    return fetch('data/indices_resumen.json?t=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (filas) { pintar(filas, ultimaDe(filas, 'actualizado'), false); })
+      .catch(function () { pintar(RESPALDO, '2026-07-19', true); });
   });
 
 var RESPALDO = [
