@@ -326,7 +326,7 @@ a { color: inherit; text-decoration: none; }
           <tr>
             <th>Categoría</th>
             <th>Básico UOCRA</th>
-            <th>Con cargas sociales CAMARCO</th>
+            <th>Con cargas sociales</th>
             <th>Jornada de 8 h con cargas</th>
           </tr>
         </thead>
@@ -363,12 +363,10 @@ a { color: inherit; text-decoration: none; }
     <div class="datos-card-head">
       <div>
         <span class="eyebrow">Una cosa medida contra otra</span>
-        <h2>Cuánto vale la mano de obra, y la obra, contra lo demás</h2>
+        <h2>Cuánto vale la mano de obra, y la construcción, contra lo demás</h2>
       </div>
     </div>
-    <p class="g-bajada" id="r-bajada">Cada línea divide una serie por otra, en base 100. Por encima de 100, la primera
-      subió más que la segunda; por debajo, menos. La mano de obra es el jornal oficial UOCRA; la obra, el costo de
-      construcción CAC de CAMARCO.</p>
+    <p class="g-bajada" id="r-bajada">Cada gráfico divide una serie por otra, en base 100. Por encima de 100, la primera subió más que la segunda; por debajo, menos. La mano de obra es el jornal oficial UOCRA.</p>
     <div class="r-grilla" id="r-grilla"></div>
     <div class="fuente-nota">Cómo se lee: “Mano de obra ÷ acero” en 80 quiere decir que con un jornal hoy se compra
       un 20% menos de acero que en el mes base. El RIPTE es el salario promedio de los trabajadores registrados.
@@ -512,7 +510,15 @@ function pct(v) {
   return '<span class="' + cls + '">' + sign + v.toFixed(2).replace('.', ',') + '%</span>';
 }
 
+/* En pantalla no va la sigla de la fuente: el indicador es el COSTO DE
+   CONSTRUCCION (la fuente queda citada en la nota de abajo). */
+var NOMBRE_VISIBLE = {
+  'cac:COSTO_CONSTRUCCION': 'Costo de construcción',
+  'cac:MATERIALES': 'Costo de construcción · materiales',
+  'cac:MANO_DE_OBRA': 'Costo de construcción · mano de obra'
+};
 function pintar(filas, actualizado, respaldo) {
+  filas.forEach(function (f) { if (NOMBRE_VISIBLE[f.familia]) f.nombre = NOMBRE_VISIBLE[f.familia]; });
   var pos = {};
   ORDEN.forEach(function (k, i) { pos[k] = i; });
   filas.sort(function (a, b) {
@@ -597,9 +603,9 @@ rpc('mano_de_obra_hoy').then(function (filas) {
 
 var SERIES_G = [
   { k: 'uocra_oficial',  n: 'Mano de obra UOCRA (oficial)', c: '#E10600', on: true },
-  { k: 'cac_mo',         n: 'Mano de obra CAC',             c: '#8f0400', on: true },
-  { k: 'cac_materiales', n: 'Materiales CAC',               c: '#1d5fa8', on: true },
-  { k: 'cac_general',    n: 'Costo de construcción CAC',    c: '#1a1a1a', on: false },
+  { k: 'cac_mo',         n: 'Mano de obra (costo de construcción)',             c: '#8f0400', on: true },
+  { k: 'cac_materiales', n: 'Materiales (costo de construcción)',               c: '#1d5fa8', on: true },
+  { k: 'cac_general',    n: 'Costo de construcción',    c: '#1a1a1a', on: false },
   { k: 'icc_general',    n: 'ICC Buenos Aires',             c: '#5A6060', on: false },
   { k: 'cemento',        n: 'Cemento (INDEC)',              c: '#1a7f40', on: true },
   { k: 'acero',          n: 'Acero en barra (INDEC)',       c: '#c8740a', on: true },
@@ -732,13 +738,13 @@ var RELACIONES = [
     lee: function (v) { return 'El jornal compra ' + dif(v) + ' que en ' + BASE_TXT + '.'; } },
   { k: 'mo_acero', a: 'uocra_oficial', b: 'acero',       n: 'Mano de obra ÷ acero', c: '#c8740a',
     lee: function (v) { return 'Con un jornal se compra ' + dif(v) + ' acero que en ' + BASE_TXT + '.'; } },
-  { k: 'mo_cac',   a: 'uocra_oficial', b: 'cac_general', n: 'Mano de obra ÷ costo de obra CAMARCO', c: '#1d5fa8',
+  { k: 'mo_cac',   a: 'uocra_oficial', b: 'cac_general', n: 'Mano de obra ÷ costo de construcción', c: '#1d5fa8',
     lee: function (v) { return 'El jornal subió ' + (v < 100 ? 'menos' : 'más') + ' que el costo de construir: ' + dif(v, true) + '.'; } },
   { k: 'mo_ripte', a: 'uocra_oficial', b: 'ripte',       n: 'Mano de obra ÷ salarios (RIPTE)', c: '#6b4fa0',
     lee: function (v) { return 'El jornal de la construcción contra el salario promedio registrado: ' + dif(v, true) + '.'; } },
-  { k: 'cac_ipc',  a: 'cac_general',   b: 'ipc',         n: 'Costo de obra ÷ inflación', c: '#1a1a1a',
+  { k: 'cac_ipc',  a: 'cac_general',   b: 'ipc',         n: 'Costo de construcción ÷ inflación', c: '#1a1a1a',
     lee: function (v) { return 'Construir sale ' + dif(v, true) + ' que en ' + BASE_TXT + ', descontada la inflación.'; } },
-  { k: 'cac_blue', a: 'cac_general',   b: 'dolar_blue',  n: 'Costo de obra ÷ dólar blue', c: '#1a7f40',
+  { k: 'cac_blue', a: 'cac_general',   b: 'dolar_blue',  n: 'Costo de construcción ÷ dólar blue', c: '#1a7f40',
     lee: function (v) { return 'Medido en dólares blue, construir sale ' + dif(v, true) + ' que en ' + BASE_TXT + '.'; } }
 ];
 var BASE_TXT = '';
@@ -800,7 +806,7 @@ function dibujarRelaciones() {
   document.getElementById('r-grilla').innerHTML = html;
   document.getElementById('r-bajada').textContent = 'Cada gráfico divide una serie por otra, en base 100 a ' + BASE_TXT +
     '. Por encima de 100, la primera subió más que la segunda; por debajo, menos. La mano de obra es el jornal ' +
-    'oficial UOCRA; el costo de obra, el indicador CAC de CAMARCO.';
+    'oficial UOCRA.';
 }
 
 rpc('series_construccion_mensual').then(function (filas) {
