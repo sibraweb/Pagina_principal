@@ -192,31 +192,39 @@
     fechas = fechas.filter(function (f) { return P.aFecha(f).getTime() <= t1; });
     fechas.unshift(desde); fechas.push(hasta);
 
-    var W = 900, H = 320, ml = 50, mr = 16, mt = 14, mb = 44;
+    /* EN PLATA, como se miran: la del CLIENTE es lo que se le certifica
+       (costo x K, sin IVA) y la de la EMPRESA es lo que cuesta hacerla. La
+       real y la proyectada van en lo que se certifica, contra la del
+       cliente. El eje llega al precio total. */
+    var precio = u.calculo.precioSinIva || 0, costoObra = u.calculo.costo || 0;
+    var tope = Math.max(precio, costoObra) || 1;
+    var W = 900, H = 320, ml = 62, mr = 16, mt = 14, mb = 44;
     var X = function (f) { return ml + (P.aFecha(f).getTime() - t0) / (t1 - t0) * (W - ml - mr); };
-    var Y = function (v) { return mt + (1 - Math.max(0, Math.min(1, v))) * (H - mt - mb); };
+    var Y = function (v) { return mt + (1 - Math.max(0, Math.min(1, v / tope))) * (H - mt - mb); };
+    var plata = function (v) { return A.fmtCorto(v); };
     function camino(pts) {
       return pts.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' ');
     }
 
-    var ptsC = fechas.map(function (f) { return [X(f), Y(r.planClienteAl(f))]; });
-    var ptsE = fechas.map(function (f) { return [X(f), Y(r.planEmpresaAl(f))]; });
+    var ptsC = fechas.map(function (f) { return [X(f), Y(r.planClienteAl(f) * precio)]; });
+    var ptsE = fechas.map(function (f) { return [X(f), Y(r.planEmpresaAl(f) * costoObra)]; });
 
     // la real: el avance de obra de cada corte hasta el que se mira
     var ptsR = [[X(desde), Y(0)]];
     c.cortes.filter(function (x) { return x.fecha <= corte.fecha; }).forEach(function (x) {
       var rx = x === corte ? r : calcularCorte(x);
-      if (rx) ptsR.push([X(x.fecha), Y(rx.avanceObra)]);
+      if (rx) ptsR.push([X(x.fecha), Y(rx.avanceObra * precio)]);
     });
     // la proyectada: desde el corte hasta el fin esperado
-    var ptsP = [[X(corte.fecha), Y(r.avanceObra)]];
+    var ptsP = [[X(corte.fecha), Y(r.avanceObra * precio)]];
     fechas.filter(function (f) { return f > corte.fecha && f <= r.finEsperado; })
       .concat(r.finEsperado > corte.fecha ? [r.finEsperado] : [])
-      .forEach(function (f) { ptsP.push([X(f), Y(r.proyectadoAl(f))]); });
+      .forEach(function (f) { ptsP.push([X(f), Y(r.proyectadoAl(f) * precio)]); });
 
-    var grilla = [0, 0.25, 0.5, 0.75, 1].map(function (v) {
+    var grilla = [0, 0.25, 0.5, 0.75, 1].map(function (q) {
+      var v = q * tope;
       return '<line x1="' + ml + '" y1="' + Y(v) + '" x2="' + (W - mr) + '" y2="' + Y(v) + '" class="c-grilla"/>' +
-        '<text x="' + (ml - 8) + '" y="' + (Y(v) + 4) + '" class="c-eje der">' + (v * 100) + '%</text>';
+        '<text x="' + (ml - 8) + '" y="' + (Y(v) + 4) + '" class="c-eje der">' + plata(v) + '</text>';
     }).join('');
     var meses = fechas.slice(1, -1).map(function (f) {
       var d = P.aFecha(f);
@@ -236,9 +244,9 @@
       (ptsP.length > 1 ? '<path d="' + camino(ptsP) + '" class="c-proy"/>' : '') +
       '</svg>' +
       '<div class="c-leyenda">' +
-      '<span><i class="c-m-cliente"></i> Plan cliente · fin ' + fechaAR(r.finCliente) + '</span>' +
-      '<span><i class="c-m-empresa"></i> Plan empresa · fin ' + fechaAR(r.finEmpresa) + '</span>' +
-      '<span><i class="c-m-real"></i> Real (' + num(r.avanceObra * 100) + '% al corte)</span>' +
+      '<span><i class="c-m-cliente"></i> Cliente, precio con K · ' + plata(precio) + ' · fin ' + fechaAR(r.finCliente) + '</span>' +
+      '<span><i class="c-m-empresa"></i> Empresa, a costo · ' + plata(costoObra) + ' · fin ' + fechaAR(r.finEmpresa) + '</span>' +
+      '<span><i class="c-m-real"></i> Real certificado · ' + plata(r.avanceObra * precio) + ' (' + num(r.avanceObra * 100) + '%)</span>' +
       '<span><i class="c-m-proy"></i> Proyectada · fin ' + fechaAR(r.finEsperado) + '</span>' +
       '</div>';
   }
