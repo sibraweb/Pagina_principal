@@ -192,7 +192,13 @@
         pf = aFecha(f.finEsperado);
         if (!pf || pf < manana) pf = manana;
       } else {
+        /* Nunca antes del INICIO de obra: la primera tarea cuelga de ese
+           hito, como en la hoja PROYECCION. Sin esto, con el corte antes del
+           arranque la proyeccion empezaba "mañana" y terminaba ANTES que el
+           plan de la empresa, que es imposible si nada se adelanto. */
+        var inicioObra = aFecha(o.empresa && o.empresa.inicio) || aFecha(o.cliente && o.cliente.inicio);
         var desde = manana;
+        if (inicioObra) { var io_ = cal.proximoHabil(inicioObra); if (io_ > desde) desde = io_; }
         (f.predecesoras || []).forEach(function (idp) {
           var q = proy[idp];
           if (q) { var sig = cal.proximoHabil(sumarDias(q.fin, 1)); if (sig > desde) desde = sig; }

@@ -190,6 +190,31 @@ a { color: inherit; text-decoration: none; }
   .footer-inner { grid-template-columns: 1fr; }
   .footer-bottom { flex-direction: column; }
 }
+
+/* ── mano de obra y graficos ─────────────────────────────── */
+.mo-table td:nth-child(n+2), .mo-table th:nth-child(n+2) { text-align: right; }
+.mo-table td.cat { font-weight: 600; }
+.mo-table td .u { color: var(--gray-500); font-size: .8em; margin-left: 3px; }
+.g-modo { display: flex; border: 1px solid var(--gray-300); }
+.g-btn { font-family: var(--font-display); font-weight: 600; font-size: .72rem; letter-spacing: .06em;
+         text-transform: uppercase; background: #fff; color: var(--gray-700); border: 0; padding: .55rem .9rem; cursor: pointer; }
+.g-btn + .g-btn { border-left: 1px solid var(--gray-300); }
+.g-btn.activo { background: var(--ink-900); color: #fff; }
+.g-btn:focus-visible { outline: 2px solid var(--red-500); outline-offset: 2px; }
+.g-bajada { font-family: var(--font-aux); font-size: .88rem; color: var(--gray-700); margin: 0 0 .6rem; }
+.g-wrap { width: 100%; overflow-x: auto; }
+#g-svg { width: 100%; min-width: 560px; height: auto; display: block; }
+#g-svg .grid { stroke: var(--gray-200); stroke-width: 1; }
+#g-svg .base { stroke: var(--gray-500); stroke-width: 1; stroke-dasharray: 3 3; }
+#g-svg text { font-family: var(--font-display); font-size: 11px; fill: var(--gray-600); }
+#g-svg .fin { font-weight: 600; font-size: 11px; }
+.g-leyenda { display: flex; flex-wrap: wrap; gap: 6px 8px; margin: .8rem 0 .2rem; }
+.g-item { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-display); font-size: .8rem;
+          background: #fff; border: 1px solid var(--gray-300); padding: .35rem .65rem; cursor: pointer; color: var(--ink-800); }
+.g-item i { width: 16px; height: 3px; display: inline-block; }
+.g-item b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.g-item.off { opacity: .4; }
+.g-item.off b { display: none; }
 </style>
 </head>
 <body>
@@ -280,12 +305,45 @@ a { color: inherit; text-decoration: none; }
         <span class="eyebrow">Mano de obra</span>
         <h2>Valor vigente de mano de obra por hora</h2>
       </div>
-      <span class="tag-soon">Próximamente</span>
+      <span class="badge-actualizado" id="mo-fecha"><i data-lucide="refresh-cw"></i> <span>Actualizando…</span></span>
     </div>
-    <div class="card-body-soon">
-      <div class="soon-icon"><i data-lucide="hard-hat"></i></div>
-      <p>Tabla simple con el <strong>jornal vigente por categoría</strong> (Oficial Especializado, Oficial, Medio Oficial, Ayudante, Sereno) según el último convenio UOCRA 76/75 homologado, tomada directamente de nuestra base de datos de índices. La sumamos en la próxima actualización.</p>
+    <div class="table-wrap">
+      <table class="indices-table mo-table">
+        <thead>
+          <tr>
+            <th>Categoría</th>
+            <th>Básico UOCRA</th>
+            <th>Con cargas sociales CAMARCO</th>
+            <th>Jornada de 8 h con cargas</th>
+          </tr>
+        </thead>
+        <tbody id="mo-tbody"></tbody>
+      </table>
     </div>
+    <div class="fuente-nota" id="mo-nota">
+      Básico: convenio UOCRA 76/75. Con cargas: básico × 2,1350, la «Incidencia de las Cargas Sociales» del Trabajo
+      Técnico Nº 185 de CAMARCO (vigencia 1/07/2026). Es el costo hora que usamos para presupuestar.
+    </div>
+  </div>
+
+  <div class="datos-card">
+    <div class="datos-card-head">
+      <div>
+        <span class="eyebrow">Construcción contra inflación</span>
+        <h2>Cuánto subió cada cosa desde <span id="g-base">2016</span></h2>
+      </div>
+      <div class="g-modo" role="group" aria-label="Cómo mostrar">
+        <button type="button" class="g-btn activo" data-modo="nominal">En pesos</button>
+        <button type="button" class="g-btn" data-modo="real">Descontada la inflación</button>
+      </div>
+    </div>
+    <p class="g-bajada" id="g-bajada">Todo en base 100 al mismo mes, para poder comparar. Tocá una serie en la
+      leyenda para mostrarla u ocultarla.</p>
+    <div class="g-wrap"><svg id="g-svg" viewBox="0 0 900 360" role="img" aria-label="Evolución de índices de la construcción"></svg></div>
+    <div class="g-leyenda" id="g-leyenda"></div>
+    <div class="fuente-nota">Fuentes: UOCRA (jornal oficial), CAMARCO (CAC), Dirección de Estadística de la Ciudad
+      (ICC Buenos Aires), INDEC (IPC y precios de obra pública: cemento y acero). “Descontada la inflación” divide
+      cada serie por el IPC: por encima de 100 subió más que la inflación, por debajo, menos.</div>
   </div>
 
 </section>
@@ -472,6 +530,173 @@ fetch(SB.url + '/rest/v1/rpc/indices_resumen_hoy', {
       .then(function (filas) { pintar(filas, ultimaDe(filas, 'actualizado'), false); })
       .catch(function () { pintar(RESPALDO, '2026-07-19', true); });
   });
+
+
+// ================================================================
+// MANO DE OBRA y GRAFICOS — tambien de la corrida diaria del servidor
+//   mano_de_obra_hoy()           basico UOCRA por categoria y el valor
+//                                con cargas CAMARCO (x 2,1350)
+//   series_construccion_mensual() las series mes a mes; la base 100 y el
+//                                deflactado por IPC se hacen aca, a la
+//                                vista, igual que en publico/generar.py
+// ================================================================
+function rpc(nombre) {
+  return fetch(SB.url + '/rest/v1/rpc/' + nombre, {
+    method: 'POST', headers: { apikey: SB.key, 'Content-Type': 'application/json' }, body: '{}'
+  }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+}
+
+var NOMBRE_CAT = { OFICIAL_ESPECIALIZADO: 'Oficial especializado', OFICIAL: 'Oficial',
+                   MEDIO_OFICIAL: 'Medio oficial', AYUDANTE: 'Ayudante', SERENO: 'Sereno' };
+rpc('mano_de_obra_hoy').then(function (filas) {
+  if (!filas.length) throw new Error('vacio');
+  document.getElementById('mo-tbody').innerHTML = filas.map(function (f) {
+    var mes = f.unidad === 'mes';
+    var u = '<span class="u">/' + (mes ? 'mes' : 'h') + '</span>';
+    return '<tr><td class="cat">' + (NOMBRE_CAT[f.categoria] || f.categoria) + '</td>'
+      + '<td>$ ' + numAR(f.basico, 2) + u + '</td>'
+      + '<td><strong>$ ' + numAR(f.con_cargas, 2) + '</strong>' + u + '</td>'
+      + '<td>' + (mes ? '<span class="val-dash">—</span>' : '$ ' + numAR(f.con_cargas * 8, 2)) + '</td></tr>';
+  }).join('');
+  var c = document.querySelector('#mo-fecha span');
+  if (c) c.textContent = 'Básicos vigentes desde ' + fechaAR(filas[0].fecha);
+}).catch(function () {
+  document.getElementById('mo-tbody').innerHTML =
+    '<tr><td colspan="4" class="val-dash">No se pudo leer la base en este momento.</td></tr>';
+});
+
+var SERIES_G = [
+  { k: 'uocra_oficial',  n: 'Mano de obra UOCRA (oficial)', c: '#E10600', on: true },
+  { k: 'cac_mo',         n: 'Mano de obra CAC',             c: '#8f0400', on: true },
+  { k: 'cac_materiales', n: 'Materiales CAC',               c: '#1d5fa8', on: true },
+  { k: 'cac_general',    n: 'Costo de construcción CAC',    c: '#1a1a1a', on: false },
+  { k: 'icc_general',    n: 'ICC Buenos Aires',             c: '#5A6060', on: false },
+  { k: 'cemento',        n: 'Cemento (INDEC)',              c: '#1a7f40', on: true },
+  { k: 'acero',          n: 'Acero en barra (INDEC)',       c: '#c8740a', on: true },
+  { k: 'ipc',            n: 'Inflación (IPC)',              c: '#9AA0A0', on: true, dash: true }
+];
+var G = { modo: 'nominal', datos: null };
+
+function mesAR(iso) {
+  var m = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  return m[+iso.slice(5, 7) - 1] + ' ' + iso.slice(2, 4);
+}
+
+function armarSeries(filas) {
+  // una fila por serie: { clave, meses: { 'YYYY-MM': valor } }
+  var por = {};
+  filas.forEach(function (f) {
+    var d = {}, ks = Object.keys(f.meses || {}).sort();
+    ks.forEach(function (m) { d[m] = Number(f.meses[m]); });
+    /* Los meses sin dato entre el primero y el ultimo arrastran el ultimo
+       valor vigente: el basico UOCRA se carga solo cuando cambia (73 meses
+       de 125), y un salario que no cambio sigue valiendo lo mismo. */
+    if (ks.length) {
+      var y = +ks[0].slice(0, 4), mm = +ks[0].slice(5, 7), fin = ks[ks.length - 1], ult = d[ks[0]];
+      while (true) {
+        var clave = y + '-' + (mm < 10 ? '0' : '') + mm;
+        if (clave > fin) break;
+        if (d[clave] === undefined) d[clave] = ult; else ult = d[clave];
+        mm++; if (mm > 12) { mm = 1; y++; }
+      }
+    }
+    por[f.clave] = d;
+  });
+  // base: el primer mes en que TODAS tienen dato, asi arrancan juntas
+  var claves = SERIES_G.map(function (s) { return s.k; }).filter(function (k) { return por[k]; });
+  var meses = {};
+  claves.forEach(function (k) { Object.keys(por[k]).forEach(function (m) { meses[m] = 1; }); });
+  meses = Object.keys(meses).sort();
+  var base = meses.filter(function (m) { return claves.every(function (k) { return por[k][m] !== undefined; }); })[0];
+  var desde = meses.indexOf(base);
+  meses = meses.slice(desde);
+  var ipc = por.ipc || {};
+  var out = {};
+  claves.forEach(function (k) {
+    var d = por[k], b = d[base];
+    out[k] = {
+      nominal: meses.map(function (m) { return d[m] !== undefined ? d[m] / b * 100 : null; }),
+      real: meses.map(function (m) {
+        return d[m] !== undefined && ipc[m] ? (d[m] / b) / (ipc[m] / ipc[base]) * 100 : null;
+      })
+    };
+  });
+  return { base: base, meses: meses, s: out };
+}
+
+function dibujar() {
+  var D = G.datos; if (!D) return;
+  var svg = document.getElementById('g-svg');
+  var W = 900, H = 360, ml = 52, mr = 150, mt = 14, mb = 30;
+  var vis = SERIES_G.filter(function (s) { return s.on && D.s[s.k]; });
+  var vals = [];
+  vis.forEach(function (s) { D.s[s.k][G.modo].forEach(function (v) { if (v !== null) vals.push(v); }); });
+  if (!vals.length) vals = [100];
+  var lo = Math.min(100, Math.min.apply(null, vals)), hi = Math.max(100, Math.max.apply(null, vals));
+  // escala "linda" y en log cuando es nominal: de 100 a 13.000 no se lee lineal
+  var log = G.modo === 'nominal' && hi / Math.max(lo, 1) > 8;
+  var f = log ? function (v) { return Math.log10(v); } : function (v) { return v; };
+  var y0 = f(lo * (log ? .9 : .95)), y1 = f(hi * (log ? 1.08 : 1.05));
+  var n = D.meses.length;
+  var X = function (i) { return ml + i / (n - 1) * (W - ml - mr); };
+  var Y = function (v) { return mt + (1 - (f(v) - y0) / (y1 - y0)) * (H - mt - mb); };
+
+  var ticks = [];
+  if (log) { [100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000].forEach(function (t) { if (t >= lo * .9 && t <= hi * 1.08) ticks.push(t); }); }
+  else { var paso = Math.pow(10, Math.floor(Math.log10((hi - lo) / 4))); paso = [1, 2, 5, 10].map(function (x) { return x * paso; }).filter(function (x) { return (hi - lo) / x <= 6; })[0] || paso;
+         for (var t = Math.ceil(lo * .95 / paso) * paso; t <= hi * 1.05; t += paso) ticks.push(t); }
+
+  var g = ticks.map(function (t) {
+    return '<line class="' + (t === 100 ? 'base' : 'grid') + '" x1="' + ml + '" x2="' + (W - mr) + '" y1="' + Y(t) + '" y2="' + Y(t) + '"/>' +
+      '<text x="' + (ml - 8) + '" y="' + (Y(t) + 4) + '" text-anchor="end">' + numAR(t, 0) + '</text>';
+  }).join('');
+  var años = D.meses.map(function (m, i) { return m.slice(5) === '01' ? '<text x="' + X(i) + '" y="' + (H - 8) + '" text-anchor="middle">' + m.slice(0, 4) + '</text>' : ''; }).join('');
+
+  // las etiquetas del final, sin pisarse
+  var etiquetas = [];
+  var lineas = vis.map(function (s) {
+    var v = D.s[s.k][G.modo], pts = [], ultimo = null;
+    v.forEach(function (x, i) { if (x !== null) { pts.push((pts.length ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(x).toFixed(1)); ultimo = [i, x]; } });
+    if (ultimo) etiquetas.push({ y: Y(ultimo[1]), x: X(ultimo[0]), v: ultimo[1], c: s.c, n: s.n });
+    return '<path d="' + pts.join(' ') + '" fill="none" stroke="' + s.c + '" stroke-width="' + (s.k === 'ipc' ? 2.5 : 2) + '"' +
+      (s.dash ? ' stroke-dasharray="5 4"' : '') + '/>';
+  }).join('');
+  etiquetas.sort(function (a, b) { return a.y - b.y; });
+  for (var i = 1; i < etiquetas.length; i++) if (etiquetas[i].y - etiquetas[i - 1].y < 14) etiquetas[i].y = etiquetas[i - 1].y + 14;
+  var fin = etiquetas.map(function (e) {
+    return '<circle cx="' + e.x + '" cy="' + Y(e.v) + '" r="3" fill="' + e.c + '"/>' +
+      '<text class="fin" x="' + (W - mr + 8) + '" y="' + (e.y + 4) + '" fill="' + e.c + '">' + numAR(e.v, 0) + ' · ' + e.n.split(' (')[0] + '</text>';
+  }).join('');
+  svg.innerHTML = g + años + lineas + fin;
+
+  document.getElementById('g-leyenda').innerHTML = SERIES_G.filter(function (s) { return D.s[s.k]; }).map(function (s) {
+    var v = D.s[s.k][G.modo].filter(function (x) { return x !== null; }).pop();
+    return '<button type="button" class="g-item' + (s.on ? '' : ' off') + '" data-k="' + s.k + '">' +
+      '<i style="background:' + s.c + '"></i>' + s.n + ' <b>' + numAR(v, 0) + '</b></button>';
+  }).join('');
+  document.getElementById('g-base').textContent = mesAR(D.base);
+  document.getElementById('g-bajada').textContent = G.modo === 'nominal'
+    ? 'En pesos, todo en base 100 a ' + mesAR(D.base) + ' para poder comparar. Escala logarítmica: la misma distancia es el mismo porcentaje de suba. Tocá una serie para mostrarla u ocultarla.'
+    : 'Descontada la inflación, base 100 a ' + mesAR(D.base) + '. Por encima de 100 subió más que el IPC; por debajo, menos. Tocá una serie para mostrarla u ocultarla.';
+}
+
+document.getElementById('g-leyenda').addEventListener('click', function (e) {
+  var b = e.target.closest('[data-k]'); if (!b) return;
+  var s = SERIES_G.filter(function (x) { return x.k === b.getAttribute('data-k'); })[0];
+  s.on = !s.on; dibujar();
+});
+document.querySelectorAll('.g-btn').forEach(function (b) {
+  b.addEventListener('click', function () {
+    G.modo = b.getAttribute('data-modo');
+    document.querySelectorAll('.g-btn').forEach(function (x) { x.classList.toggle('activo', x === b); });
+    dibujar();
+  });
+});
+rpc('series_construccion_mensual').then(function (filas) {
+  G.datos = armarSeries(filas); dibujar();
+}).catch(function () {
+  document.getElementById('g-svg').innerHTML = '<text x="450" y="180" text-anchor="middle">No se pudo leer la base en este momento.</text>';
+});
 
 var RESPALDO = [
   {familia:'uocra', nombre:'UOCRA Oficial', valor:5817, fecha:'2026-07-01', mom:2.00, ytd:30.75, yoy:37.42, a5:1947.88},

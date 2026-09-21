@@ -195,9 +195,10 @@
     /* EN PLATA, como se miran (Juan, 21-09-2026):
          CLIENTE  a PRECIO (costo x K, sin IVA): lo que se le certifica.
          EMPRESA  a COSTO: lo que sale hacer la obra, a su ritmo interno.
-       Por eso la del cliente termina MAS ARRIBA: en el precio. La real y la
-       proyectada van en lo que se certifica, a precio. El eje llega al
-       precio total. */
+         REAL y PROYECTADA a COSTO: se comparan contra el plan de la
+           empresa. A precio iban por arriba de la curva de la empresa aun
+           sin avance, que era mentira.
+       La del cliente termina mas arriba, en el precio. */
     var precio = u.calculo.precioSinIva || 0, costoObra = u.calculo.costo || 0;
     var tope = Math.max(precio, costoObra) || 1;
     var W = 900, H = 320, ml = 62, mr = 16, mt = 14, mb = 44;
@@ -208,20 +209,24 @@
       return pts.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' ');
     }
 
-    var ptsC = fechas.map(function (f) { return [X(f), Y(r.planClienteAl(f) * precio)]; });
-    var ptsE = fechas.map(function (f) { return [X(f), Y(r.planEmpresaAl(f) * costoObra)]; });
+    // cada curva termina cuando llega a su total: sin cola horizontal
+    function cortarEn(fin) {
+      return fechas.filter(function (f) { return f < fin; }).concat(fin ? [fin] : []);
+    }
+    var ptsC = cortarEn(r.finCliente).map(function (f) { return [X(f), Y(r.planClienteAl(f) * precio)]; });
+    var ptsE = cortarEn(r.finEmpresa).map(function (f) { return [X(f), Y(r.planEmpresaAl(f) * costoObra)]; });
 
     // la real: el avance de obra de cada corte hasta el que se mira
     var ptsR = [[X(desde), Y(0)]];
     c.cortes.filter(function (x) { return x.fecha <= corte.fecha; }).forEach(function (x) {
       var rx = x === corte ? r : calcularCorte(x);
-      if (rx) ptsR.push([X(x.fecha), Y(rx.avanceObra * precio)]);
+      if (rx) ptsR.push([X(x.fecha), Y(rx.avanceObra * costoObra)]);
     });
     // la proyectada: desde el corte hasta el fin esperado
-    var ptsP = [[X(corte.fecha), Y(r.avanceObra * precio)]];
+    var ptsP = [[X(corte.fecha), Y(r.avanceObra * costoObra)]];
     fechas.filter(function (f) { return f > corte.fecha && f <= r.finEsperado; })
       .concat(r.finEsperado > corte.fecha ? [r.finEsperado] : [])
-      .forEach(function (f) { ptsP.push([X(f), Y(r.proyectadoAl(f) * precio)]); });
+      .forEach(function (f) { ptsP.push([X(f), Y(r.proyectadoAl(f) * costoObra)]); });
 
     var grilla = [0, 0.25, 0.5, 0.75, 1].map(function (q) {
       var v = q * tope;
@@ -248,8 +253,8 @@
       '<div class="c-leyenda">' +
       '<span><i class="c-m-cliente"></i> Cliente, a precio con K · ' + plata(precio) + ' · fin ' + fechaAR(r.finCliente) + '</span>' +
       '<span><i class="c-m-empresa"></i> Empresa, a costo · ' + plata(costoObra) + ' · fin ' + fechaAR(r.finEmpresa) + '</span>' +
-      '<span><i class="c-m-real"></i> Real certificado · ' + plata(r.avanceObra * precio) + ' (' + num(r.avanceObra * 100) + '%)</span>' +
-      '<span><i class="c-m-proy"></i> Proyectada · fin ' + fechaAR(r.finEsperado) + '</span>' +
+      '<span><i class="c-m-real"></i> Real, a costo · ' + plata(r.avanceObra * costoObra) + ' (' + num(r.avanceObra * 100) + '%)</span>' +
+      '<span><i class="c-m-proy"></i> Proyectada, a costo · fin ' + fechaAR(r.finEsperado) + '</span>' +
       '</div>';
   }
 
