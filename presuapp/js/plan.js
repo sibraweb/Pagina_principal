@@ -158,6 +158,28 @@
         finEsp = cal.finTrasHabiles(ini, t.duracion);      // arranco pero sin avance: el plan
       }
       var espC = esperado(t), espE = esperado(emp[t.id]);
+
+      /* La que NO ARRANCO tambien tiene situacion: se la mide como si
+         empezara hoy con avance cero. Si segun el plan ya tendria que estar
+         en marcha, esta ATRASADA, y se dice cuantos dias habiles lleva sin
+         empezar; si todavia no le toca, esta EN FECHA. Antes decia "sin
+         empezar" y no se sabia si eso era un problema o no. */
+      function arranque(tp) {
+        if (!tp || ini || fin) return null;
+        var fi = aFecha(tp.inicio);
+        if (!fi) return null;
+        if (corte < fi) return { debio: tp.inicio, dias: 0 };
+        return { debio: tp.inicio, dias: cal.habiles(fi, corte) - 1 };
+      }
+      var arrC = arranque(t), arrE = arranque(emp[t.id]);
+
+      /* ⚠ La regla de 3 se dispara con avances chicos: una tarea que lleva 20
+         dias y se carga al 2% "dura" mil dias, y arrastra a todas las que
+         vienen despues. Casi siempre es un avance mal escrito (0,5 queriendo
+         decir 50%). No se corrige solo -puede ser verdad-, pero se avisa. */
+      var alarma = durEst && t.duracion && durEst > 3 * t.duracion
+        ? 'Al ritmo cargado dura ' + durEst + ' días contra ' + t.duracion + ' del plan: revisá el avance.'
+        : '';
       return {
         id: t.id, code: t.code, desc: t.desc, unit: t.unit, qty: t.qty,
         predecesoras: t.predecesoras, duracion: t.duracion,
@@ -167,8 +189,11 @@
         avance: av, estado: estado,
         finEsperado: finEsp ? iso(finEsp) : '', duracionEstimada: durEst,
         esperadoCliente: espC, esperadoEmpresa: espE,
-        situacionCliente: ini || fin || espC > 0 ? situacion(av, espC) : 'sin empezar',
-        situacionEmpresa: ini || fin || espE > 0 ? situacion(av, espE) : 'sin empezar',
+        // el mismo dia que le toca arrancar todavia esta en fecha
+        situacionCliente: arrC ? (arrC.dias > 0 ? 'atrasada' : 'en fecha') : situacion(av, espC),
+        situacionEmpresa: arrE ? (arrE.dias > 0 ? 'atrasada' : 'en fecha') : situacion(av, espE),
+        arranqueCliente: arrC, arranqueEmpresa: arrE,
+        alarmaRitmo: alarma,
         critica: t.critica
       };
     });

@@ -135,6 +135,18 @@
     return '<span class="est ' + cls + '">' + esc(e === 'en ejecucion' ? 'en ejecución' : e) + '</span>';
   }
 
+  /* Para la que no arranco: cuando le tocaba y cuanto hace. */
+  /* Si todavia no le toca pero lo que la precede viene atrasado, ya se
+     sabe que va a arrancar tarde: se dice, aunque siga "en fecha". */
+  function notaArranque(a, f) {
+    if (!a) return '';
+    var txt = a.dias > 0 ? 'debió arrancar el ' + fechaAR(a.debio) + ' · ' + a.dias + ' d'
+      : (f && f.inicioProyectado > a.debio
+          ? 'le toca el ' + fechaAR(a.debio) + ', arrancaría el ' + fechaAR(f.inicioProyectado)
+          : 'arranca el ' + fechaAR(a.debio));
+    return '<br><span class="text-muted" style="font-size:.72rem">' + txt + '</span>';
+  }
+
   function pintarTabla(r, corte) {
     var c = ctl();
     var filas = r.filas.map(function (f) {
@@ -150,13 +162,18 @@
         '<td class="der"><input class="mini" type="number" min="0" max="100" step="1" data-campo="avance" ' +
           'value="' + (av === undefined || av === null ? '' : av) + '" placeholder="%"' +
           (terminada ? ' disabled title="Terminó: el avance es 100%"' : '') + '></td>' +
-        '<td class="fecha"><strong>' + fechaAR(f.finEsperado) + '</strong>' +
-          (f.duracionEstimada ? '<br><span class="text-muted">' + f.duracionEstimada + ' d al ritmo real</span>' : '') + '</td>' +
+        '<td class="fecha"><strong>' + fechaAR(f.finEsperado || f.finProyectado) + '</strong>' +
+          (f.duracionEstimada ? '<br><span class="text-muted">' + f.duracionEstimada + ' d al ritmo real</span>'
+            : (!f.inicioReal ? '<br><span class="text-muted">si arranca ' + fechaAR(f.inicioProyectado) + '</span>' : '')) +
+          (f.alarmaRitmo ? '<br><span class="alarma" title="' + esc(f.alarmaRitmo) + '">⚠ ' + esc(f.alarmaRitmo) + '</span>' : '') +
+          '</td>' +
         '<td><input type="date" data-campo="fin" value="' + esc(real.fin || '') + '"' +
           (finDespues ? ' title="Terminó después de este corte: en este corte todavía no contaba"' : '') + '></td>' +
         '<td>' + tagEstado(f.estado) + '</td>' +
-        '<td class="der">' + num(f.esperadoCliente * 100) + '%<br>' + tagSituacion(f.situacionCliente) + '</td>' +
-        '<td class="der">' + num(f.esperadoEmpresa * 100) + '%<br>' + tagSituacion(f.situacionEmpresa) + '</td>' +
+        '<td class="der">' + num(f.esperadoCliente * 100) + '%<br>' + tagSituacion(f.situacionCliente) +
+          notaArranque(f.arranqueCliente, f) + '</td>' +
+        '<td class="der">' + num(f.esperadoEmpresa * 100) + '%<br>' + tagSituacion(f.situacionEmpresa) +
+          notaArranque(f.arranqueEmpresa, f) + '</td>' +
         '</tr>';
     }).join('');
     $('ctl-tabla').innerHTML = '<div class="tabla-scroll"><table class="grilla ctl-grilla"><thead><tr>' +
