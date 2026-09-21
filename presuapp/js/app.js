@@ -139,7 +139,11 @@
     $('computo-count').textContent = c.items.length + (c.items.length === 1 ? ' renglón' : ' renglones');
     var cont = $('computo-grilla');
     if (!c.items.length) {
-      cont.innerHTML = '<div class="empty-state">Subí tu cómputo o agregá tareas del catálogo</div>';
+      // el cómputo vacío invita a lo primero que hay que hacer
+      cont.innerHTML = '<div class="empty-state vacio-computo">' +
+        '<div>Todavía no hay tareas en la obra.</div>' +
+        '<button class="btn btn-primary btn-grande" data-abrir-base="1">＋ Elegir tareas de la base</button>' +
+        '<div class="text-muted">361 tareas con su análisis, por rubro · o subí tu cómputo desde Excel</div></div>';
       return;
     }
     var sinAnalisis = c.items.filter(function (f) { return f.sinAnalisis; }).length;
@@ -1017,6 +1021,7 @@
     $('computo-grilla').addEventListener('click', function (e) {
       var b = e.target.closest('button');
       if (!b) return;
+      if (b.getAttribute('data-abrir-base')) { $('btn-buscar-tarea').click(); return; }
       if (b.getAttribute('data-borrar')) {
         var id = parseInt(b.getAttribute('data-borrar'), 10);
         estado.items = estado.items.filter(function (x) { return x.id !== id; });
