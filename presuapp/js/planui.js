@@ -41,6 +41,7 @@
         meses: 6,
         sabado: false, domingo: false,   // el sabado NO es laborable
         jornada: 8, frente: 2,           // con esto la duracion sale sola
+        factorEmpresa: 1.2,              // el ritmo empresa, sobre el del cliente
         feriadosOff: {},                 // los nacionales que en ESTA obra se trabajan
         feriadosPropios: [],             // provinciales, del pueblo, del gremio
         corte: '',                       // el dia hasta el cual esta medida la obra
@@ -204,10 +205,21 @@
         var hOfi = horasDeOficial(it.code);
         if (hOfi > 0) { rend = (jornada * oficiales) / hOfi; auto = true; }
       }
+      /* Los DOS ritmos se completan siempre: el control de obra compara el
+         avance real contra el plan del cliente y contra el de la empresa.
+         Si la persona no fijo el de la empresa, se propone el del cliente
+         por un factor -en el Excel de gantt es x1,2: la empresa se arma el
+         plan un 20% mas rapido para tener colchon-. */
+      var fac = M.safeNum(p.factorEmpresa) || 1.2;
+      var rc = M.safeNum((n.cliente || {}).rendimiento), re = M.safeNum((n.empresa || {}).rendimiento);
+      var hOf = horasDeOficial(it.code);
+      var rAuto = hOf > 0 ? (jornada * oficiales) / hOf : 0;
+      var rendC = rc || (base === 'cliente' ? rend : rAuto);
+      var rendE = re || (base === 'empresa' ? rend : (rendC ? rendC * fac : 0));
       out[it.id] = {
         predecesoras: (n.predecesoras || []).slice(),
-        cliente: base === 'cliente' ? { rendimiento: rend, cuadrillas: r.cuadrillas } : (n.cliente || {}),
-        empresa: base === 'empresa' ? { rendimiento: rend, cuadrillas: r.cuadrillas } : (n.empresa || {}),
+        cliente: { rendimiento: rendC, cuadrillas: (n.cliente || {}).cuadrillas },
+        empresa: { rendimiento: rendE, cuadrillas: (n.empresa || {}).cuadrillas || (n.cliente || {}).cuadrillas },
         _auto: auto
       };
     });
@@ -268,14 +280,21 @@
         meses: p.meses, fechaInicio: p.fechaInicio, valores: p.avances
       });
     } else {
-      programacion = P.programar(items, planEfectivo(), {
+      var efectivo = planEfectivo();
+      programacion = P.programar(items, efectivo, {
         calendario: cal(), fechaInicio: p.fechaInicio, baseline: p.baseline
       });
       reparto = P.repartirPorFechas(programacion, { calendario: cal() });
+      // los dos ritmos, para el control de obra
+      var progCliente = p.baseline === 'cliente' ? programacion
+        : P.programar(items, efectivo, { calendario: cal(), fechaInicio: p.fechaInicio, baseline: 'cliente' });
+      var progEmpresa = p.baseline === 'empresa' ? programacion
+        : P.programar(items, efectivo, { calendario: cal(), fechaInicio: p.fechaInicio, baseline: 'empresa' });
     }
 
     var curvas = P.curvas(c, reparto, c.k || 1);
-    ultimo = { calculo: c, programacion: programacion, reparto: reparto, curvas: curvas };
+    ultimo = { calculo: c, programacion: programacion, reparto: reparto, curvas: curvas,
+               cliente: progCliente || null, empresa: progEmpresa || null };
     return ultimo;
   }
 
@@ -287,9 +306,8 @@
       pintarGantt();
       pintarLookAhead();
       pintarFeriados();
-      pintarCorte();
-      pintarSeguimiento();
-      pintarCurvas();
+      // el control de obra (hoja REAL) vive en control.js
+      if (window.ControlUI) window.ControlUI.render();
       pintarMateriales();
       A.guardar();
     });
@@ -652,253 +670,6 @@
     cont.innerHTML = html + '</tbody></table></div>';
   }
 
-  /* ── como viene la obra ───────────────────────────────────────
-     El plan dice cuando TENDRIA que terminar. Esto dice cuando va a
-     terminar al ritmo que se viene trabajando, que casi nunca es el
-     mismo. La cuenta es la de siempre en obra:
-
-        rendimiento real = avance certificado / dias trabajados
-        dias que faltan  = lo que falta / rendimiento real
-
-     Todo en dias HABILES, que son los que se trabaja. Si la obra
-     arranco tarde, el atraso ya esta contado: se mide desde el
-     arranque real, no desde el que decia el plan.                   */
-  function seguimiento() {
-    var p = plan();
-    if (!ultimo) return null;
-
-    var c = ultimo.curvas, meses = c.meses, calen = cal();
-    var finPrevisto = ultimo.programacion ? ultimo.programacion.fin
-                    : (meses.length ? meses[meses.length - 1].fin : '');
-
-    // el ultimo mes con certificado cargado
-    var iUlt = -1, avance = 0;
-    meses.forEach(function (m, i) {
-      var v = p.certificado[m.numero];
-      if (v === undefined || v === null || v === '') return;
-      iUlt = i; avance = M.safeNum(v);
-    });
-
-    var arranque = P.aFecha(p.realInicio) ||
-                   P.aFecha(ultimo.programacion ? ultimo.programacion.primerDia : p.fechaInicio);
-    var res = {
-      arranque: P.iso(arranque),
-      finPrevisto: finPrevisto,
-      finReal: p.realFin || '',
-      avance: iUlt >= 0 ? avance : null,
-      mesUltimo: iUlt >= 0 ? meses[iUlt] : null,
-      finEstimado: '', desvioDias: null, ritmo: null, diasTrabajados: 0, diasQueFaltan: 0
-    };
-
-    if (p.realFin) {                       // ya termino: no hay nada que estimar
-      res.finEstimado = p.realFin;
-      res.desvioDias = calen.habiles(P.aFecha(finPrevisto), P.aFecha(p.realFin)) - 1;
-      if (P.aFecha(p.realFin) < P.aFecha(finPrevisto)) {
-        res.desvioDias = -(calen.habiles(P.aFecha(p.realFin), P.aFecha(finPrevisto)) - 1);
-      }
-      res.cerrada = true;
-      return res;
-    }
-
-    if (iUlt < 0 || avance <= 0) return res;   // sin certificado no se estima nada
-
-    /* Se mide hasta la FECHA DE CORTE. Antes se usaba el fin del ultimo
-       mes con certificado, que es una suposicion: si el certificado
-       cierra el 20, contar hasta el 30 regala diez dias de obra. */
-    var corte = P.aFecha(fechaCorte());
-    if (!corte || corte < arranque) corte = P.aFecha(meses[iUlt].fin);
-    res.corte = P.iso(corte);
-    res.diasTrabajados = calen.habiles(arranque, corte);
-    if (res.diasTrabajados <= 0) return res;
-
-    res.ritmo = avance / res.diasTrabajados;           // % por dia habil
-    if (avance >= 100) { res.finEstimado = P.iso(corte); res.diasQueFaltan = 0; }
-    else {
-      res.diasQueFaltan = Math.ceil((100 - avance) / res.ritmo);
-      res.finEstimado = P.iso(calen.finTrasHabiles(calen.proximoHabil(new Date(corte.getTime() + 86400000)),
-                                                   res.diasQueFaltan));
-    }
-    var fp = P.aFecha(finPrevisto), fe = P.aFecha(res.finEstimado);
-    res.desvioDias = fe >= fp ? (calen.habiles(fp, fe) - 1) : -(calen.habiles(fe, fp) - 1);
-    return res;
-  }
-
-  function pintarCorte() {
-    var p = plan();
-    $('corte-fecha').value = fechaCorte();
-    var sg = seguimiento();
-    $('corte-resumen').textContent = sg && sg.diasTrabajados
-      ? sg.diasTrabajados + ' días hábiles desde el arranque'
-      : 'sin medir';
-    $('dias-trabajados').textContent = sg && sg.diasTrabajados ? sg.diasTrabajados + ' d' : '—';
-    // el avance a la fecha de corte: el del ultimo mes certificado
-    if (sg && sg.avance !== null && $('corte-avance').value === '') {
-      $('corte-avance').value = sg.avance;
-    }
-  }
-
-  function pintarSeguimiento() {
-    var p = plan(), sg = seguimiento();
-    $('real-inicio').value = p.realInicio || '';
-    $('real-fin').value = p.realFin || '';
-    if (!sg) {
-      $('fin-previsto').textContent = $('fin-estimado').textContent = $('desvio-plazo').textContent = '—';
-      $('obra-estado').textContent = 'sin datos';
-      $('obra-explicacion').innerHTML = '';
-      return;
-    }
-    $('fin-previsto').textContent = sg.finPrevisto || '—';
-    $('fin-estimado').textContent = sg.finEstimado || '—';
-
-    if (sg.desvioDias === null) {
-      $('desvio-plazo').innerHTML = '<span class="text-muted">falta el certificado</span>';
-      $('obra-estado').textContent = 'sin certificar';
-      $('obra-explicacion').innerHTML = '';
-      return;
-    }
-    var d = sg.desvioDias;
-    var clase = d > 0 ? 'c-mal' : 'c-ok';
-    var texto = d === 0 ? 'en fecha' : (d > 0 ? Math.abs(d) + ' días de atraso' : Math.abs(d) + ' días de adelanto');
-    $('desvio-plazo').innerHTML = '<span class="' + clase + '">' + texto + '</span>';
-    $('obra-estado').textContent = sg.cerrada ? 'obra terminada'
-      : (sg.avance !== null ? num(sg.avance) + '% certificado' : 'sin certificar');
-
-    $('obra-explicacion').innerHTML = sg.cerrada
-      ? '<div class="explicacion">La obra terminó el <strong>' + esc(sg.finReal) + '</strong>. ' +
-        'El plan decía ' + esc(sg.finPrevisto) + '.</div>'
-      : (sg.ritmo
-        ? '<div class="explicacion">Desde el <strong>' + esc(sg.arranque) + '</strong> se trabajaron ' +
-          '<strong>' + sg.diasTrabajados + ' días hábiles</strong> y se certificó <strong>' +
-          num(sg.avance) + '%</strong>: son <strong>' + num(sg.ritmo) + '% por día</strong>. ' +
-          'A ese ritmo, el ' + num(100 - sg.avance) + '% que falta lleva <strong>' + sg.diasQueFaltan +
-          ' días</strong> más.</div>'
-        : '');
-  }
-
-  /* ── las curvas ────────────────────────────────────────────────
-     Tres lecturas del mismo plan. La real se dibuja CONTINUA hasta el
-     ultimo mes con certificado cargado y PUNTEADA de ahi en adelante:
-     lo que ya paso es un hecho, lo que viene es una proyeccion, y la
-     linea tiene que decir cual es cual sin que haya que preguntar.   */
-  function pintarCurvas() {
-    var cont = $('plan-curvas');
-    if (!ultimo) { cont.innerHTML = '<div class="empty-state">Sin plan todavía</div>'; return; }
-
-    var c = ultimo.curvas, p = plan();
-    var meses = c.meses;
-    var W = 900, H = 320, ml = 62, mr = 16, mt = 16, mb = 46;
-    var ancho = W - ml - mr, alto = H - mt - mb;
-    var x = function (i) { return ml + (meses.length < 2 ? ancho / 2 : (i / (meses.length - 1)) * ancho); };
-    var y = function (pct) { return mt + alto - (Math.max(0, Math.min(110, pct)) / 110) * alto; };
-
-    // certificado: acumulado que carga la persona
-    var cert = [], ultimoCert = -1;
-    meses.forEach(function (m, i) {
-      var v = p.certificado[m.numero];
-      if (v === undefined || v === null || v === '') { cert.push(null); return; }
-      cert.push(M.safeNum(v));
-      ultimoCert = i;
-    });
-
-    function camino(puntos) {
-      return puntos.map(function (pt, i) { return (i ? 'L' : 'M') + pt[0].toFixed(1) + ' ' + pt[1].toFixed(1); }).join(' ');
-    }
-    var ptsCliente = meses.map(function (m, i) { return [x(i), y(m.avanceAcumPct)]; });
-
-    /* La real: lo certificado, y desde ahi la proyeccion AL RITMO REAL,
-       no al del plan. Si se viene avanzando 3 puntos por mes, la
-       punteada avanza 3 puntos por mes — no repite la curva del plan
-       corrida hacia abajo, que haria terminar en fecha a una obra que
-       no va a terminar en fecha. */
-    var ptsReal = [], ptsProy = [];
-    var sg = seguimiento();
-    if (ultimoCert >= 0) {
-      for (var i = 0; i <= ultimoCert; i++) if (cert[i] !== null) ptsReal.push([x(i), y(cert[i])]);
-      ptsProy.push([x(ultimoCert), y(cert[ultimoCert])]);
-
-      // cuanto se avanza por mes al ritmo real
-      var porMes = null;
-      if (sg && sg.ritmo) {
-        var habilesPorMes = ultimo.reparto.meses.map(function (m) {
-          return cal().habiles(P.aFecha(m.inicio), P.aFecha(m.fin));
-        });
-        porMes = habilesPorMes;
-      }
-      var acum = cert[ultimoCert];
-      for (var j = ultimoCert + 1; j < meses.length && acum < 100; j++) {
-        acum += (sg && sg.ritmo && porMes) ? sg.ritmo * porMes[j]
-                                           : (meses[j].avanceAcumPct - meses[j - 1].avanceAcumPct);
-        ptsProy.push([x(j), y(Math.min(100, acum))]);
-      }
-      // si al ritmo real no llega al 100% dentro del plan, la punteada
-      // muere en el borde y el fin estimado lo dice en numeros arriba
-    }
-
-    var grilla = '';
-    [0, 25, 50, 75, 100].forEach(function (v) {
-      grilla += '<line x1="' + ml + '" y1="' + y(v) + '" x2="' + (W - mr) + '" y2="' + y(v) +
-        '" class="c-grilla"/><text x="' + (ml - 8) + '" y="' + (y(v) + 4) + '" class="c-eje der">' + v + '%</text>';
-    });
-    var ejeX = meses.map(function (m, i) {
-      return '<text x="' + x(i) + '" y="' + (H - mb + 18) + '" class="c-eje medio">' + esc(m.label) + '</text>' +
-             '<text x="' + x(i) + '" y="' + (H - mb + 32) + '" class="c-eje medio tenue">' + fmtCorto(m.clienteAcum) + '</text>';
-    }).join('');
-
-    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="curvas" role="img" ' +
-      'aria-label="Curvas de inversión del plan">' + grilla + ejeX +
-      '<path d="' + camino(ptsCliente) + '" class="c-plan"/>' +
-      ptsCliente.map(function (pt) { return '<circle cx="' + pt[0].toFixed(1) + '" cy="' + pt[1].toFixed(1) + '" r="3" class="c-plan-pt"/>'; }).join('') +
-      (ptsReal.length > 1 ? '<path d="' + camino(ptsReal) + '" class="c-real"/>' : '') +
-      (ptsReal.length ? ptsReal.map(function (pt) { return '<circle cx="' + pt[0].toFixed(1) + '" cy="' + pt[1].toFixed(1) + '" r="3.5" class="c-real-pt"/>'; }).join('') : '') +
-      (ptsProy.length > 1 ? '<path d="' + camino(ptsProy) + '" class="c-proy"/>' : '') +
-      '</svg>';
-
-    var leyenda = '<div class="c-leyenda">' +
-      '<span><i class="c-m-plan"></i> Plan (avance previsto)</span>' +
-      '<span><i class="c-m-real"></i> Certificado — línea llena</span>' +
-      '<span><i class="c-m-proy"></i> Proyectado — punteada</span>' +
-      (ultimoCert >= 0
-        ? '<span class="' + (cert[ultimoCert] >= meses[ultimoCert].avanceAcumPct ? 'c-ok' : 'c-mal') + '">' +
-          (cert[ultimoCert] >= meses[ultimoCert].avanceAcumPct ? 'adelantado ' : 'atrasado ') +
-          num(Math.abs(cert[ultimoCert] - meses[ultimoCert].avanceAcumPct)) + ' puntos</span>'
-        : '<span class="text-muted">cargá el certificado de cada mes para ver la curva real</span>') +
-      '</div>';
-
-    cont.innerHTML = svg + leyenda;
-    pintarTablaCurvas(cert);
-  }
-
-  function pintarTablaCurvas(cert) {
-    var c = ultimo.curvas;
-    var filas = c.meses.map(function (m, i) {
-      var v = cert[i];
-      return '<tr><td>' + esc(m.label) + '</td>' +
-        '<td class="der">' + num(m.avancePct) + '%</td>' +
-        '<td class="der"><strong>' + num(m.avanceAcumPct) + '%</strong></td>' +
-        '<td class="der">' + num(m.empresa) + '</td>' +
-        '<td class="der">' + num(m.cliente) + '</td>' +
-        '<td class="der">' + num(m.clienteAcum) + '</td>' +
-        '<td class="der"><input class="mini" type="number" step="any" min="0" max="120" ' +
-          'data-cert="' + m.numero + '" value="' + (v === null || v === undefined ? '' : v) +
-          '" placeholder="—"></td>' +
-        '<td class="der">' + (v === null || v === undefined ? '<span class="text-muted">·</span>'
-          : '<span class="' + (v >= m.avanceAcumPct ? 'c-ok' : 'c-mal') + '">' +
-            (v >= m.avanceAcumPct ? '+' : '') + num(v - m.avanceAcumPct) + '</span>') + '</td>' +
-        '</tr>';
-    }).join('');
-
-    $('plan-curvas-tabla').innerHTML =
-      '<div class="tabla-scroll" style="margin-top:14px"><table class="grilla"><thead><tr>' +
-      '<th>Mes</th><th class="der">Avance</th><th class="der">Acumulado</th>' +
-      '<th class="der">Costo empresa</th><th class="der">Certifica cliente</th><th class="der">Acum. cliente</th>' +
-      '<th class="der">Certificado real %</th><th class="der">Desvío</th>' +
-      '</tr></thead><tbody>' + filas + '</tbody>' +
-      '<tfoot><tr><td colspan="3" class="der"><strong>TOTAL</strong></td>' +
-      '<td class="der"><strong>' + num(c.totalEmpresa) + '</strong></td>' +
-      '<td class="der"><strong>' + num(c.totalCliente) + '</strong></td>' +
-      '<td colspan="3"></td></tr></tfoot></table></div>';
-  }
-
   /* ── materiales por mes ────────────────────────────────────── */
   function pintarMateriales() {
     var cont = $('plan-materiales');
@@ -1066,24 +837,6 @@
       render().then(pintarFeriados);
     };
 
-    // la fecha de corte
-    $('corte-fecha').onchange = function () { plan().corte = this.value; render(); };
-    $('corte-avance').onchange = function () {
-      // el avance a la fecha de corte se guarda contra el mes en que cae
-      var p = plan(), c = fechaCorte();
-      if (!ultimo) return;
-      var m = ultimo.reparto.meses.filter(function (x) { return c >= x.inicio && c <= x.fin; })[0]
-           || ultimo.reparto.meses[ultimo.reparto.meses.length - 1];
-      if (!m) return;
-      if (this.value === '') delete p.certificado[m.numero];
-      else p.certificado[m.numero] = M.safeNum(this.value);
-      render();
-    };
-
-    // como viene la obra
-    $('real-inicio').onchange = function () { plan().realInicio = this.value; render(); };
-    $('real-fin').onchange = function () { plan().realFin = this.value; render(); };
-
     /* Bajar y volver a subir: el mes que viene se carga el avance nuevo
        y se sigue. Sin esto habria que volver a cargar rendimientos y
        predecesoras de cero, que es el trabajo caro de todo esto. */
@@ -1140,15 +893,7 @@
       renderConRespiro();
     });
 
-    // el certificado de cada mes
-    $('plan-curvas-tabla').addEventListener('input', function (e) {
-      var mes = e.target.getAttribute && e.target.getAttribute('data-cert');
-      if (!mes) return;
-      var p = plan();
-      if (e.target.value === '') delete p.certificado[mes];
-      else p.certificado[mes] = M.safeNum(e.target.value);
-      conRespiro(function () { pintarCurvas(); A.guardar(); }, 400)();
-    });
+
   }
 
   /* La pantalla se dibuja cuando se entra, no antes: armar el gantt de
@@ -1162,7 +907,10 @@
     },
     render: render,
     recalcular: recalcular,
-    estado: function () { return ultimo; }
+    estado: function () { return ultimo; },
+    plan: plan,
+    calendario: cal,
+    feriadosActivos: feriadosActivos
   };
 
   conectar();

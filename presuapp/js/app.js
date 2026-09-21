@@ -954,7 +954,8 @@
     document.querySelectorAll('.tab').forEach(function (t) { t.classList.toggle('active', t.getAttribute('data-tab') === nombre); });
     $('tab-' + nombre).classList.add('active');
     if (nombre === 'control') renderControl();
-    if (nombre === 'plan' && window.PlanUI) window.PlanUI.mostrar();
+    // el control de obra se mide contra el plan: al entrar se recalculan los dos
+    if ((nombre === 'plan' || nombre === 'control-obra') && window.PlanUI) window.PlanUI.mostrar();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 

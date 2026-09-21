@@ -98,6 +98,187 @@
     };
   }
 
+  /* ── CONTROL DE OBRA: la hoja REAL ────────────────────────────
+     Es la logica de la hoja REAL del Excel de gantt, tarea por tarea:
+
+       ESTADO          sin inicio real -> no iniciada; con inicio y sin
+                       fin -> en ejecucion; con fin real -> finalizada.
+       FIN ESPERADO    si no termino: al ritmo que viene,
+                          duracion = dias habiles trabajados / avance
+                          fin      = inicio real + esa duracion
+                       Una tarea que lleva 10 dias y va por el 40%,
+                       dura 25 dias. Cuando termina, manda la fecha real.
+       AVANCE ESPERADO lo que el plan dice que tendria que llevar al dia
+                       de corte, contra el ritmo CLIENTE y el EMPRESA.
+       SITUACION       adelantada / en fecha / atrasada, con tolerancia.
+
+     El historial vive afuera (una lista de cortes, cada uno con el
+     avance de cada tarea): esto calcula UN corte. Con eso se proyecta
+     la obra entera -las que no arrancaron empiezan cuando terminan las
+     que las preceden, ya no cuando decia el plan- y sale el FIN
+     ESPERADO DE OBRA, que es el que importa.                         */
+  function controlar(o) {
+    var cal = o.calendario || calendario({});
+    var corte = aFecha(o.corte) || aFecha(new Date());
+    var real = o.real || {}, avances = o.avances || {};
+    var tol = o.tolerancia || { adelanto: 5, atraso: 5 };      // en puntos
+    var costo = {}, total = 0;
+    (o.items || []).forEach(function (it) { costo[it.id] = M.safeNum(it.costoTotal); total += costo[it.id]; });
+    var emp = {};
+    ((o.empresa && o.empresa.tareas) || []).forEach(function (t) { emp[t.id] = t; });
+
+    function esperado(t) {
+      if (!t) return 0;
+      var fi = aFecha(t.inicio), ff = aFecha(t.fin);
+      if (!fi || !ff || corte < fi) return 0;
+      if (corte >= ff) return 1;
+      var n = cal.habiles(fi, ff);
+      return n ? cal.habiles(fi, corte) / n : 0;
+    }
+    function situacion(av, esp) {
+      var d = (av - esp) * 100;
+      if (d > tol.adelanto) return 'adelantada';
+      if (d < -tol.atraso) return 'atrasada';
+      return 'en fecha';
+    }
+
+    var tareas = (o.cliente && o.cliente.tareas) || [];
+    var filas = tareas.map(function (t) {
+      var r = real[t.id] || {};
+      var ini = aFecha(r.inicio), fin = aFecha(r.fin);
+      var av = fin ? 1 : Math.max(0, Math.min(1, M.safeNum(avances[t.id]) / 100));
+      var estado = fin ? 'finalizada' : (ini ? 'en ejecucion' : 'no iniciada');
+      var finEsp = null, durEst = null;
+      if (fin) finEsp = fin;
+      else if (ini && av > 0) {
+        var trab = cal.habiles(ini, corte);
+        durEst = Math.max(1, Math.ceil(trab / av));
+        finEsp = cal.finTrasHabiles(ini, durEst);
+      } else if (ini) {
+        finEsp = cal.finTrasHabiles(ini, t.duracion);      // arranco pero sin avance: el plan
+      }
+      var espC = esperado(t), espE = esperado(emp[t.id]);
+      return {
+        id: t.id, code: t.code, desc: t.desc, unit: t.unit, qty: t.qty,
+        predecesoras: t.predecesoras, duracion: t.duracion,
+        inicioPlan: t.inicio, finPlan: t.fin,
+        inicioEmpresa: emp[t.id] ? emp[t.id].inicio : '', finEmpresa: emp[t.id] ? emp[t.id].fin : '',
+        inicioReal: ini ? iso(ini) : '', finReal: fin ? iso(fin) : '',
+        avance: av, estado: estado,
+        finEsperado: finEsp ? iso(finEsp) : '', duracionEstimada: durEst,
+        esperadoCliente: espC, esperadoEmpresa: espE,
+        situacionCliente: ini || fin || espC > 0 ? situacion(av, espC) : 'sin empezar',
+        situacionEmpresa: ini || fin || espE > 0 ? situacion(av, espE) : 'sin empezar',
+        critica: t.critica
+      };
+    });
+
+    /* ── la proyeccion de la obra ──────────────────────────────────
+       En orden del plan (una predecesora siempre arranca antes que su
+       sucesora). La terminada queda donde termino; la que esta en
+       marcha, en su fin esperado -y si ese fin ya paso sin que se haya
+       cerrado, no puede terminar antes de mañana-; la que no arranco,
+       el dia habil siguiente al corte o al fin de sus predecesoras, lo
+       que venga despues, con su duracion de plan.                   */
+    var manana = cal.proximoHabil(sumarDias(corte, 1));
+    var proy = {};
+    filas.slice().sort(function (a, b) {
+      return a.inicioPlan < b.inicioPlan ? -1 : a.inicioPlan > b.inicioPlan ? 1 : 0;
+    }).forEach(function (f) {
+      var pi, pf;
+      if (f.finReal) { pi = aFecha(f.inicioReal) || aFecha(f.finReal); pf = aFecha(f.finReal); }
+      else if (f.inicioReal) {
+        pi = aFecha(f.inicioReal);
+        pf = aFecha(f.finEsperado);
+        if (!pf || pf < manana) pf = manana;
+      } else {
+        var desde = manana;
+        (f.predecesoras || []).forEach(function (idp) {
+          var q = proy[idp];
+          if (q) { var sig = cal.proximoHabil(sumarDias(q.fin, 1)); if (sig > desde) desde = sig; }
+        });
+        // como en el modulo de obra: la que no arranco se proyecta con la
+        // duracion teorica EMPRESA, que es el ritmo con el que se trabaja
+        pi = desde; pf = cal.finTrasHabiles(pi, (emp[f.id] && emp[f.id].duracion) || f.duracion);
+      }
+      proy[f.id] = { inicio: pi, fin: pf };
+      f.inicioProyectado = iso(pi); f.finProyectado = iso(pf);
+    });
+
+    var finObra = null, iniReal = null;
+    filas.forEach(function (f) {
+      var pf = aFecha(f.finProyectado);
+      if (pf && (!finObra || pf > finObra)) finObra = pf;
+      var ir = aFecha(f.inicioReal);
+      if (ir && (!iniReal || ir < iniReal)) iniReal = ir;
+    });
+
+    // avance de OBRA, ponderado por plata: lo mismo que se certifica
+    function ponderado(clave) {
+      if (!total) return 0;
+      return filas.reduce(function (s, f) { return s + (costo[f.id] || 0) * f[clave]; }, 0) / total;
+    }
+
+    /* El avance de obra proyectado a una fecha: lo hecho al corte, mas lo
+       que le falta a cada tarea repartido parejo en sus dias habiles
+       proyectados que caen despues del corte. */
+    function proyectadoAl(fecha) {
+      var x = aFecha(fecha);
+      if (!total || !x) return 0;
+      if (x <= corte) return ponderado('avance');
+      var s = 0;
+      filas.forEach(function (f) {
+        var c = costo[f.id] || 0;
+        var hecho = f.avance, falta = 1 - hecho;
+        if (falta <= 0) { s += c; return; }
+        var pi = aFecha(f.inicioProyectado), pf = aFecha(f.finProyectado);
+        var desde = pi > manana ? pi : manana;
+        var n = cal.habiles(desde, pf);
+        var llevado = n ? cal.habiles(desde, x < pf ? x : pf) / n : (x >= pf ? 1 : 0);
+        s += c * (hecho + falta * Math.max(0, Math.min(1, llevado)));
+      });
+      return s / total;
+    }
+    /* El avance del plan a una fecha (cliente o empresa). */
+    function planAl(tareasPlan, fecha) {
+      var x = aFecha(fecha);
+      if (!total || !x) return 0;
+      return tareasPlan.reduce(function (s, t) {
+        var fi = aFecha(t.inicio), ff = aFecha(t.fin);
+        var fr = !fi || x < fi ? 0 : x >= ff ? 1 : (cal.habiles(fi, x) / (cal.habiles(fi, ff) || 1));
+        return s + (costo[t.id] || 0) * fr;
+      }, 0) / total;
+    }
+
+    var finCliente = (o.cliente && o.cliente.fin) || '';
+    var finEmpresa = (o.empresa && o.empresa.fin) || '';
+    var desvio = null;
+    if (finObra && finCliente) {
+      var fc = aFecha(finCliente);
+      desvio = finObra >= fc ? cal.habiles(fc, finObra) - 1 : -(cal.habiles(finObra, fc) - 1);
+    }
+
+    return {
+      corte: iso(corte), filas: filas,
+      inicioReal: iniReal ? iso(iniReal) : '',
+      finCliente: finCliente, finEmpresa: finEmpresa,
+      finEsperado: finObra ? iso(finObra) : '',
+      desvioDias: desvio,
+      avanceObra: ponderado('avance'),
+      esperadoCliente: ponderado('esperadoCliente'),
+      esperadoEmpresa: ponderado('esperadoEmpresa'),
+      cuentan: {
+        finalizadas: filas.filter(function (f) { return f.estado === 'finalizada'; }).length,
+        enEjecucion: filas.filter(function (f) { return f.estado === 'en ejecucion'; }).length,
+        noIniciadas: filas.filter(function (f) { return f.estado === 'no iniciada'; }).length,
+        atrasadas: filas.filter(function (f) { return f.situacionCliente === 'atrasada'; }).length
+      },
+      proyectadoAl: proyectadoAl,
+      planClienteAl: function (f) { return planAl(tareas, f); },
+      planEmpresaAl: function (f) { return planAl((o.empresa && o.empresa.tareas) || [], f); }
+    };
+  }
+
   /* ── FERIADOS ─────────────────────────────────────────────────
      Un plan que cuenta el 25 de mayo como dia trabajado miente, y
      miente para el lado peor: promete una fecha que no se va a cumplir.
@@ -585,6 +766,7 @@
     aFecha: aFecha, iso: iso, armarMeses: armarMeses,
     materialesPorMesDesde: materialesPorMesDesde,
     calendario: calendario,
+    controlar: controlar,
     feriadosArgentina: feriadosArgentina,
     feriadosEntre: feriadosEntre,
     duracionTarea: duracionTarea,

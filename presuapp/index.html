@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700;800&family=Libre+Franklin:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=20260921100548">
-<link rel="stylesheet" href="css/extra.css?v=20260921100548">
+<link rel="stylesheet" href="css/app.css?v=20260921101924">
+<link rel="stylesheet" href="css/extra.css?v=20260921101924">
 </head>
 <body>
 
@@ -356,68 +356,76 @@
     <div class="flex-row mb8">
       <div class="card-title" style="margin:0">FECHA DE CORTE</div>
       <div class="spacer"></div>
-      <span class="badge" id="corte-resumen">—</span>
+      <span class="badge" id="ctl-cortes-cuenta">—</span>
     </div>
-    <p class="text-muted mb8">Todo lo que sigue se mide <strong>a un día</strong>. Sin decir a qué día,
-      un 60% certificado no dice nada: contra el calendario puede ser un adelanto o un atraso de un mes.
-      Es el día hasta el cual está medida la obra, normalmente el cierre del último certificado.</p>
+    <p class="text-muted mb8">Todo se mide <strong>a un día</strong>. Cada corte guarda el avance de cada tarea
+      a esa fecha, y quedan todos: el historial es lo que después arma la curva real. Un corte nuevo arranca
+      con los avances del anterior, así sólo cambiás lo que se movió.</p>
     <div class="plan-config">
       <div class="obra-field">
-        <label>Medido al</label>
-        <input type="date" id="corte-fecha">
+        <label>Corte que estás mirando</label>
+        <select id="ctl-corte"></select>
       </div>
       <div class="obra-field">
-        <label>Arrancó el</label>
-        <input type="date" id="real-inicio">
+        <label>Nuevo corte al</label>
+        <div class="flex-row" style="gap:6px;flex-wrap:nowrap">
+          <input type="date" id="ctl-nuevo-fecha" style="margin:0">
+          <button class="btn btn-primary" id="ctl-nuevo">Crear</button>
+        </div>
       </div>
       <div class="obra-field">
-        <label>Terminó el <span class="text-muted">(si ya terminó)</span></label>
-        <input type="date" id="real-fin">
+        <label>Tolerancia adelanto (puntos)</label>
+        <input type="number" id="ctl-tol-adel" min="0" max="50" step="1">
       </div>
       <div class="obra-field">
-        <label>Avance certificado a esa fecha</label>
-        <input type="number" id="corte-avance" step="any" min="0" max="120" placeholder="%">
+        <label>Tolerancia atraso (puntos)</label>
+        <input type="number" id="ctl-tol-atr" min="0" max="50" step="1">
+      </div>
+      <div class="obra-field">
+        <label>&nbsp;</label>
+        <button class="btn btn-secondary" id="ctl-borrar-corte">Borrar este corte</button>
       </div>
     </div>
+  </div>
+
+  <div class="resumen-general-bar" id="ctl-resumen">
+    <div class="rg-block"><div class="rg-label">INICIO REAL</div><div class="rg-value" id="ctl-ini-real">—</div></div>
+    <div class="rg-sep"></div>
+    <div class="rg-block"><div class="rg-label">FIN CLIENTE</div><div class="rg-value" id="ctl-fin-cliente">—</div></div>
+    <div class="rg-sep"></div>
+    <div class="rg-block"><div class="rg-label">FIN EMPRESA</div><div class="rg-value" id="ctl-fin-empresa">—</div></div>
+    <div class="rg-sep"></div>
+    <div class="rg-block"><div class="rg-label">FIN ESPERADO</div><div class="rg-value" id="ctl-fin-esperado">—</div></div>
+    <div class="rg-sep"></div>
+    <div class="rg-block rg-total-block"><div class="rg-label">DESVÍO VS CLIENTE</div><div class="rg-value rg-total" id="ctl-desvio">—</div></div>
   </div>
 
   <div class="card">
     <div class="flex-row mb8">
-      <div class="card-title" style="margin:0">CÓMO VIENE LA OBRA</div>
+      <div class="card-title" style="margin:0">AVANCE REAL · TAREA POR TAREA</div>
       <div class="spacer"></div>
-      <span class="badge" id="obra-estado">sin datos</span>
+      <span class="text-muted" id="ctl-cuenta"></span>
     </div>
-    <div class="plan-config">
-      <div class="obra-field">
-        <label>Fin previsto <span class="text-muted">(plan)</span></label>
-        <div class="dato-fijo" id="fin-previsto">—</div>
-      </div>
-      <div class="obra-field">
-        <label>Fin estimado <span class="text-muted">(al ritmo real)</span></label>
-        <div class="dato-fijo" id="fin-estimado">—</div>
-      </div>
-      <div class="obra-field">
-        <label>Desvío de plazo</label>
-        <div class="dato-fijo" id="desvio-plazo">—</div>
-      </div>
-      <div class="obra-field">
-        <label>Días hábiles trabajados</label>
-        <div class="dato-fijo" id="dias-trabajados">—</div>
-      </div>
-    </div>
-    <div id="obra-explicacion"></div>
+    <p class="text-muted mb8">Cargá cuándo arrancó cada tarea y cuánto lleva al corte. El <strong>fin
+      esperado</strong> sale del ritmo que viene: si lleva 10 días hábiles y va por el 40%, dura 25.
+      Cuando termina, poné la fecha real de fin y esa manda. El avance esperado es lo que el plan dice que
+      tendría que llevar a esta fecha, contra el ritmo del cliente y contra el de la empresa.</p>
+    <div id="ctl-tabla"><div class="empty-state">Armá el plan de trabajo primero: el control se mide contra él</div></div>
   </div>
 
   <div class="card">
-    <div class="card-title">CURVAS: PLAN, CERTIFICADO Y PROYECCIÓN</div>
-    <p class="text-muted mb8">Un solo plan físico, tres lecturas. <strong>Cliente</strong> es lo que se
-      certifica (costo × K); <strong>empresa</strong> es lo que sale hacer la obra. La tercera es la real:
-      cargá el avance certificado de cada mes y la curva se dibuja <strong>continua hasta la fecha de
-      corte</strong> y <strong>punteada</strong> de ahí en adelante, proyectada al ritmo que se viene
-      trabajando —no al del plan, que es lo que haría terminar en fecha a una obra que no va a terminar
-      en fecha.</p>
-    <div id="plan-curvas"></div>
-    <div id="plan-curvas-tabla"></div>
+    <div class="card-title">CURVAS: CLIENTE, EMPRESA, REAL Y PROYECCIÓN</div>
+    <p class="text-muted mb8">Avance físico de la obra ponderado por costo. La <strong>real</strong> une el
+      avance de cada corte, <strong>llena</strong>; desde el corte que estás mirando sale la
+      <strong>proyectada</strong>, <strong>punteada</strong>: las tareas en marcha al ritmo que traen y las que
+      no arrancaron cuando terminen las que las preceden.</p>
+    <div id="ctl-curvas"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">HISTORIAL DE AVANCES</div>
+    <p class="text-muted mb8">El avance de cada tarea en cada corte. Es lo que se guarda en el proyecto.</p>
+    <div id="ctl-historial"></div>
   </div>
 
   <div class="card">
@@ -429,8 +437,8 @@
       <input type="file" id="plan-abrir" accept=".json" hidden>
     </div>
     <p class="text-muted">Se baja <strong>todo</strong> en un archivo: el cómputo, tus precios, el K,
-      los rendimientos, las predecesoras, el calendario y lo que lleves certificado. El mes que viene
-      lo subís, cargás el corte nuevo y seguís donde quedaste — no hay que volver a armar nada.</p>
+      los rendimientos, las predecesoras, el calendario, los inicios y fines reales y el historial de
+      cortes. El mes que viene lo subís, creás el corte nuevo y seguís donde quedaste.</p>
   </div>
 
 </div>
@@ -556,14 +564,15 @@
 
 <div id="toast-zona"></div>
 
-<script src="vendor/xlsx.full.min.js?v=20260921100548"></script>
+<script src="vendor/xlsx.full.min.js?v=20260921101924"></script>
 <script>window.PRESUAPP_REMOTO = true;</script>
-<script src="js/motor.js?v=20260921100548"></script>
-<script src="js/datos.js?v=20260921100548"></script>
-<script src="js/importar.js?v=20260921100548"></script>
-<script src="js/app.js?v=20260921100548"></script>
-<script src="js/malla.js?v=20260921100548"></script>
-<script src="js/plan.js?v=20260921100548"></script>
-<script src="js/planui.js?v=20260921100548"></script>
+<script src="js/motor.js?v=20260921101924"></script>
+<script src="js/datos.js?v=20260921101924"></script>
+<script src="js/importar.js?v=20260921101924"></script>
+<script src="js/app.js?v=20260921101924"></script>
+<script src="js/malla.js?v=20260921101924"></script>
+<script src="js/plan.js?v=20260921101924"></script>
+<script src="js/control.js?v=20260921101924"></script>
+<script src="js/planui.js?v=20260921101924"></script>
 </body>
 </html>

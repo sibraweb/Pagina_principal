@@ -341,3 +341,23 @@
 .btn.btn-grande { font-size: .78rem; padding: .85rem 1.4rem; }
 .vacio-computo { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 2.6rem 1rem; }
 .vacio-computo > div:first-child { font-size: .95rem; color: var(--gray-700); }
+
+/* ═══════════════ CONTROL DE OBRA ═══════════════ */
+.ctl-grilla input[type=date] { margin: 0; padding: .3rem .35rem; font-size: .74rem; width: 130px; }
+.ctl-grilla input.mini { width: 64px; margin: 0; padding: .3rem .35rem; text-align: right; }
+.ctl-grilla td { vertical-align: middle; }
+.ctl-grilla tr.critica td:first-child { border-left: 3px solid var(--red-500); }
+.est, .sit { display: inline-block; font-family: var(--title); font-weight: 600; font-size: .6rem;
+             letter-spacing: .06em; text-transform: uppercase; padding: .12rem .4rem; white-space: nowrap; }
+.est.fin { background: #eaf3ec; color: var(--success); }
+.est.eje { background: var(--ink-900); color: #fff; }
+.est.no  { background: var(--gray-100); color: var(--gray-500); }
+.sit.mal  { color: var(--red-500); border: 1px solid var(--red-500); }
+.sit.bien { color: var(--success); border: 1px solid var(--success); }
+.sit.ok   { color: var(--gray-700); border: 1px solid var(--gray-300); }
+.sit.nada { color: var(--gray-500); }
+.c-cliente { fill: none; stroke: var(--ink-800); stroke-width: 2; }
+.c-empresa { fill: none; stroke: var(--gray-500); stroke-width: 2; stroke-dasharray: 2 3; }
+.c-corte { stroke: var(--red-500); stroke-width: 1; stroke-dasharray: 3 3; opacity: .6; }
+.c-m-cliente { background: var(--ink-800); }
+.c-m-empresa { background: repeating-linear-gradient(90deg, var(--gray-500) 0 2px, transparent 2px 5px); }
