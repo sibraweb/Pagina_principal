@@ -211,7 +211,7 @@ a { color: inherit; text-decoration: none; }
   <ul class="nav-links">
     <li><a href="../">Constructora</a></li>
     <li><a href="#" class="active">Datos de Interés</a></li>
-    <li><a href="https://sibratech.com.ar/presuapp/" target="_blank" rel="noopener">Presuapp</a></li>
+    <li><a href="https://sibratech.com.ar/presuapp/">Presuapp</a></li>
     <li><a href="../#contacto">Contacto</a></li>
   </ul>
 
@@ -221,7 +221,7 @@ a { color: inherit; text-decoration: none; }
 </nav>
 <div class="nav-mobile" id="nav-mobile">
   <a href="../">← Sibratech Constructora</a>
-  <a href="https://sibratech.com.ar/presuapp/" target="_blank" rel="noopener">Presuapp</a>
+  <a href="https://sibratech.com.ar/presuapp/">Presuapp</a>
   <a href="../#contacto">Contacto</a>
 </div>
 
@@ -251,7 +251,7 @@ a { color: inherit; text-decoration: none; }
         <span class="eyebrow">Fuentes oficiales</span>
         <h2>Índices económicos y de la construcción</h2>
       </div>
-      <span class="badge-actualizado"><i data-lucide="refresh-cw"></i> Actualizado 19/07/2026</span>
+      <span class="badge-actualizado" id="indices-fecha"><i data-lucide="refresh-cw"></i> <span>Actualizando…</span></span>
     </div>
     <div class="table-wrap">
       <table class="indices-table">
@@ -296,7 +296,7 @@ a { color: inherit; text-decoration: none; }
     <div class="coming-soon-big">
       <div class="soon-icon"><i data-lucide="building-2"></i></div>
       <h3>Precios de las distintas obras</h3>
-      <p>Próximo módulo: costos de referencia por tipo de obra (vivienda, local, galpón, oficina) actualizados con los mismos índices de esta página. Mientras tanto, consultá precios de obra en <a href="https://sibratech.com.ar/presuapp/" target="_blank" rel="noopener" style="color:var(--red-500);font-weight:600">Presuapp →</a></p>
+      <p>Próximo módulo: costos de referencia por tipo de obra (vivienda, local, galpón, oficina) actualizados con los mismos índices de esta página. Mientras tanto, consultá precios de obra en <a href="https://sibratech.com.ar/presuapp/" style="color:var(--red-500);font-weight:600">Presuapp →</a></p>
     </div>
   </div>
 </section>
@@ -386,32 +386,34 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 if (location.hash) activarTab(location.hash.replace('#', ''));
 
 // ================================================================
-// DATOS — hoy hardcodeados (última foto de /api/resumen del módulo
-// de índices). Reemplazar loadIndices() por un fetch() al endpoint
-// público cuando esté publicado; el resto del render queda igual.
+// DATOS — los imprime `indices/publico/generar.py` en data/ con cada
+// corrida de actualizacion. Antes estaban pegados a mano en este
+// archivo y la pagina quedo congelada en el 19/07 aunque el generador
+// corria: los numeros nuevos no llegaban a ningun lado.
+//
+// Si el JSON no carga, se muestra el ultimo respaldo que quedo en el
+// HTML y se dice de que fecha es: una tabla vieja sin fecha miente.
 // ================================================================
-function loadIndices() {
-  return [
-    {n:'UOCRA Oficial',            v:'5.817,0000',       f:'2026-07-01', mom:2.00,  ytd:30.75,  yoy:37.42,  a5:1947.88},
-    {n:'RIPTE',                    v:'1.837.609,3500',   f:'2026-04-01', mom:3.49,  ytd:12.49,  yoy:31.01,  a5:2323.99},
-    {n:'Dólar oficial',            v:'1.500,0000',       f:'2026-07-17', mom:0.00,  ytd:1.35,   yoy:16.28,  a5:1370.59},
-    {n:'Dólar blue',               v:'1.530,0000',       f:'2026-07-17', mom:0.99,  ytd:0.00,   yoy:18.15,  a5:754.75},
-    {n:'Dólar MEP',                v:'1.520,7000',       f:'2026-07-17', mom:null,  ytd:null,   yoy:null,   a5:null},
-    {n:'CER',                      v:'809,5150',         f:'2026-07-19', mom:1.29,  ytd:19.61,  yoy:33.21,  a5:2366.37},
-    {n:'UVA',                      v:'2.041,8100',       f:'2026-07-19', mom:1.24,  ytd:19.56,  yoy:33.12,  a5:2287.80},
-    {n:'UVI',                      v:'1.491,9000',       f:'2026-07-19', mom:2.14,  ytd:18.22,  yoy:31.80,  a5:1643.88},
-    {n:'ICL (alquileres)',         v:'34,8100',          f:'2026-07-19', mom:1.75,  ytd:18.52,  yoy:31.71,  a5:2300.69},
-    {n:'IPC (INDEC, índice)',      v:'79.679,5105',      f:'2026-06-30', mom:1.90,  ytd:16.87,  yoy:33.56,  a5:2339.29},
-    {n:'CAMARCO costo construcción', v:'21.035,6000',    f:'2026-05-31', mom:2.65,  ytd:12.03,  yoy:27.32,  a5:2028.25},
-    {n:'CAMARCO materiales',       v:'23.500,2000',      f:'2026-05-31', mom:2.76,  ytd:10.15,  yoy:25.70,  a5:1993.93},
-    {n:'CAMARCO mano de obra',     v:'17.423,2000',      f:'2026-05-31', mom:2.43,  ytd:15.95,  yoy:30.66,  a5:2099.34},
-    {n:'Construcción general (APYMECO)', v:'13.397,4900', f:'2026-02-28', mom:0.40, ytd:1.67,   yoy:20.67,  a5:2007.55},
-    {n:'Índice de Salarios INDEC', v:'8.978,1000',       f:'2026-04-30', mom:3.73,  ytd:12.65,  yoy:36.88,  a5:2314.51},
-    {n:'ICC Buenos Aires (costo construcción)', v:'163.761,1600', f:'2026-06-30', mom:2.60, ytd:15.06, yoy:29.30, a5:1735.07},
-    {n:'Alquiler CABA (promedio, 2013-2019)', v:'18.553,5000', f:'2019-08-31', mom:4.06, ytd:22.73, yoy:32.11, a5:345.65},
-    {n:'Riesgo país',              v:'419,0000',         f:'2026-07-17', mom:-1.64, ytd:-26.62, yoy:-45.58, a5:-73.73},
-    {n:'MERVAL',                   v:'3.263.581,7600',   f:'2026-07-14', mom:4.54,  ytd:6.95,   yoy:57.28,  a5:5040.75}
-  ];
+var ORDEN = [
+  'uocra', 'ripte', 'salarios:INDICE_TOTAL',
+  'dolar:dolar_oficial', 'dolar:dolar_blue', 'dolar:dolar_mep',
+  'cer', 'uva', 'uvi', 'icl', 'ipc_nivel',
+  'cac:COSTO_CONSTRUCCION', 'cac:MATERIALES', 'cac:MANO_DE_OBRA',
+  'icc_buenos_aires:GENERAL', 'apymeco:INDICE_GENERAL',
+  'caucion:TASA_1D', 'caucion:TASA_7D', 'caucion:TASA_30D',
+  'riesgo_pais', 'merval', 'alquiler_caba:PROMEDIO'
+];
+// las tasas son %: se muestran con el signo, no como un indice
+var ES_TASA = { 'caucion:TASA_1D': 1, 'caucion:TASA_7D': 1, 'caucion:TASA_30D': 1 };
+
+function numAR(v, dec) {
+  if (v === null || v === undefined || v === '') return '<span class="val-dash">—</span>';
+  return Number(v).toLocaleString('es-AR', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+}
+function fechaAR(iso) {
+  if (!iso) return '—';
+  iso = String(iso).slice(0, 10);
+  return iso.slice(8, 10) + '/' + iso.slice(5, 7) + '/' + iso.slice(0, 4);
 }
 
 function pct(v) {
@@ -422,22 +424,47 @@ function pct(v) {
   return '<span class="' + cls + '">' + sign + v.toFixed(2).replace('.', ',') + '%</span>';
 }
 
-function renderIndices() {
-  var rows = loadIndices();
-  var tbody = document.getElementById('indices-tbody');
-  tbody.innerHTML = rows.map(function(r) {
+function pintar(filas, actualizado, respaldo) {
+  var pos = {};
+  ORDEN.forEach(function (k, i) { pos[k] = i; });
+  filas.sort(function (a, b) {
+    var pa = pos[a.familia] !== undefined ? pos[a.familia] : 99;
+    var pb = pos[b.familia] !== undefined ? pos[b.familia] : 99;
+    return pa - pb;
+  });
+  document.getElementById('indices-tbody').innerHTML = filas.map(function (r) {
+    var tasa = ES_TASA[r.familia];
     return '<tr>'
-      + '<td>' + r.n + '</td>'
-      + '<td>' + r.v + '</td>'
-      + '<td class="fecha">' + r.f + '</td>'
+      + '<td>' + r.nombre + '</td>'
+      + '<td>' + numAR(r.valor, 2) + (tasa ? '%' : '') + '</td>'
+      + '<td class="fecha">' + fechaAR(r.fecha) + '</td>'
       + '<td>' + pct(r.mom) + '</td>'
       + '<td>' + pct(r.ytd) + '</td>'
       + '<td>' + pct(r.yoy) + '</td>'
       + '<td>' + pct(r.a5) + '</td>'
       + '</tr>';
   }).join('');
+  var cartel = document.querySelector('#indices-fecha span');
+  if (cartel) cartel.textContent = (respaldo ? 'Sin conexión · datos del ' : 'Actualizado ') + fechaAR(actualizado);
 }
-renderIndices();
+
+fetch('data/indices_resumen.json?t=' + Date.now(), { cache: 'no-store' })
+  .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(function (filas) {
+    var act = filas.reduce(function (m, f) { return f.actualizado && f.actualizado > m ? f.actualizado : m; }, '');
+    pintar(filas, act, false);
+  })
+  .catch(function () {
+    // respaldo: la ultima foto que quedo guardada en la pagina
+    pintar(RESPALDO, '2026-07-19', true);
+  });
+
+var RESPALDO = [
+  {familia:'uocra', nombre:'UOCRA Oficial', valor:5817, fecha:'2026-07-01', mom:2.00, ytd:30.75, yoy:37.42, a5:1947.88},
+  {familia:'cer', nombre:'CER', valor:809.515, fecha:'2026-07-19', mom:1.29, ytd:19.61, yoy:33.21, a5:2366.37},
+  {familia:'uva', nombre:'UVA', valor:2041.81, fecha:'2026-07-19', mom:1.24, ytd:19.56, yoy:33.12, a5:2287.80},
+  {familia:'cac:COSTO_CONSTRUCCION', nombre:'CAMARCO costo construcción', valor:21035.6, fecha:'2026-05-31', mom:2.65, ytd:12.03, yoy:27.32, a5:2028.25}
+];
 </script>
 </body>
 </html>
