@@ -192,17 +192,14 @@
     fechas = fechas.filter(function (f) { return P.aFecha(f).getTime() <= t1; });
     fechas.unshift(desde); fechas.push(hasta);
 
-    /* EN PLATA, y las CUATRO a precio (costo x K, sin IVA), que es lo que
-       se certifica. Lo que distingue a la del CLIENTE de la de la EMPRESA
-       es el RITMO, no el precio: la empresa se arma el plan mas rapido para
-       tener colchon, asi que su curva va SIEMPRE por arriba de la del
-       cliente y llega al mismo total, antes. La real tiene que ir entre
-       las dos: debajo de la empresa es consumir el colchon, debajo del
-       cliente es atraso de contrato.
-       (Hasta el 21-09-2026 la de empresa iba a costo, y se pisaba con la
-       del cliente: el ritmo +30% y el K 1,22 se compensaban.) */
-    var precio = u.calculo.precioSinIva || 0;
-    var tope = precio || 1;
+    /* EN PLATA, como se miran (Juan, 21-09-2026):
+         CLIENTE  a PRECIO (costo x K, sin IVA): lo que se le certifica.
+         EMPRESA  a COSTO: lo que sale hacer la obra, a su ritmo interno.
+       Por eso la del cliente termina MAS ARRIBA: en el precio. La real y la
+       proyectada van en lo que se certifica, a precio. El eje llega al
+       precio total. */
+    var precio = u.calculo.precioSinIva || 0, costoObra = u.calculo.costo || 0;
+    var tope = Math.max(precio, costoObra) || 1;
     var W = 900, H = 320, ml = 62, mr = 16, mt = 14, mb = 44;
     var X = function (f) { return ml + (P.aFecha(f).getTime() - t0) / (t1 - t0) * (W - ml - mr); };
     var Y = function (v) { return mt + (1 - Math.max(0, Math.min(1, v / tope))) * (H - mt - mb); };
@@ -212,7 +209,7 @@
     }
 
     var ptsC = fechas.map(function (f) { return [X(f), Y(r.planClienteAl(f) * precio)]; });
-    var ptsE = fechas.map(function (f) { return [X(f), Y(r.planEmpresaAl(f) * precio)]; });
+    var ptsE = fechas.map(function (f) { return [X(f), Y(r.planEmpresaAl(f) * costoObra)]; });
 
     // la real: el avance de obra de cada corte hasta el que se mira
     var ptsR = [[X(desde), Y(0)]];
@@ -249,8 +246,8 @@
       (ptsP.length > 1 ? '<path d="' + camino(ptsP) + '" class="c-proy"/>' : '') +
       '</svg>' +
       '<div class="c-leyenda">' +
-      '<span><i class="c-m-cliente"></i> Cliente, contrato · ' + plata(precio) + ' · fin ' + fechaAR(r.finCliente) + '</span>' +
-      '<span><i class="c-m-empresa"></i> Empresa, meta interna · fin ' + fechaAR(r.finEmpresa) + '</span>' +
+      '<span><i class="c-m-cliente"></i> Cliente, a precio con K · ' + plata(precio) + ' · fin ' + fechaAR(r.finCliente) + '</span>' +
+      '<span><i class="c-m-empresa"></i> Empresa, a costo · ' + plata(costoObra) + ' · fin ' + fechaAR(r.finEmpresa) + '</span>' +
       '<span><i class="c-m-real"></i> Real certificado · ' + plata(r.avanceObra * precio) + ' (' + num(r.avanceObra * 100) + '%)</span>' +
       '<span><i class="c-m-proy"></i> Proyectada · fin ' + fechaAR(r.finEsperado) + '</span>' +
       '</div>';
