@@ -346,6 +346,24 @@ a { color: inherit; text-decoration: none; }
       cada serie por el IPC: por encima de 100 subió más que la inflación, por debajo, menos.</div>
   </div>
 
+  <div class="datos-card">
+    <div class="datos-card-head">
+      <div>
+        <span class="eyebrow">Una cosa medida contra otra</span>
+        <h2>Cuánto vale la mano de obra, y la obra, contra lo demás</h2>
+      </div>
+    </div>
+    <p class="g-bajada" id="r-bajada">Cada línea divide una serie por otra, en base 100. Por encima de 100, la primera
+      subió más que la segunda; por debajo, menos. La mano de obra es el jornal oficial UOCRA; la obra, el costo de
+      construcción CAC de CAMARCO.</p>
+    <div class="g-wrap"><svg id="r-svg" viewBox="0 0 900 360" role="img" aria-label="Relaciones entre mano de obra, costo de construcción, IPC, acero, RIPTE y dólar blue"></svg></div>
+    <div class="g-leyenda" id="r-leyenda"></div>
+    <div class="fuente-nota">Cómo se lee: “Mano de obra ÷ acero” en 80 quiere decir que con un jornal hoy se compra
+      un 20% menos de acero que en el mes base. “Obra ÷ dólar blue” es el costo de construir medido en dólares. El
+      RIPTE es el salario promedio de los trabajadores registrados. Todas arrancan en abril de 2016, el primer mes con
+      jornal UOCRA cargado.</div>
+  </div>
+
 </section>
 
 <!-- ── TAB: PRECIOS DE OBRAS ────────────────────────────────── -->
@@ -602,6 +620,7 @@ function armarSeries(filas) {
     }
     por[f.clave] = d;
   });
+  G.crudo = por;   // las relaciones se arman sobre esto
   // base: el primer mes en que TODAS tienen dato, asi arrancan juntas
   var claves = SERIES_G.map(function (s) { return s.k; }).filter(function (k) { return por[k]; });
   var meses = {};
@@ -692,8 +711,87 @@ document.querySelectorAll('.g-btn').forEach(function (b) {
     dibujar();
   });
 });
+
+/* ── Relaciones: una serie dividida por otra ────────────────────
+   (A_m / A_base) / (B_m / B_base) x 100. La base es el primer mes en que
+   todas las relaciones prendidas tienen dato, asi arrancan juntas. */
+var RELACIONES = [
+  { k: 'mo_ipc',   a: 'uocra_oficial', b: 'ipc',         n: 'Mano de obra ÷ inflación',            s: 'MO ÷ IPC',            c: '#E10600', on: true },
+  { k: 'mo_acero', a: 'uocra_oficial', b: 'acero',       n: 'Mano de obra ÷ acero',                s: 'MO ÷ acero',                c: '#c8740a', on: true },
+  { k: 'mo_cac',   a: 'uocra_oficial', b: 'cac_general', n: 'Mano de obra ÷ costo de obra CAMARCO', s: 'MO ÷ CAMARCO', c: '#1d5fa8', on: true },
+  { k: 'mo_ripte', a: 'uocra_oficial', b: 'ripte',       n: 'Mano de obra ÷ salarios (RIPTE)',     s: 'MO ÷ RIPTE',     c: '#6b4fa0', on: true },
+  { k: 'cac_ipc',  a: 'cac_general',   b: 'ipc',         n: 'Costo de obra ÷ inflación',           s: 'Obra ÷ IPC',           c: '#1a1a1a', on: true },
+  { k: 'cac_blue', a: 'cac_general',   b: 'dolar_blue',  n: 'Costo de obra ÷ dólar blue',          s: 'Obra ÷ blue',          c: '#1a7f40', on: true }
+];
+
+function dibujarRelaciones() {
+  var P = G.crudo; if (!P) return;
+  var vis = RELACIONES.filter(function (r) { return r.on && P[r.a] && P[r.b]; });
+  var todas = RELACIONES.filter(function (r) { return P[r.a] && P[r.b]; });
+  var meses = {};
+  todas.forEach(function (r) { Object.keys(P[r.a]).forEach(function (m) { if (P[r.b][m] !== undefined) meses[m] = 1; }); });
+  meses = Object.keys(meses).sort();
+  var usar = vis.length ? vis : todas;
+  var base = meses.filter(function (m) {
+    return usar.every(function (r) { return P[r.a][m] !== undefined && P[r.b][m] !== undefined; });
+  })[0];
+  if (!base) return;
+  meses = meses.slice(meses.indexOf(base));
+  var serie = {};
+  todas.forEach(function (r) {
+    var a0 = P[r.a][base], b0 = P[r.b][base];
+    serie[r.k] = meses.map(function (m) {
+      var a = P[r.a][m], b = P[r.b][m];
+      return a === undefined || b === undefined || !a0 || !b0 || !b ? null : (a / a0) / (b / b0) * 100;
+    });
+  });
+
+  var svg = document.getElementById('r-svg');
+  var W = 900, H = 360, ml = 52, mr = 120, mt = 14, mb = 30;
+  var vals = [100];
+  vis.forEach(function (r) { serie[r.k].forEach(function (v) { if (v !== null) vals.push(v); }); });
+  var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+  var y0 = lo * .95, y1 = hi * 1.05, n = meses.length;
+  var X = function (i) { return ml + i / Math.max(1, n - 1) * (W - ml - mr); };
+  var Y = function (v) { return mt + (1 - (v - y0) / (y1 - y0)) * (H - mt - mb); };
+  var paso = [5, 10, 20, 25, 50, 100].filter(function (p) { return (y1 - y0) / p <= 7; })[0] || 100;
+  var g = '';
+  for (var t = Math.ceil(y0 / paso) * paso; t <= y1; t += paso) {
+    g += '<line class="' + (t === 100 ? 'base' : 'grid') + '" x1="' + ml + '" x2="' + (W - mr) + '" y1="' + Y(t) + '" y2="' + Y(t) + '"/>' +
+         '<text x="' + (ml - 8) + '" y="' + (Y(t) + 4) + '" text-anchor="end">' + numAR(t, 0) + '</text>';
+  }
+  var años = meses.map(function (m, i) { return m.slice(5) === '01' ? '<text x="' + X(i) + '" y="' + (H - 8) + '" text-anchor="middle">' + m.slice(0, 4) + '</text>' : ''; }).join('');
+  var etiquetas = [];
+  var lineas = vis.map(function (r) {
+    var pts = [], ult = null;
+    serie[r.k].forEach(function (v, i) { if (v !== null) { pts.push((pts.length ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1)); ult = [i, v]; } });
+    if (ult) etiquetas.push({ y: Y(ult[1]), x: X(ult[0]), v: ult[1], c: r.c, n: r.s || r.n });
+    return '<path d="' + pts.join(' ') + '" fill="none" stroke="' + r.c + '" stroke-width="2"/>';
+  }).join('');
+  etiquetas.sort(function (a, b) { return a.y - b.y; });
+  for (var i = 1; i < etiquetas.length; i++) if (etiquetas[i].y - etiquetas[i - 1].y < 14) etiquetas[i].y = etiquetas[i - 1].y + 14;
+  var fin = etiquetas.map(function (e) {
+    return '<circle cx="' + e.x + '" cy="' + Y(e.v) + '" r="3" fill="' + e.c + '"/>' +
+      '<text class="fin" x="' + (W - mr + 8) + '" y="' + (e.y + 4) + '" fill="' + e.c + '">' + numAR(e.v, 0) + ' · ' + e.n + '</text>';
+  }).join('');
+  svg.innerHTML = g + años + lineas + fin;
+
+  document.getElementById('r-leyenda').innerHTML = todas.map(function (r) {
+    var v = serie[r.k].filter(function (x) { return x !== null; }).pop();
+    return '<button type="button" class="g-item' + (r.on ? '' : ' off') + '" data-r="' + r.k + '">' +
+      '<i style="background:' + r.c + '"></i>' + r.n + ' <b>' + numAR(v, 0) + '</b></button>';
+  }).join('');
+  document.getElementById('r-bajada').textContent = 'Base 100 a ' + mesAR(base) + '. Cada línea divide una serie ' +
+    'por otra: por encima de 100, la primera subió más que la segunda; por debajo, menos. Tocá una para mostrarla u ocultarla.';
+}
+document.getElementById('r-leyenda').addEventListener('click', function (e) {
+  var b = e.target.closest('[data-r]'); if (!b) return;
+  var r = RELACIONES.filter(function (x) { return x.k === b.getAttribute('data-r'); })[0];
+  r.on = !r.on; dibujarRelaciones();
+});
+
 rpc('series_construccion_mensual').then(function (filas) {
-  G.datos = armarSeries(filas); dibujar();
+  G.datos = armarSeries(filas); dibujar(); dibujarRelaciones();
 }).catch(function () {
   document.getElementById('g-svg').innerHTML = '<text x="450" y="180" text-anchor="middle">No se pudo leer la base en este momento.</text>';
 });
