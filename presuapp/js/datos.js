@@ -120,10 +120,16 @@
           return {
             total: filas.length, offset: 0, tope: lim,
             filas: filas.map(function (f) {
+              // Sin `price`: en la búsqueda libre el precio nuestro no baja
+              // (se buscan las 446 fichas; devolverlo sería regalar la lista).
+              // Viaja la FECHA, que dice si está fresco sin decir cuánto es.
+              // El precio sí aparece en los insumos de la obra, que llegan
+              // por `cotizar`.
               return {
                 code: f.codigo, desc: f.descripcion, unit: f.unidad_obra,
                 unidadCompra: f.unidad_compra, factor: f.contenido,
-                category: f.categoria_out, price: f.precio, precioFecha: f.precio_fecha
+                category: f.categoria_out,
+                precioFecha: f.precio_fecha, edadDias: f.edad_dias
               };
             })
           };
@@ -174,7 +180,11 @@
       return { id: String(it.id), codigo: it.code, cantidad: Motor.safeNum(it.qty) };
     });
     var mios = (overrides || []).map(function (o) {
-      return { codigo: o.code, precio: Motor.safeNum(o.price), contenido: o.factor || null };
+      // la FECHA del precio propio viaja con el precio: el servidor la usa
+      // para fechar el análisis como lo ve el visitante, no como lo vemos
+      // nosotros
+      return { codigo: o.code, precio: Motor.safeNum(o.price),
+               contenido: o.factor || null, fecha: o.fecha || null };
     });
     return rpc('presuapp_cotizar', { p_items: envio, p_overrides: mios }).then(function (r) {
       var porId = {};
@@ -202,6 +212,12 @@
           costoTotal: qty * pu,
           // el reparto por categoria viene sumado del servidor, no por fila
           materiales: 0, manoObra: 0, equipos: 0,
+          /* La edad de los precios de ESTA tarea, ya con los precios
+             propios del visitante adentro: la calcula el servidor, que es
+             el unico que ve las dos cosas -nuestros precios y los suyos-. */
+          edadDias: f.edad_dias, edadMaxima: f.edad_maxima_dias,
+          pctConFecha: f.pct_con_fecha,
+          masViejo: f.mas_viejo, masViejoFecha: f.mas_viejo_fecha,
           analisis: null,
           sinAnalisis: !!f.sin_analisis
         };
@@ -216,8 +232,10 @@
       cerrado.remoto = true;
 
       /* La lista de compras, con la misma forma que devuelve el Motor.
-         El precio unitario viene SOLO donde lo puso el visitante: el
-         nuestro no viaja de a listas enteras.                          */
+         Acá SÍ viene nuestro precio, con su fecha: son los insumos de la
+         obra que armó el visitante, no la lista entera. `precioCompra` es
+         el de la unidad en que se compra (la bolsa), que es con lo que el
+         visitante compara su propia lista.                              */
       cerrado.insumos = (r.insumos || []).map(function (x) {
         return {
           code: x.codigo, desc: x.descripcion, unit: x.unidad_obra,
@@ -226,6 +244,10 @@
           cantidad: Motor.safeNum(x.cantidad),
           cantidadCompra: Motor.safeNum(x.cantidad_compra),
           unitPrice: x.precio === null || x.precio === undefined ? null : Motor.safeNum(x.precio),
+          precioCompra: x.precio_compra === null || x.precio_compra === undefined
+            ? null : Motor.safeNum(x.precio_compra),
+          precioFecha: x.precio_fecha || null,
+          edadDias: x.edad_dias === null || x.edad_dias === undefined ? null : x.edad_dias,
           total: x.total === null || x.total === undefined ? null : Motor.safeNum(x.total),
           origenPrecio: x.origen_precio,
           rubros: []

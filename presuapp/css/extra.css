@@ -26,6 +26,12 @@
 .grilla input.cant { width: 100px; text-align: right; }
 .grilla input.sector { width: 140px; }
 .grilla input.precio { width: 120px; text-align: right; }
+/* La fecha del precio propio, debajo del precio y en chico: está para
+   cuando el visitante la quiera corregir, no para llamar la atención. */
+.grilla input.precio-fecha {
+  display: block; width: 120px; margin-top: 3px; margin-left: auto;
+  font-size: .72rem; padding: 2px 4px; color: var(--tenue, #8d9393);
+}
 .grilla .cod { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; color: var(--muted, #777); white-space: nowrap; }
 .grilla .fila-rubro td {
   background: rgba(0,0,0,.05); font-weight: 800; font-size: 11px;

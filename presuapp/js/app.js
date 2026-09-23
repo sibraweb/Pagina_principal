@@ -240,21 +240,24 @@
     var html = '<div class="tabla-scroll"><table class="grilla"><thead><tr>' +
       '<th>Código</th><th>Descripción</th><th class="col-hide">Un.</th><th class="der">Cantidad</th>' +
       '<th class="der">' + (verVenta ? 'P. venta' : 'P. costo') + '</th><th class="der">Total</th>' +
+      '<th class="col-hide">Precios de</th>' +
       '</tr></thead><tbody>';
     c.rubros.forEach(function (r, i) {
       html += '<tr class="fila-rubro" style="--rubro:' + color(i) + '"><td colspan="5">' + esc(r.rubro) + '</td>' +
-        '<td class="der">' + num(verVenta ? r.costo * kk : r.costo) + '</td></tr>';
+        '<td class="der">' + num(verVenta ? r.costo * kk : r.costo) + '</td><td class="col-hide"></td></tr>';
       r.items.forEach(function (f) {
         html += '<tr><td class="cod">' + esc(f.code) + '</td><td>' + esc(f.desc || '—') +
           (f.sector ? ' <span class="text-muted">· ' + esc(f.sector) + '</span>' : '') + '</td>' +
           '<td class="col-hide">' + esc(f.unit) + '</td>' +
           '<td class="der">' + num(f.qty) + '</td>' +
           '<td class="der">' + num(verVenta ? f.precioUnitario * kk : f.precioUnitario) + '</td>' +
-          '<td class="der">' + num(verVenta ? f.costoTotal * kk : f.costoTotal) + '</td></tr>';
+          '<td class="der">' + num(verVenta ? f.costoTotal * kk : f.costoTotal) + '</td>' +
+          '<td class="col-hide">' + antiguedadTarea(f) + '</td></tr>';
       });
     });
     html += '</tbody><tfoot><tr><td colspan="5" class="der"><strong>' + (verVenta ? 'PRECIO SIN IVA' : 'COSTO DE OBRA') + '</strong></td>' +
-      '<td class="der"><strong>' + num(verVenta ? c.precioSinIva : c.costo) + '</strong></td></tr></tfoot></table></div>';
+      '<td class="der"><strong>' + num(verVenta ? c.precioSinIva : c.costo) + '</strong></td>' +
+      '<td class="col-hide"></td></tr></tfoot></table></div>';
     tabla.innerHTML = html;
   }
 
@@ -262,20 +265,109 @@
   /* Las filas de la pestaña Precios. Un precio SIBRATECH en null -los
      insumos de la obra en remoto, que no traen el nuestro- se ve como un
      punto: se busca por nombre y aparece. */
+  /* La antigüedad de los precios de una tarea, ponderada por lo que cada
+     insumo pesa en el costo —y ya con los precios propios del visitante
+     adentro, que el servidor calcula al cotizar—. Al lado va el insumo más
+     viejo: un promedio lindo puede esconder uno de hace ocho años, y ese
+     es justo el que hay que ir a mirar. */
+  function antiguedadTarea(f) {
+    if (f.edadDias === null || f.edadDias === undefined) return '<span class="text-muted">—</span>';
+    var años = f.edadDias > 400;
+    var cuanto = años ? Math.round(f.edadDias / 365) + ' años'
+      : f.edadDias > 60 ? Math.round(f.edadDias / 30) + ' meses' : f.edadDias + ' días';
+    var viejo = f.masViejo
+      ? '<div class="text-muted" style="font-size:.7rem">el más viejo: ' + esc(f.masViejo) +
+        ', ' + fechaAR(f.masViejoFecha) + '</div>' : '';
+    return '<span' + (años ? ' style="color:var(--rojo,#E10600)"' : '') + '>' + cuanto + '</span>' + viejo;
+  }
+
+  function fechaAR(iso) {
+    if (!iso) return '—';
+    var s = String(iso).slice(0, 10);
+    return s.slice(8, 10) + '/' + s.slice(5, 7) + '/' + s.slice(0, 4);
+  }
+
+  /* La fecha del precio va SIEMPRE pegada al precio, acá y en la lista de
+     compras: un precio sin fecha no se puede juzgar. Ocho años se dicen en
+     años, no en días, porque "2.965 d" no lo lee nadie. */
+  function edadDelPrecio(fecha, dias) {
+    if (!fecha) return '<div class="text-muted" style="font-size:.72rem">sin fecha</div>';
+    var cuanto = (dias === null || dias === undefined) ? ''
+      : ' · ' + (dias > 400 ? Math.round(dias / 365) + ' años' : dias + ' d');
+    return '<div class="text-muted" style="font-size:.72rem">' + fechaAR(fecha) + cuanto + '</div>';
+  }
+
+  /* El input del precio propio, igual en las dos pantallas. Va por unidad
+     de COMPRA (la bolsa), que es como le pasan el precio al visitante, y
+     con SU fecha: un precio propio sin fecha envejece igual que el nuestro
+     y nadie se entera. Si no la pone, es la de hoy. */
+  function inputPrecioPropio(code) {
+    var mio = estado.overrides.filter(function (o) { return o.code === code; })[0];
+    return '<input class="precio" type="number" step="any" data-precio-propio="' + esc(code) + '" ' +
+        'value="' + (mio ? mio.price : '') + '" placeholder="—">' +
+      (mio ? '<input class="precio-fecha" type="date" data-fecha-propia="' + esc(code) + '" ' +
+        'value="' + esc(mio.fecha || hoyISO()) + '" title="¿De cuándo es este precio?">' : '');
+  }
+
+  function hoyISO() { return new Date().toISOString().slice(0, 10); }
+
+  /* Anota (o borra) el precio que puso el visitante. Lo usan la pantalla de
+     Precios y la lista de compras: el precio es uno solo, se toque donde se
+     toque. */
+  function anotarPrecioPropio(code, valor, desc, unit) {
+    var i = estado.overrides.findIndex(function (o) { return o.code === code; });
+    var v = String(valor == null ? '' : valor).trim();
+    if (v === '') { if (i >= 0) estado.overrides.splice(i, 1); }
+    else if (i >= 0) { estado.overrides[i].price = M.precioDeTexto(v); estado.overrides[i].fecha = estado.overrides[i].fecha || hoyISO(); }
+    else estado.overrides.push({ code: code, desc: desc || '', unit: unit || '',
+                                price: M.precioDeTexto(v), fecha: hoyISO() });
+    renderTodo();
+  }
+
+  function anotarFechaPropia(code, fecha) {
+    var o = estado.overrides.filter(function (x) { return x.code === code; })[0];
+    if (!o) return;
+    o.fecha = fecha || hoyISO();
+    renderTodo();
+  }
+
+  /* Qué fecha se muestra al lado del precio: si el precio es del visitante,
+     la de él; si es nuestro, la nuestra. */
+  function fechaDelPrecio(r) {
+    var mio = estado.overrides.filter(function (o) { return o.code === r.code; })[0];
+    if (!mio) return edadDelPrecio(r.precioFecha, r.edadDias);
+    // Días entre dos FECHAS, no entre dos instantes: `new Date('2026-09-23')`
+    // es medianoche UTC y acá son las 21 del día anterior, así que restar
+    // milisegundos hacía que un precio de hoy naciera con un día encima.
+    var f = (mio.fecha || hoyISO()).split('-');
+    var suyo = new Date(+f[0], +f[1] - 1, +f[2]);
+    var hoy = new Date(); hoy = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+    return edadDelPrecio(mio.fecha || hoyISO(),
+      Math.max(0, Math.round((hoy - suyo) / 86400000)));
+  }
+
   function pintarFilasInsumos(lista, encabezado) {
     var filas = lista.map(function (i) {
       // el precio propio esta en el estado: no hace falta el catalogo
       var mio = estado.overrides.filter(function (o) { return o.code === i.code; })[0];
-      var p = { origen: mio ? 'propio' : (i.price > 0 ? 'catalogo' : (i.price === null ? '' : 'sin-precio')),
+      /* "sin precio" es sólo cuando NO tenemos ninguno. En la búsqueda
+         libre el precio no baja, pero la fecha dice que existe: eso no es
+         un insumo sin precio. */
+      var tenemos = i.price > 0 || !!i.precioFecha;
+      var p = { origen: mio ? 'propio' : (tenemos ? 'catalogo' : 'sin-precio'),
                 precio: mio ? mio.price : i.price };
+      /* El precio nuestro se muestra SOLO en los insumos de la obra (ahí
+         viene). En la búsqueda libre va la fecha: dice si el precio está
+         fresco sin decir cuánto es. */
+      var edad = fechaDelPrecio(i);
       return '<tr data-insumo="' + esc(i.code) + '">' +
         '<td class="cod">' + esc(i.code) + '</td>' +
         '<td>' + esc(i.desc) + '</td>' +
         '<td class="col-hide">' + tagCategoria(M.normalizarCategoria(i.category)) + '</td>' +
         '<td class="col-hide">' + esc(i.unit) + '</td>' +
-        '<td class="der text-muted">' + (i.price === null || i.price === undefined ? PUNTO : num(i.price)) + '</td>' +
-        '<td class="der"><input class="precio" type="number" step="any" data-precio-propio="' + esc(i.code) + '" ' +
-          'value="' + (p.origen === 'propio' ? p.precio : '') + '" placeholder="—"></td>' +
+        '<td class="der text-muted">' +
+          (i.price === null || i.price === undefined ? '' : num(i.price)) + edad + '</td>' +
+        '<td class="der">' + inputPrecioPropio(i.code) + '</td>' +
         '<td>' + tagOrigen(p.origen) + '</td></tr>';
     }).join('');
     $('insumo-lista').innerHTML = (encabezado || '') + '<div class="tabla-scroll"><table class="grilla"><thead><tr>' +
@@ -293,14 +385,19 @@
        los insumos de TU obra, que es justo donde vas a poner tus precios. */
     if (q.length < 3) {
       var deLaObra = insumosDeLaObra(cat).map(function (r) {
+        // En la obra sí va nuestro precio, por unidad de COMPRA (la bolsa),
+        // que es como se compra y como lo compara el visitante.
         return { code: r.code, desc: r.desc, unit: r.unit, category: r.category,
-                 price: remoto() ? null : r.unitPrice };
+                 price: remoto()
+                   ? (r.precioCompra === undefined ? null : r.precioCompra)
+                   : r.unitPrice,
+                 precioFecha: r.precioFecha, edadDias: r.edadDias };
       });
       var ayuda = '<div class="aviso-fila"><div class="aviso-marca"></div><div>' +
         '<strong>La base de SIBRATECH está en línea.</strong> Escribí al menos 3 letras ' +
-        '(“cem”, “are”, “ofi”) para buscar cualquier insumo con su precio.' +
-        (deLaObra.length ? ' Abajo, los ' + deLaObra.length + ' insumos que usa tu obra: ' +
-          'cargá tu precio donde lo tengas más barato.' : '') + '</div></div>';
+        '(“cem”, “are”, “ofi”) para buscar cualquier insumo y ver de cuándo es su precio.' +
+        (deLaObra.length ? ' Abajo, los ' + deLaObra.length + ' insumos que usa tu obra, ' +
+          'con nuestro precio y su fecha: cargá el tuyo donde lo tengas más barato.' : '') + '</div></div>';
       $('insumo-count').textContent = deLaObra.length ? deLaObra.length + ' de tu obra' : 'escribí para buscar';
       $('insumo-mas').textContent = '';
       if (!deLaObra.length) { $('insumo-lista').innerHTML = ayuda; return; }
@@ -347,29 +444,32 @@
       cont.innerHTML = '<div class="empty-state">Cargá el cómputo primero</div>';
       return;
     }
-    /* Cuando el catalogo no baja, el precio de CADA insumo tampoco: la
-       lista de compras dice cuanto hay que pedir, y la plata esta en el
-       presupuesto. Donde el visitante puso su precio, ese si se muestra:
-       es de el.                                                        */
+    /* Cada precio viene con SU FECHA, y el precio propio se carga acá
+       mismo: es la pantalla donde el visitante está mirando qué comprar,
+       y es cuando se acuerda de lo que le costó la última vez. El precio
+       es uno solo — lo que se cambia acá cambia en Precios y al revés. */
     var total = filas.reduce(function (s, r) { return s + (r.total || 0); }, 0);
-    var hayPlata = filas.some(function (r) { return r.total !== null && r.total !== undefined; });
+    var sinPrecio = filas.filter(function (r) { return r.origenPrecio === 'sin-precio'; }).length;
     var plata = function (v) { return (v === null || v === undefined) ? '<span class="text-muted">·</span>' : num(v); };
 
     cont.innerHTML = '<div class="tabla-scroll"><table class="grilla"><thead><tr>' +
       '<th>Código</th><th>Insumo</th><th class="col-hide">Tipo</th><th class="der">Cantidad</th><th>Un.</th>' +
       '<th class="der">Pedir</th><th>Un. compra</th>' +
-      '<th class="der">P. unitario</th><th class="der">Total</th><th class="col-hide">Rubros</th>' +
+      '<th class="der">P. unitario</th><th class="der">Mi precio</th><th class="der">Total</th>' +
+      '<th class="col-hide">Rubros</th>' +
       '</tr></thead><tbody>' +
       filas.map(function (r) {
         return '<tr><td class="cod">' + esc(r.code) + '</td><td>' + esc(r.desc) + ' ' + tagOrigen(r.origenPrecio) + '</td>' +
           '<td class="col-hide">' + tagCategoria(r.category) + '</td>' +
           '<td class="der"><strong>' + num(r.cantidad) + '</strong></td><td>' + esc(r.unit) + '</td>' +
           '<td class="der">' + num(r.cantidadCompra) + '</td><td>' + esc(r.unidadCompra || r.unit) + '</td>' +
-          '<td class="der">' + plata(r.unitPrice) + '</td><td class="der">' + plata(r.total) + '</td>' +
+          '<td class="der">' + plata(r.unitPrice) + fechaDelPrecio(r) + '</td>' +
+          '<td class="der">' + inputPrecioPropio(r.code) + '</td>' +
+          '<td class="der">' + plata(r.total) + '</td>' +
           '<td class="col-hide text-muted" style="font-size:11px">' + esc((r.rubros || []).join(', ')) + '</td></tr>';
       }).join('') +
-      '</tbody><tfoot><tr><td colspan="8" class="der"><strong>' +
-      (hayPlata ? 'TOTAL (sólo lo que tiene tu precio)' : 'TOTAL') + '</strong></td>' +
+      '</tbody><tfoot><tr><td colspan="9" class="der"><strong>' +
+      (sinPrecio ? 'TOTAL (faltan ' + sinPrecio + ' sin precio)' : 'TOTAL') + '</strong></td>' +
       '<td class="der"><strong>' + num(total) + '</strong></td><td></td></tr></tfoot></table></div>';
   }
 
@@ -1074,28 +1174,21 @@
     };
     $('buscar-insumo').oninput = function () { paginaInsumos = 0; renderInsumos(); };
     $('filtro-categoria').onchange = function () { paginaInsumos = 0; renderInsumos(); };
-    $('insumo-lista').addEventListener('change', function (e) {
-      var code = e.target.getAttribute && e.target.getAttribute('data-precio-propio');
-      if (!code) return;
-      var v = e.target.value.trim();
-      var i = estado.overrides.findIndex(function (o) { return o.code === code; });
-      if (v === '') { if (i >= 0) estado.overrides.splice(i, 1); }
-      else {
-        var precio = M.precioDeTexto(v);
-        if (i >= 0) estado.overrides[i].price = precio;
-        else {
-          // la descripcion esta en la fila que se esta editando
-          var tr = e.target.closest('tr');
-          var celdas = tr ? tr.querySelectorAll('td') : [];
-          estado.overrides.push({
-            code: code,
-            desc: celdas[1] ? celdas[1].textContent.trim() : '',
-            unit: celdas[3] ? celdas[3].textContent.trim() : '',
-            price: precio
-          });
-        }
-      }
-      renderTodo();
+    /* El mismo manejador en las dos pantallas: el precio propio se carga
+       donde el visitante lo tenga a mano —buscando el insumo o mirando la
+       lista de compras— y es el mismo dato en los dos lados. */
+    ['insumo-lista', 'materiales-tabla'].forEach(function (id) {
+      $(id).addEventListener('change', function (e) {
+        var fecha = e.target.getAttribute && e.target.getAttribute('data-fecha-propia');
+        if (fecha) { anotarFechaPropia(fecha, e.target.value); return; }
+        var code = e.target.getAttribute && e.target.getAttribute('data-precio-propio');
+        if (!code) return;
+        var tr = e.target.closest('tr');
+        var celdas = tr ? tr.querySelectorAll('td') : [];
+        anotarPrecioPropio(code, e.target.value,
+          celdas[1] ? celdas[1].textContent.trim() : '',
+          celdas[4] ? celdas[4].textContent.trim() : '');
+      });
     });
 
     // materiales
