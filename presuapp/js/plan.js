@@ -206,6 +206,19 @@
        el dia habil siguiente al corte o al fin de sus predecesoras, lo
        que venga despues, con su duracion de plan.                   */
     var manana = cal.proximoHabil(sumarDias(corte, 1));
+
+    /* ⚠ SIN UN SOLO DATO CARGADO, LA PROYECCIÓN ES EL PLAN DE LA EMPRESA.
+       Si no hay ni un inicio real ni un avance, no hay NADA que diga que la
+       obra está atrasada, y empujar a "mañana" las tareas que el plan ponía
+       en el pasado corría el fin de obra por una obra que todavía no se
+       midió. El atraso se afirma con datos; sin datos, la proyección repite
+       el plan y las dos curvas terminan el mismo día. */
+    var hayDatos = Object.keys(real).some(function (id) {
+      return real[id] && (real[id].inicio || real[id].fin);
+    }) || Object.keys(avances).some(function (id) {
+      return M.safeNum(avances[id]) > 0;
+    });
+
     var proy = {};
     filas.slice().sort(function (a, b) {
       return a.inicioPlan < b.inicioPlan ? -1 : a.inicioPlan > b.inicioPlan ? 1 : 0;
@@ -222,6 +235,13 @@
            arranque la proyeccion empezaba "mañana" y terminaba ANTES que el
            plan de la empresa, que es imposible si nada se adelanto. */
         var inicioObra = aFecha(o.empresa && o.empresa.inicio) || aFecha(o.cliente && o.cliente.inicio);
+        // sin datos, la tarea se proyecta donde la puso el plan de empresa
+        if (!hayDatos && emp[f.id] && emp[f.id].inicio && emp[f.id].fin) {
+          pi = aFecha(emp[f.id].inicio); pf = aFecha(emp[f.id].fin);
+          proy[f.id] = { inicio: pi, fin: pf };
+          f.inicioProyectado = iso(pi); f.finProyectado = iso(pf);
+          return;
+        }
         var desde = manana;
         if (inicioObra) { var io_ = cal.proximoHabil(inicioObra); if (io_ > desde) desde = io_; }
         (f.predecesoras || []).forEach(function (idp) {
@@ -263,7 +283,9 @@
         var hecho = f.avance, falta = 1 - hecho;
         if (falta <= 0) { s += c; return; }
         var pi = aFecha(f.inicioProyectado), pf = aFecha(f.finProyectado);
-        var desde = pi > manana ? pi : manana;
+        // el piso "de acá en adelante" vale cuando hay algo medido; sin
+        // datos la curva proyectada repite la de empresa, día por día
+        var desde = (hayDatos && manana > pi) ? manana : pi;
         var n = cal.habiles(desde, pf);
         var llevado = n ? cal.habiles(desde, x < pf ? x : pf) / n : (x >= pf ? 1 : 0);
         s += c * (hecho + falta * Math.max(0, Math.min(1, llevado)));
