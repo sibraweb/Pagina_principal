@@ -93,6 +93,9 @@
               // SUBRUBRO = el capitulo mas cercano (TAREAS COMPLEMENTARIAS)
               code: f.codigo, rubro: f.capitulo || f.rubro, subrubro: f.rubro,
               rubroCodigo: f.capitulo_codigo, desc: f.descripcion, unit: f.unidad,
+              // el NODO de la malla lo resuelve el servidor contra nuestro
+              // codigo: el navegador ya no lo tiene para clasificar
+              nodo: f.nodo,
               price: f.precio, edadDias: f.edad_dias, edadMaxima: f.edad_maxima_dias,
               pctConFecha: f.pct_con_fecha, insumosSinFecha: f.insumos_sin_fecha
             };
@@ -205,6 +208,8 @@
           // el presupuesto se agrupa por RUBRO (el capitulo), no por subrubro
           rubro: f.capitulo || f.rubro || it.rubro || 'Sin rubro',
           subrubro: f.rubro || it.subrubro || '',
+          // un proyecto guardado antes de que existiera el nodo lo recupera acá
+          nodo: it.nodo || f.nodo || '',
           sector: it.sector || '',
           qty: qty,
           precioUnitario: pu,

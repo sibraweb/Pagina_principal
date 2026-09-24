@@ -112,6 +112,13 @@
       .then(function (r) {
         if (calculando !== pedido) return calcular();   // llego uno mas nuevo
         ultimoCalculo = r;
+        /* Un proyecto guardado antes de que existiera el nodo de la malla
+           lo recupera acá: el servidor lo devuelve con cada tarea, y sin él
+           "Armar el plan solo" no sabría encadenar nada. */
+        (r.items || []).forEach(function (f) {
+          var it = estado.items.filter(function (x) { return String(x.id) === String(f.id); })[0];
+          if (it && !it.nodo && f.nodo) it.nodo = f.nodo;
+        });
         return r;
       })
       .catch(function (e) {
@@ -1113,7 +1120,8 @@
       var qty = M.safeNum(input ? input.value : 1) || 1;
       var a = ultimaBusqueda[code];
       estado.items.push({ id: proximoId++, code: code, desc: a ? a.desc : '', unit: a ? a.unit : '',
-        rubro: a ? a.rubro : '', subrubro: a ? (a.subrubro || '') : '', sector: '', qty: qty });
+        rubro: a ? a.rubro : '', subrubro: a ? (a.subrubro || '') : '',
+        nodo: a ? (a.nodo || '') : '', sector: '', qty: qty });
       renderTodo();
       toast((a ? a.desc.slice(0, 40) : code) + ' · ' + num(qty) + ' ' + (a ? a.unit : ''), 'ok');
     });

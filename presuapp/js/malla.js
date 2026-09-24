@@ -130,7 +130,10 @@
     var porNodo = {}, sinNodo = [], deTarea = {};
 
     items.forEach(function (it) {
-      var n = nodoDe(it.code);
+      /* El nodo viene resuelto del servidor (`it.nodo`) porque el codigo
+         nuestro ya no viaja. En modo local, donde si esta el codigo, se
+         clasifica como siempre. */
+      var n = it.nodo ? NODOS.filter(function (x) { return x.id === it.nodo; })[0] : nodoDe(it.code);
       if (!n) { sinNodo.push(it); return; }
       (porNodo[n.id] = porNodo[n.id] || []).push(it.id);
       deTarea[it.id] = n.id;
