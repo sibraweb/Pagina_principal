@@ -279,13 +279,12 @@
      es justo el que hay que ir a mirar. */
   function antiguedadTarea(f) {
     if (f.edadDias === null || f.edadDias === undefined) return '<span class="text-muted">—</span>';
-    var años = f.edadDias > 400;
-    var cuanto = años ? Math.round(f.edadDias / 365) + ' años'
-      : f.edadDias > 60 ? Math.round(f.edadDias / 30) + ' meses' : f.edadDias + ' días';
     var viejo = f.masViejo
       ? '<div class="text-muted" style="font-size:.7rem">el más viejo: ' + esc(f.masViejo) +
         ', ' + fechaAR(f.masViejoFecha) + '</div>' : '';
-    return '<span' + (años ? ' style="color:var(--rojo,#E10600)"' : '') + '>' + cuanto + '</span>' + viejo;
+    // mismo semáforo que los insumos: el presupuesto y la lista de compras
+    // no pueden pintar de distinto color la misma antigüedad
+    return '<span class="edad ' + semaforo(f.edadDias) + '">' + haceCuanto(f.edadDias) + '</span>' + viejo;
   }
 
   function fechaAR(iso) {
@@ -297,11 +296,28 @@
   /* La fecha del precio va SIEMPRE pegada al precio, acá y en la lista de
      compras: un precio sin fecha no se puede juzgar. Ocho años se dicen en
      años, no en días, porque "2.965 d" no lo lee nadie. */
+  /* El semáforo del precio (Juan, 2026-09-25): hasta 30 días verde, hasta
+     90 amarillo, después rojo. 90 es la misma ventana con la que el APU
+     considera vigente un precio de proveedor, así que el color dice lo
+     mismo que decide el cálculo. */
+  function semaforo(dias) {
+    if (dias === null || dias === undefined) return '';
+    return dias <= 30 ? 'edad-verde' : dias <= 90 ? 'edad-amarillo' : 'edad-rojo';
+  }
+
+  /* Cuánto hace, dicho como se dice: días hasta dos meses, después meses,
+     y años cuando ya pasó de un año. "2.965 d" no lo lee nadie. */
+  function haceCuanto(dias) {
+    if (dias === null || dias === undefined) return '';
+    if (dias > 400) return Math.round(dias / 365) + ' años';
+    if (dias > 60) return Math.round(dias / 30) + ' meses';
+    return dias + ' d';
+  }
+
   function edadDelPrecio(fecha, dias) {
     if (!fecha) return '<div class="text-muted" style="font-size:.72rem">sin fecha</div>';
-    var cuanto = (dias === null || dias === undefined) ? ''
-      : ' · ' + (dias > 400 ? Math.round(dias / 365) + ' años' : dias + ' d');
-    return '<div class="text-muted" style="font-size:.72rem">' + fechaAR(fecha) + cuanto + '</div>';
+    var cuanto = (dias === null || dias === undefined) ? '' : ' · ' + haceCuanto(dias);
+    return '<div class="edad ' + semaforo(dias) + '">' + fechaAR(fecha) + cuanto + '</div>';
   }
 
   /* El input del precio propio, igual en las dos pantallas. Va por unidad
