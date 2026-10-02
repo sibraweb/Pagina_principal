@@ -741,9 +741,11 @@
   var ultimaPropuesta = null;
 
   /* ══════════════════ EXPORTAR ══════════════════ */
-  function exportar() {
+  function exportar() { exportarComo('excel'); }
+  function imprimir() { exportarComo('pdf'); }
+  function exportarComo(como) {
     if (!ultimo) { toast('No hay plan para exportar', 'error'); return; }
-    if (A.pedirEmailAntes('plan', exportar)) return;
+    if (A.pedirEmailAntes('plan', function () { exportarComo(como); })) return;
 
     var meses = ultimo.reparto.meses, c = ultimo.curvas, p = plan();
     var hojas = [];
@@ -779,7 +781,8 @@
     hojas.push({ nombre: 'Materiales por mes', filas: hm });
 
     var nombre = (A.estado().obra.nombre || 'Plan de trabajo').replace(/[\\/:*?"<>|]/g, '-');
-    window.Importar.exportarLibro(hojas, nombre + ' - plan.xlsx');
+    if (como === 'pdf') { A.imprimirLibro(hojas, 'Plan de trabajo'); return; }
+    A.exportarLibro(hojas, nombre + ' - plan.xlsx');
     toast('Plan exportado: cronograma, curvas y materiales por mes', 'ok');
   }
 
@@ -816,6 +819,7 @@
     $('plan-la-semanas').oninput = conRespiro(pintarLookAhead, 300);
     $('plan-mat-categoria').onchange = pintarMateriales;
     $('plan-export').onclick = exportar;
+    if ($('plan-pdf')) $('plan-pdf').onclick = imprimir;
     $('plan-proponer').onclick = proponerPlan;
 
     // el calendario

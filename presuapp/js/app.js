@@ -75,8 +75,37 @@
   function cerrar(id) { $(id).classList.remove('open'); }
 
   /* ── persistencia ─────────────────────────────────────────── */
+  /* Quien quiera enterarse de que la obra cambio (obras.js la sube a
+     el navegador como obra) se cuelga de aca: la pantalla no sabe adonde va a parar. */
+  var ganchos = { guardar: null, exportado: null };
   function guardar() {
     try { localStorage.setItem(CLAVE, JSON.stringify(estado)); } catch (e) { /* modo incognito */ }
+    if (ganchos.guardar) ganchos.guardar(estado);
+  }
+  function estadoVacio() {
+    return {
+      obra: { nombre: '', cliente: '', ubicacion: '', fecha: '' },
+      items: [],
+      overrides: [],
+      params: { ggPct: 12, beneficioPct: 10, iibbPct: 0, financiacionPct: 0, modoK: 'aditivo', ivaPct: 21 },
+      verPrecioVenta: false
+    };
+  }
+  /* Reemplaza la obra entera (abrir otra, obra nueva). El plan y el
+     control de obra viven adentro del estado, asi que vienen con ella. */
+  function cargarEstado(s) {
+    if (!s || !Array.isArray(s.items)) throw new Error('formato desconocido');
+    estado = Object.assign(estadoVacio(), s);
+    estado.obra = Object.assign(estadoVacio().obra, s.obra || {});
+    estado.params = Object.assign(estadoVacio().params, s.params || {});
+    estado.overrides = s.overrides || [];
+    proximoId = 1;
+    estado.items.forEach(function (it) { if (it.id === undefined) it.id = proximoId++; else if (it.id >= proximoId) proximoId = it.id + 1; });
+    ultimoCalculo = null;
+    pintarFormularios();
+    var r = renderTodo();
+    if (window.PlanUI) r = r.then(function () { return window.PlanUI.render(); });
+    return r;
   }
   function recuperar() {
     try {
@@ -119,6 +148,7 @@
           var it = estado.items.filter(function (x) { return String(x.id) === String(f.id); })[0];
           if (it && !it.nodo && f.nodo) it.nodo = f.nodo;
         });
+        anotarHistorial(r);
         return r;
       })
       .catch(function (e) {
@@ -127,6 +157,42 @@
       });
     calculando = pedido;
     return pedido;
+  }
+
+  /* ── historial de precios ──────────────────────────────────────
+     Cada precio que la obra VIO queda anotado con su fecha, aunque
+     despues se actualice: el presupuesto de marzo se hizo con el cemento
+     de marzo, y eso no se tiene que perder cuando entra la lista de
+     septiembre. Se anota solo cuando cambia, uno por dia como mucho:
+     abrir la obra cien veces no agranda el archivo.
+
+       historial.insumos[codigo] = { d, u, p: [[fecha, precio, origen, fechaDelPrecio]] }
+       historial.tareas[codigo]  = { d, u, p: [[fecha, precioUnitario, origen]] }   */
+  function fechaLocal() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function anotarHistorial(r) {
+    if (!r || !r.items) return;
+    var h = estado.historial = estado.historial || { insumos: {}, tareas: {} };
+    var hoy = fechaLocal();
+    function anotar(lugar, code, desc, unit, fila) {
+      if (!code || fila[1] === null || fila[1] === undefined || !isFinite(fila[1])) return;
+      var e = lugar[code] = lugar[code] || { d: desc, u: unit, p: [] };
+      e.d = desc || e.d; e.u = unit || e.u;
+      var ult = e.p[e.p.length - 1];
+      if (ult && Math.abs(ult[1] - fila[1]) < 0.005 && ult[2] === fila[2]) return;
+      if (ult && ult[0] === hoy) e.p[e.p.length - 1] = fila;
+      else e.p.push(fila);
+    }
+    (r.insumos || []).forEach(function (x) {
+      anotar(h.insumos, x.code, x.desc, x.unit,
+        [hoy, x.unitPrice, x.origenPrecio === 'propio' ? 'propio' : 'sibratech', x.precioFecha || null]);
+    });
+    (r.items || []).forEach(function (f) {
+      if (f.sinAnalisis && !f.precioManual) return;
+      anotar(h.tareas, f.code, f.desc, f.unit, [hoy, f.precioUnitario, f.precioManual ? 'manual' : 'analisis']);
+    });
   }
 
   /* Un respiro antes de salir a preguntar. Sin esto, escribir "1250" en
@@ -754,13 +820,41 @@
     };
   }
 
+  /* Toda descarga de Excel pasa por aca: se baja y se anota el uso. */
+  function exportarLibro(hojas, archivo) {
+    I.exportarLibro(hojas, archivo);
+    if (window.Contacto) window.Contacto.anotar('excel', estado.obra.nombre, archivo);
+    if (ganchos.exportado) ganchos.exportado(hojas, archivo);
+  }
+
+  /* El mismo libro, como PDF: se arma una hoja para imprimir y el
+     navegador ofrece "Guardar como PDF". */
+  function imprimirLibro(hojas, titulo) {
+    if (!window.Imprimir) { toast('No esta cargada la impresion', 'error'); return; }
+    var c = window.Contacto && window.Contacto.usuario();
+    window.Imprimir.libro(hojas, {
+      titulo: titulo,
+      obra: estado.obra,
+      autor: c ? [c.nombre, c.apellido].filter(Boolean).join(' ') : ''
+    });
+    if (window.Contacto) window.Contacto.anotar('pdf', estado.obra.nombre, titulo);
+  }
+  function imprimirPresupuesto() {
+    if (!estado.items.length) { toast('No hay nada para imprimir', 'error'); return; }
+    pedirEmail('presupuesto', function () {
+      return recalcular().then(function () {
+        imprimirLibro(armarLibro().hojas, 'Presupuesto');
+      });
+    });
+  }
+
   function exportarExcel() {
     if (!estado.items.length) { toast('No hay nada para exportar', 'error'); return; }
     // se recalcula antes de escribir: el Excel sale del numero de ahora
     pedirEmail('presupuesto', function () {
       return recalcular().then(function () {
         var libro = armarLibro();
-        I.exportarLibro(libro.hojas, libro.archivo);
+        exportarLibro(libro.hojas, libro.archivo);
         toast('Excel exportado — los totales son los mismos de la pantalla', 'ok');
       });
     });
@@ -771,37 +865,24 @@
      cuando se lleva algo, y el archivo se descarga IGUAL si el registro
      falla — el que vino a presupuestar no tiene por que pagar un error
      nuestro de red.                                                   */
-  var emailPendiente = null;
-  /* true = hay que frenar y pedir el email; la funcion se reintenta sola */
+  /* true = hay que frenar y pedir los datos; la funcion se reintenta sola */
+  function conDatos() { return !!(window.Contacto && window.Contacto.usuario()); }
   function pedirEmailAntes(origen, reintentar) {
-    if (!remoto() || emailGuardado()) return false;
+    if (!remoto() || emailGuardado() || conDatos() || !window.Obras) return false;
     pedirEmail(origen, reintentar);
     return true;
   }
+  /* Los que dejaron sólo el email con la versión anterior no se vuelven a frenar. */
   var CLAVE_EMAIL = 'presupuestapp_email';
   function emailGuardado() {
     try { return localStorage.getItem(CLAVE_EMAIL) || ''; } catch (e) { return ''; }
   }
+  /* El formulario es el mismo que el de mandar la obra por mail (obras.js). */
   function pedirEmail(origen, bajar) {
-    if (!remoto() || emailGuardado()) { bajar(); return; }
-    $('email-origen').textContent = origen === 'presupuesto' ? 'el presupuesto en Excel'
-      : origen === 'formato' ? 'el formato para pedir precios' : 'la lista de insumos';
-    $('email-valor').value = '';
-    $('email-obra').value = estado.obra.nombre || '';
-    abrir('modal-email');
-    $('email-valor').focus();
-    emailPendiente = { origen: origen, bajar: bajar };
-  }
-  function confirmarEmail() {
-    var e = $('email-valor').value.trim();
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) { toast('Ese email no parece válido', 'error'); return; }
-    try { localStorage.setItem(CLAVE_EMAIL, e); } catch (x) { /* modo incognito */ }
-    var p = emailPendiente;
-    cerrar('modal-email');
-    emailPendiente = null;
-    D.registrarDescarga(e, $('email-nombre').value.trim(), $('email-obra').value.trim(), p.origen)
-      .catch(function () { /* el archivo se baja igual */ });
-    p.bajar();
+    if (!remoto() || emailGuardado() || conDatos() || !window.Obras) { bajar(); return; }
+    window.Obras.pedirDatos(origen === 'presupuesto' ? 'el presupuesto'
+      : origen === 'formato' ? 'el formato para pedir precios'
+      : origen === 'plan' ? 'el plan de trabajo' : 'la lista de insumos', bajar);
   }
 
   /* El formato para pedir precios, pero SÓLO con los insumos que la obra
@@ -821,7 +902,7 @@
     hoja.push([]);
     hoja.push(['', 'Completá la columna PRECIO y subí este mismo archivo en la pestaña Precios.']);
     hoja.push(['', 'El precio va por unidad de compra y sin IVA. CONTENIDO es cuántas unidades de obra trae una de compra.']);
-    I.exportarHoja(hoja, 'Pedido de precios',
+    exportarLibro([{ nombre: 'Pedido de precios', filas: hoja }],
       'precios_a_cotizar_' + (estado.obra.nombre || 'obra').replace(/[\\/:*?"<>|]/g, '-') + '.xlsx');
     toast(filas.length + ' insumos para cotizar — completá el precio y volvé a subirlo', 'ok');
   }
@@ -836,7 +917,7 @@
         r.unitPrice === null || r.unitPrice === undefined ? '' : r.unitPrice,
         r.total === null || r.total === undefined ? '' : r.total]);
     });
-    I.exportarHoja(hoja, 'Insumos', 'insumos_' + (estado.obra.nombre || 'obra').replace(/[\\/:*?"<>|]/g, '-') + '.xlsx');
+    exportarLibro([{ nombre: 'Insumos', filas: hoja }], 'insumos_' + (estado.obra.nombre || 'obra').replace(/[\\/:*?"<>|]/g, '-') + '.xlsx');
     toast('Lista de insumos exportada', 'ok');
   }
 
@@ -855,12 +936,7 @@
     r.onload = function (e) {
       try {
         var s = JSON.parse(e.target.result);
-        if (!s || !Array.isArray(s.items)) throw new Error('formato desconocido');
-        estado = Object.assign(estado, s);
-        proximoId = 1;
-        estado.items.forEach(function (it) { if (it.id === undefined) it.id = proximoId++; else if (it.id >= proximoId) proximoId = it.id + 1; });
-        pintarFormularios();
-        renderTodo();
+        cargarEstado(s);
         toast('Proyecto abierto: ' + estado.items.length + ' renglones', 'ok');
       } catch (err) { toast('No se pudo abrir: ' + err.message, 'error'); }
     };
@@ -1182,6 +1258,7 @@
     $('chk-precio-venta').onchange = function () { estado.verPrecioVenta = this.checked; renderPresupuesto(); guardar(); };
 
     $('btn-export-excel').onclick = exportarExcel;
+    if ($('btn-export-pdf')) $('btn-export-pdf').onclick = imprimirPresupuesto;
     $('btn-guardar-json').onclick = guardarProyecto;
     $('file-proyecto').onchange = function (e) { if (e.target.files[0]) abrirProyecto(e.target.files[0]); e.target.value = ''; };
 
@@ -1222,15 +1299,13 @@
     $('btn-formato-precios').onclick = bajarFormatoPrecios;
 
     // email al bajar
-    $('btn-email-confirmar').onclick = confirmarEmail;
-    $('email-valor').onkeydown = function (e) { if (e.key === 'Enter') confirmarEmail(); };
 
     // mapeo
     $('btn-mapeo-confirmar').onclick = confirmarMapeo;
   }
 
   /* ══════════════════ ARRANQUE ══════════════════ */
-  D.iniciar().then(function (cat) {
+  var arranque = D.iniciar().then(function (cat) {
     var chip = $('vigencia-chip');
     if (!D.hayCatalogo()) {
       chip.className = 'chip error mt8';
@@ -1251,8 +1326,9 @@
     var habia = recuperar();
     pintarFormularios();
     conectar();
-    renderTodo();
+    var r = renderTodo();
     if (habia) toast('Recuperado lo último que estabas armando', 'ok');
+    return r;
   });
 
   /* Puerta para los tests y para mirar el estado desde la consola. */
@@ -1273,6 +1349,11 @@
     pedirEmailAntes: pedirEmailAntes,
     abrirModal: abrir, cerrarModal: cerrar,
     guardarProyecto: guardarProyecto, abrirProyecto: abrirProyecto,
+    cargarEstado: cargarEstado, estadoVacio: estadoVacio,
+    exportarLibro: exportarLibro, imprimirLibro: imprimirLibro,
+    ganchos: ganchos,
+    // la obra recuperada del navegador ya esta en pantalla
+    listo: function () { return arranque; },
     esc: esc, num: num, pct: pct, rend: rend, fmt: fmt, fmtCorto: fmtCorto,
     toast: toast
   };

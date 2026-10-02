@@ -346,6 +346,8 @@
     tareasDeRubro: tareasDeRubro,
     cotizar: cotizar,
     registrarDescarga: registrarDescarga,
+    // la cuenta (js/cuenta.js) usa la misma puerta para el perfil y el uso
+    rpc: rpc,
     catalogoLocal: catalogoLocal,
     hayCatalogo: hayCatalogo
   };

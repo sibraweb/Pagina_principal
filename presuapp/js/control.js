@@ -26,7 +26,11 @@
   if (!P || !A) return;
   var $ = function (id) { return document.getElementById(id); };
   var esc = A.esc, num = A.num, toast = A.toast;
-  var hoy = function () { return new Date().toISOString().slice(0, 10); };
+  // la fecha LOCAL: con toISOString, después de las 21 en Argentina ya es «mañana»
+  var hoy = function () {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  };
 
   function ctl() {
     var p = window.PlanUI.plan();
@@ -147,18 +151,45 @@
     return '<br><span class="text-muted" style="font-size:.72rem">' + txt + '</span>';
   }
 
+  /* ── las fechas reales, contra el corte ─────────────────────────
+     Un corte es la foto de ESE día: nada de lo que se carga en él puede
+     ser del futuro (Juan, 2026-10-02). Inicio y fin van hasta la fecha
+     del corte, el mismo día incluido. Una fecha posterior sólo puede venir
+     de un corte posterior: se muestra, bloqueada, y se cambia desde ahí. */
+  function campoFecha(campo, valor, corte) {
+    var posterior = valor && valor > corte.fecha;
+    // ¿algún corte posterior llega a esa fecha? Si no, es una fecha del futuro
+    // cargada antes de esta regla: queda abierta para corregirla.
+    var deOtroCorte = posterior && ctl().cortes.some(function (x) { return x.fecha > corte.fecha && x.fecha >= valor; });
+    return '<input type="date" data-campo="' + campo + '" value="' + esc(valor || '') + '" max="' + esc(corte.fecha) + '"' +
+      (deOtroCorte ? ' disabled title="Se cargó en un corte posterior: se cambia desde ese corte"' : '') + '>' +
+      (deOtroCorte ? '<br><span class="tag-corte" title="En este corte (' + fechaAR(corte.fecha) +
+        ') todavía no había pasado">de un corte posterior</span>'
+        : posterior ? '<br><span class="tag-corte mal" title="Es posterior a todos los cortes: no se puede saber el futuro">' +
+          'fecha futura: corregila</span>' : '');
+  }
+  function validarFecha(campo, valor, real, corte) {
+    if (!valor) return '';
+    if (valor > corte.fecha) {
+      return 'El corte es del ' + fechaAR(corte.fecha) + ': la fecha de ' + campo +
+        ' no puede ser posterior. Si pasó después, cargala en un corte de esa fecha o posterior.';
+    }
+    if (campo === 'fin' && real.inicio && valor < real.inicio) return 'El fin no puede ser anterior al inicio (' + fechaAR(real.inicio) + ').';
+    if (campo === 'inicio' && real.fin && valor > real.fin) return 'El inicio no puede ser posterior al fin (' + fechaAR(real.fin) + ').';
+    return '';
+  }
+
   function pintarTabla(r, corte) {
     var c = ctl();
     var filas = r.filas.map(function (f) {
       var real = c.real[f.id] || {};
       var terminada = !!(real.fin && real.fin <= corte.fecha);
       var av = terminada ? 100 : corte.avances[f.id];
-      var finDespues = real.fin && real.fin > corte.fecha;
       return '<tr data-ctl="' + f.id + '"' + (f.critica ? ' class="critica"' : '') + '>' +
         '<td class="cod">' + esc(f.code) + '</td>' +
         '<td>' + esc(f.desc || '—') + '</td>' +
         '<td class="fecha">' + fechaAR(f.inicioPlan) + '<br><span class="text-muted">' + fechaAR(f.finPlan) + '</span></td>' +
-        '<td><input type="date" data-campo="inicio" value="' + esc(real.inicio || '') + '"></td>' +
+        '<td>' + campoFecha('inicio', real.inicio, corte) + '</td>' +
         '<td class="der"><input class="mini" type="number" min="0" max="100" step="1" data-campo="avance" ' +
           'value="' + (av === undefined || av === null ? '' : av) + '" placeholder="%"' +
           (terminada ? ' disabled title="Terminó: el avance es 100%"' : '') + '></td>' +
@@ -167,8 +198,7 @@
             : (!f.inicioReal ? '<br><span class="text-muted">si arranca ' + fechaAR(f.inicioProyectado) + '</span>' : '')) +
           (f.alarmaRitmo ? '<br><span class="alarma" title="' + esc(f.alarmaRitmo) + '">⚠ ' + esc(f.alarmaRitmo) + '</span>' : '') +
           '</td>' +
-        '<td><input type="date" data-campo="fin" value="' + esc(real.fin || '') + '"' +
-          (finDespues ? ' title="Terminó después de este corte: en este corte todavía no contaba"' : '') + '></td>' +
+        '<td>' + campoFecha('fin', real.fin, corte) + '</td>' +
         '<td>' + tagEstado(f.estado) + '</td>' +
         '<td class="der">' + num(f.esperadoCliente * 100) + '%<br>' + tagSituacion(f.situacionCliente) +
           notaArranque(f.arranqueCliente, f) + '</td>' +
@@ -307,6 +337,7 @@
     $('ctl-nuevo').onclick = function () {
       var f = $('ctl-nuevo-fecha').value;
       if (!f) { toast('Poné la fecha del corte', 'error'); return; }
+      if (f > hoy()) { toast('El corte no puede ser posterior a hoy: no se puede medir el futuro', 'error'); return; }
       var c = ctl();
       if (c.cortes.some(function (x) { return x.fecha === f; })) {
         c.corteSel = f; guardarYRender(); toast('Ese corte ya existe: lo abrí', 'aviso'); return;
@@ -341,6 +372,12 @@
         else corte.avances[id] = Math.max(0, Math.min(100, M.safeNum(e.target.value)));
       } else {
         if (!c.real[id]) c.real[id] = {};
+        var error = validarFecha(campo, e.target.value, c.real[id], corte);
+        if (error) {
+          toast(error, 'error');
+          e.target.value = c.real[id][campo] || '';      // no se guarda: vuelve lo que había
+          return;
+        }
         c.real[id][campo] = e.target.value;
         if (campo === 'fin' && e.target.value && !c.real[id].inicio) {
           toast('Tiene fecha de fin pero no de inicio: cargá cuándo arrancó', 'aviso');

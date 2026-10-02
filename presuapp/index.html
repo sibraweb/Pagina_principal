@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700;800&family=Libre+Franklin:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=20260925131817">
-<link rel="stylesheet" href="css/extra.css?v=20260925131817">
+<link rel="stylesheet" href="css/app.css?v=20261002135040">
+<link rel="stylesheet" href="css/extra.css?v=20261002135040">
 </head>
 <body>
 
@@ -39,6 +39,22 @@
         <a class="link-manual" href="manual/">¿Primera vez? Leé el manual, paso a paso →</a>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ══════════════════ LA OBRA ══════════════════ -->
+<div class="obra-barra">
+  <div class="obra-barra-inner">
+    <label class="obra-barra-label" for="obra-selector">Obra</label>
+    <select id="obra-selector"></select>
+    <button class="btn btn-secondary btn-chico" id="obra-nueva" type="button">＋ Obra nueva</button>
+    <button class="btn btn-secondary btn-chico" id="obra-mis-obras" type="button">Mis obras</button>
+    <label class="btn btn-secondary btn-chico" for="obra-abrir-archivo">Abrir obra</label>
+    <input type="file" id="obra-abrir-archivo" accept=".presuapp,.json" hidden>
+    <button class="btn btn-primary btn-chico" id="obra-guardar" type="button">Guardar obra (por mail)</button>
+    <div class="spacer"></div>
+    <span class="chip" id="obra-estado"></span>
+    <button class="link-datos" id="obra-mis-datos" type="button" title="Tus datos" hidden></button>
   </div>
 </div>
 
@@ -166,9 +182,10 @@
 
   <div class="flex-row" style="margin-top:12px">
     <button class="btn btn-success" id="btn-export-excel">Exportar Excel</button>
-    <button class="btn btn-secondary" id="btn-guardar-json">Guardar proyecto</button>
-    <label class="btn btn-secondary" for="file-proyecto">Abrir proyecto</label>
-    <input type="file" id="file-proyecto" accept=".json" hidden>
+    <button class="btn btn-secondary" id="btn-export-pdf">Imprimir / PDF</button>
+    <button class="btn btn-secondary" id="btn-guardar-json">Guardar obra (por mail)</button>
+    <label class="btn btn-secondary" for="file-proyecto">Abrir obra</label>
+    <input type="file" id="file-proyecto" accept=".presuapp,.json" hidden>
   </div>
 </div>
 
@@ -224,6 +241,7 @@
       <div class="spacer"></div>
       <button class="btn btn-primary" id="btn-formato-precios">Bajar formato para pedir precios</button>
       <button class="btn btn-secondary" id="btn-export-materiales">Exportar lista</button>
+      <button class="btn btn-secondary" id="btn-historial">Historial de precios</button>
     </div>
   </div>
   <div class="card"><div id="materiales-tabla"><div class="empty-state">Cargá el cómputo primero</div></div></div>
@@ -349,6 +367,7 @@
         <option value="Equipos">Equipos</option>
       </select>
       <button class="btn btn-secondary" id="plan-export">Exportar el plan</button>
+      <button class="btn btn-secondary" id="plan-pdf">Imprimir / PDF</button>
     </div>
     <p class="text-muted mb8">La lista de compras abierta mes a mes. El pedido se redondea
       <strong>en cada mes</strong>: si en marzo hacen falta 26 kg de cemento y en abril 30, son dos bolsas
@@ -505,23 +524,111 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-email">
+<!-- ══════════════════ OBRAS Y DATOS ══════════════════ -->
+<div class="modal-overlay" id="modal-datos">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-title" id="datos-titulo">Te mandamos la obra a tu mail</div>
+    <p class="text-muted mb8" id="datos-texto"></p>
+    <div class="obra-field" id="datos-obra-fila"><label for="datos-obra">Nombre de la obra *</label>
+      <input type="text" id="datos-obra" placeholder="Ej: Galpón industrial Ruta 34"></div>
+    <div id="datos-ya" class="datos-ya" hidden>Te la mandamos a <strong id="datos-ya-email"></strong>
+      · <button class="link-datos" id="datos-cambiar" type="button">no soy yo / cambiar</button></div>
+    <div id="datos-campos">
+      <div class="datos-dos">
+        <div class="obra-field"><label for="datos-nombre">Nombre *</label>
+          <input type="text" id="datos-nombre" autocomplete="given-name"></div>
+        <div class="obra-field"><label for="datos-apellido">Apellido *</label>
+          <input type="text" id="datos-apellido" autocomplete="family-name"></div>
+      </div>
+      <div class="obra-field"><label for="datos-telefono">Teléfono *</label>
+        <input type="tel" id="datos-telefono" placeholder="Ej: 11 1234-5678" autocomplete="tel"></div>
+      <div class="obra-field"><label for="datos-email">Email *</label>
+        <input type="email" id="datos-email" placeholder="vos@ejemplo.com" autocomplete="email"></div>
+    </div>
+    <div class="flex-row" style="margin-top:14px">
+      <button class="btn btn-secondary" id="datos-bajar-igual" type="button" hidden>Bajarla a mi disco</button>
+      <div class="spacer"></div>
+      <button class="btn btn-secondary" data-cerrar="modal-datos" type="button">Ahora no</button>
+      <button class="btn btn-primary" id="btn-datos-confirmar" type="button">Mandármela por mail</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-enviado">
   <div class="modal" style="max-width:460px">
-    <div class="modal-title">Antes de bajar el archivo</div>
-    <p class="text-muted mb8">La app es libre y no hay que registrarse para usarla.
-      Dejanos un mail para saber a quién le sirve y avisarte cuando actualicemos los precios.
-      Te llevás <strong id="email-origen">el archivo</strong>.</p>
-    <div class="obra-field"><label>Email *</label>
-      <input type="email" id="email-valor" placeholder="vos@ejemplo.com" autocomplete="email"></div>
-    <div class="obra-field"><label>Nombre</label>
-      <input type="text" id="email-nombre" placeholder="opcional" autocomplete="name"></div>
-    <div class="obra-field"><label>Obra</label>
-      <input type="text" id="email-obra" placeholder="opcional"></div>
+    <div class="modal-title">Listo, va en camino</div>
+    <p class="mb8">En unos minutos te llega <strong id="enviado-obra"></strong> a <strong id="enviado-email"></strong>.
+      Si no la ves, revisá el correo no deseado.</p>
+    <p class="text-muted mb8">Para seguir otro día, en cualquier compu: «Abrir obra» y elegís el archivo del mail.</p>
+    <p class="mb8"><strong>¿Querés también bajarla a tu disco?</strong></p>
     <div class="flex-row" style="margin-top:14px">
       <div class="spacer"></div>
-      <button class="btn btn-secondary" data-cerrar="modal-email">Ahora no</button>
-      <button class="btn btn-primary" id="btn-email-confirmar">Bajar el archivo</button>
+      <button class="btn btn-secondary" data-cerrar="modal-enviado" type="button">No, gracias</button>
+      <button class="btn btn-primary" id="enviado-bajar" type="button">Sí, bajarla</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-obra-nueva">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-title">Obra nueva</div>
+    <p class="text-muted mb8">Queda en este navegador. Cuando quieras, «Guardar obra» te la manda por mail.</p>
+    <div class="obra-field"><label for="nueva-nombre">Nombre de la obra *</label>
+      <input type="text" id="nueva-nombre" placeholder="Ej: Galpón industrial Ruta 34"></div>
+    <div class="obra-field"><label for="nueva-cliente">Comitente</label>
+      <input type="text" id="nueva-cliente" placeholder="Cliente / Empresa"></div>
+    <div class="obra-field"><label for="nueva-ubicacion">Ubicación</label>
+      <input type="text" id="nueva-ubicacion" placeholder="Ciudad, provincia"></div>
+    <div class="flex-row" style="margin-top:14px">
+      <div class="spacer"></div>
+      <button class="btn btn-secondary" data-cerrar="modal-obra-nueva" type="button">Cancelar</button>
+      <button class="btn btn-primary" id="btn-nueva-crear" type="button">Crear la obra</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-obras">
+  <div class="modal" style="max-width:820px">
+    <div class="flex-row mb8">
+      <div class="modal-title" style="margin:0">Mis obras (en este navegador)</div>
+      <div class="spacer"></div>
+      <button class="btn btn-primary btn-chico" id="obras-nueva" type="button">＋ Obra nueva</button>
+    </div>
+    <div id="obras-lista"></div>
+    <div class="flex-row" style="margin-top:14px">
+      <div class="spacer"></div>
+      <button class="btn btn-secondary" data-cerrar="modal-obras" type="button">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-historial">
+  <div class="modal" style="max-width:980px">
+    <div class="modal-title">Historial de precios de esta obra</div>
+    <p class="text-muted mb8">Cada precio que usó la obra, con la fecha en que lo usó. Cuando los precios se actualizan,
+      lo anterior no se pierde: queda acá. Pasá el mouse por un renglón para ver todos sus cambios.</p>
+    <div class="flex-row mb8">
+      <button class="btn btn-primary btn-chico" id="hist-ver-insumos" type="button">Insumos</button>
+      <button class="btn btn-secondary btn-chico" id="hist-ver-tareas" type="button">Tareas</button>
+      <div class="spacer"></div>
+      <button class="btn btn-success btn-chico" id="hist-excel" type="button">Excel</button>
+      <button class="btn btn-secondary btn-chico" id="hist-pdf" type="button">PDF</button>
+    </div>
+    <div id="hist-tabla"></div>
+    <div class="flex-row" style="margin-top:14px">
+      <div class="spacer"></div>
+      <button class="btn btn-secondary" data-cerrar="modal-historial" type="button">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="aviso-drive" id="aviso-mail" role="dialog" aria-labelledby="aviso-mail-titulo" hidden>
+  <div class="aviso-drive-titulo" id="aviso-mail-titulo">¿Te mandamos la obra a tu mail?</div>
+  <p>Hoy queda sólo en este navegador. Por mail la tenés guardada y la abrís desde cualquier compu.</p>
+  <div class="flex-row">
+    <button class="btn btn-secondary btn-chico" id="aviso-mail-no" type="button">No, gracias</button>
+    <div class="spacer"></div>
+    <button class="btn btn-primary btn-chico" id="aviso-mail-si" type="button">Sí, mandámela</button>
   </div>
 </div>
 
@@ -573,15 +680,18 @@
 
 <div id="toast-zona"></div>
 
-<script src="vendor/xlsx.full.min.js?v=20260925131817"></script>
+<script src="vendor/xlsx.full.min.js?v=20261002135040"></script>
 <script>window.PRESUAPP_REMOTO = true;</script>
-<script src="js/motor.js?v=20260925131817"></script>
-<script src="js/datos.js?v=20260925131817"></script>
-<script src="js/importar.js?v=20260925131817"></script>
-<script src="js/app.js?v=20260925131817"></script>
-<script src="js/malla.js?v=20260925131817"></script>
-<script src="js/plan.js?v=20260925131817"></script>
-<script src="js/control.js?v=20260925131817"></script>
-<script src="js/planui.js?v=20260925131817"></script>
+<script src="js/motor.js?v=20261002135040"></script>
+<script src="js/datos.js?v=20261002135040"></script>
+<script src="js/importar.js?v=20261002135040"></script>
+<script src="js/app.js?v=20261002135040"></script>
+<script src="js/malla.js?v=20261002135040"></script>
+<script src="js/plan.js?v=20261002135040"></script>
+<script src="js/control.js?v=20261002135040"></script>
+<script src="js/planui.js?v=20261002135040"></script>
+<script src="js/imprimir.js?v=20261002135040"></script>
+<script src="js/contacto.js?v=20261002135040"></script>
+<script src="js/obras.js?v=20261002135040"></script>
 </body>
 </html>
