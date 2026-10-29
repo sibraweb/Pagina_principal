@@ -159,6 +159,25 @@
       }
       var espC = esperado(t), espE = esperado(emp[t.id]);
 
+      /* El AVANCE contra el plan mide donde estas HOY; el RITMO mide donde vas
+         a terminar. Una tarea al 10% puede estar "adelantada" porque el plan
+         todavia no la esperaba, y a la vez, al ritmo que viene, terminar el
+         año que viene. Esas dos lecturas no pueden convivir: si al ritmo real
+         termina despues de su fin de plan (mas alla de la tolerancia), esta
+         ATRASADA, y se dice por que. */
+      function atrasoPorRitmo(tp) {
+        if (!finEsp || fin || !tp || !tp.fin) return 0;
+        var ff = aFecha(tp.fin);
+        return finEsp > ff ? cal.habiles(ff, finEsp) - 1 : 0;
+      }
+      function tolDias(tp) { return Math.max(1, Math.ceil((M.safeNum(tp && tp.duracion) || 1) * tol.atraso / 100)); }
+      function situacionTarea(av, esp, tp) {
+        var porAvance = situacion(av, esp), d = atrasoPorRitmo(tp);
+        if (d > tolDias(tp)) return { sit: 'atrasada', porRitmo: porAvance !== 'atrasada', dias: d };
+        return { sit: porAvance, porRitmo: false, dias: d };
+      }
+      var sitC = situacionTarea(av, espC, t), sitE = situacionTarea(av, espE, emp[t.id]);
+
       /* La que NO ARRANCO tambien tiene situacion: se la mide como si
          empezara hoy con avance cero. Si segun el plan ya tendria que estar
          en marcha, esta ATRASADA, y se dice cuantos dias habiles lleva sin
@@ -177,9 +196,13 @@
          dias y se carga al 2% "dura" mil dias, y arrastra a todas las que
          vienen despues. Casi siempre es un avance mal escrito (0,5 queriendo
          decir 50%). No se corrige solo -puede ser verdad-, pero se avisa. */
-      var alarma = durEst && t.duracion && durEst > 3 * t.duracion
-        ? 'Al ritmo cargado dura ' + durEst + ' días contra ' + t.duracion + ' del plan: revisá el avance.'
-        : '';
+      var alarma = '';
+      if (durEst && t.duracion && durEst > 3 * t.duracion) {
+        var fi0 = aFecha(t.inicio), ar = function (d) { var x = iso(d); return x.slice(8, 10) + '/' + x.slice(5, 7) + '/' + x.slice(0, 4); };
+        alarma = 'Al ritmo cargado dura ' + durEst + ' días contra ' + t.duracion + ' del plan (terminaría el ' + ar(finEsp) + '): revisá el avance.';
+        // la regla de 3 cuenta los dias desde el INICIO REAL: si es anterior al del plan, pesan todos
+        if (ini && fi0 && ini < fi0) alarma += ' Ojo: el inicio real (' + ar(ini) + ') es anterior al del plan (' + ar(fi0) + ') y cuenta desde ahí.';
+      }
       return {
         id: t.id, code: t.code, desc: t.desc, unit: t.unit, qty: t.qty,
         predecesoras: t.predecesoras, duracion: t.duracion,
@@ -190,8 +213,11 @@
         finEsperado: finEsp ? iso(finEsp) : '', duracionEstimada: durEst,
         esperadoCliente: espC, esperadoEmpresa: espE,
         // el mismo dia que le toca arrancar todavia esta en fecha
-        situacionCliente: arrC ? (arrC.dias > 0 ? 'atrasada' : 'en fecha') : situacion(av, espC),
-        situacionEmpresa: arrE ? (arrE.dias > 0 ? 'atrasada' : 'en fecha') : situacion(av, espE),
+        situacionCliente: arrC ? (arrC.dias > 0 ? 'atrasada' : 'en fecha') : sitC.sit,
+        situacionEmpresa: arrE ? (arrE.dias > 0 ? 'atrasada' : 'en fecha') : sitE.sit,
+        // si es el ritmo (y no el avance de hoy) lo que la pone atrasada, se dice
+        ritmoCliente: !arrC && sitC.porRitmo ? sitC.dias : 0,
+        ritmoEmpresa: !arrE && sitE.porRitmo ? sitE.dias : 0,
         arranqueCliente: arrC, arranqueEmpresa: arrE,
         alarmaRitmo: alarma,
         critica: t.critica

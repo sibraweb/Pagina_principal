@@ -139,6 +139,12 @@
     return '<span class="est ' + cls + '">' + esc(e === 'en ejecucion' ? 'en ejecución' : e) + '</span>';
   }
 
+  /* Atrasada por RITMO: el avance de hoy no lo dice, pero al ritmo que viene termina tarde. */
+  function notaRitmo(dias) {
+    if (!dias) return '';
+    return '<br><span class="text-muted" style="font-size:.72rem">por ritmo: terminaría ' + dias + ' d hábiles después de su fin</span>';
+  }
+
   /* Para la que no arranco: cuando le tocaba y cuanto hace. */
   /* Si todavia no le toca pero lo que la precede viene atrasado, ya se
      sabe que va a arrancar tarde: se dice, aunque siga "en fecha". */
@@ -201,9 +207,9 @@
         '<td>' + campoFecha('fin', real.fin, corte) + '</td>' +
         '<td>' + tagEstado(f.estado) + '</td>' +
         '<td class="der">' + num(f.esperadoCliente * 100) + '%<br>' + tagSituacion(f.situacionCliente) +
-          notaArranque(f.arranqueCliente, f) + '</td>' +
+          notaArranque(f.arranqueCliente, f) + notaRitmo(f.ritmoCliente) + '</td>' +
         '<td class="der">' + num(f.esperadoEmpresa * 100) + '%<br>' + tagSituacion(f.situacionEmpresa) +
-          notaArranque(f.arranqueEmpresa, f) + '</td>' +
+          notaArranque(f.arranqueEmpresa, f) + notaRitmo(f.ritmoEmpresa) + '</td>' +
         '</tr>';
     }).join('');
     $('ctl-tabla').innerHTML = '<div class="tabla-scroll"><table class="grilla ctl-grilla"><thead><tr>' +
