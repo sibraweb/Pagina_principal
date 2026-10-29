@@ -1251,10 +1251,21 @@
       $('obra-' + c).oninput = function () { estado.obra[c] = this.value; guardar(); };
     });
     var mapaK = { 'k-gg': 'ggPct', 'k-beneficio': 'beneficioPct', 'k-iibb': 'iibbPct', 'k-financiacion': 'financiacionPct', 'k-iva': 'ivaPct' };
+    /* El precio sin IVA sale del calculo central (`ultimoCalculo`), no de los
+       inputs: si solo se repintara la planilla, K diria 1,00 y el precio, el plan
+       y el control de obra seguirian con el K anterior. Por eso, ademas de
+       repintar al instante, se vuelve a calcular todo (con una pausa, para no
+       pedirlo en cada tecla). */
+    var kTimer = null;
+    function kCambio() {
+      renderPresupuesto(); guardar();
+      clearTimeout(kTimer);
+      kTimer = setTimeout(function () { renderTodo(); }, 350);
+    }
     Object.keys(mapaK).forEach(function (id) {
-      $(id).oninput = function () { estado.params[mapaK[id]] = M.safeNum(this.value); renderPresupuesto(); guardar(); };
+      $(id).oninput = function () { estado.params[mapaK[id]] = M.safeNum(this.value); kCambio(); };
     });
-    $('k-modo').onchange = function () { estado.params.modoK = this.value; renderPresupuesto(); guardar(); };
+    $('k-modo').onchange = function () { estado.params.modoK = this.value; kCambio(); };
     $('chk-precio-venta').onchange = function () { estado.verPrecioVenta = this.checked; renderPresupuesto(); guardar(); };
 
     $('btn-export-excel').onclick = exportarExcel;
